@@ -21,6 +21,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'whatsapp_number',
+        'member_number',
+        'username',
+        'birth_date',
+        'gender',
+        'address',
+        'is_member',
+        'member_discount',
+        'role',
     ];
 
     /**
@@ -43,6 +52,68 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
+            'is_member' => 'boolean',
+            'member_discount' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Relationships
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function noShowNotes()
+    {
+        return $this->hasMany(NoShowNote::class);
+    }
+
+    public function voucherUsages()
+    {
+        return $this->hasMany(VoucherUsage::class);
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeMembers($query)
+    {
+        return $query->where('is_member', true);
+    }
+
+    public function scopeCustomers($query)
+    {
+        return $query->where('role', 'customer');
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    /**
+     * Helper methods
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isOwner()
+    {
+        return $this->role === 'owner';
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
     }
 }
