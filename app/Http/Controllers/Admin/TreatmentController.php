@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class TreatmentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     public function index()
     {
         $treatments = Treatment::orderBy('name')->paginate(15);

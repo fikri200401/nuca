@@ -70,4 +70,24 @@ class LandingController extends Controller
 
         return view('landing.vouchers', compact('vouchers'));
     }
+
+    /**
+     * Check booking status
+     */
+    public function checkBooking(Request $request)
+    {
+        $request->validate([
+            'booking_code' => 'required|string',
+        ]);
+
+        $booking = \App\Models\Booking::where('booking_code', $request->booking_code)
+            ->with(['treatment', 'doctor', 'user', 'deposit'])
+            ->first();
+
+        if (!$booking) {
+            return redirect('/#booking-check')->with('booking_error', 'Kode booking tidak ditemukan. Pastikan kode booking benar.');
+        }
+
+        return redirect('/#booking-check')->with('booking_info', $booking);
+    }
 }

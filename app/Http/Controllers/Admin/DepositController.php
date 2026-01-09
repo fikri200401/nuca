@@ -15,7 +15,6 @@ class DepositController extends Controller
 
     public function __construct(WhatsAppService $whatsappService)
     {
-        $this->middleware(['auth', 'role:admin']);
         $this->whatsappService = $whatsappService;
     }
 

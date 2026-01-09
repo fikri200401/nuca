@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Storage;
 
 class BeforeAfterPhotoController extends Controller
 {
-    public function __construct()
+    /**
+     * Display a listing of before-after photos
+     */
+    public function index()
     {
-        $this->middleware(['auth', 'role:admin']);
+        $photos = BeforeAfterPhoto::with(['booking.user', 'booking.treatment'])
+            ->latest()
+            ->paginate(15);
+
+        return view('admin.before-after-photos.index', compact('photos'));
     }
 
     /**

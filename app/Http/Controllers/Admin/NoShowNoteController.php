@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class NoShowNoteController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     /**
      * Store no-show note
      */

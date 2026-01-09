@@ -8,7 +8,21 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Schedule tasks
-Schedule::command('deposits:expire')->everyFiveMinutes();
-Schedule::command('bookings:send-reminders')->dailyAt('09:00');
+/*
+|--------------------------------------------------------------------------
+| Scheduled Tasks
+|--------------------------------------------------------------------------
+| Auto-expire deposits dan send booking reminders
+*/
 
+// Auto-expire deposits setiap 1 menit
+Schedule::command('deposits:expire')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground();
+
+// Send booking reminders setiap jam (cek booking besok)
+Schedule::command('bookings:send-reminders')
+    ->hourly()
+    ->withoutOverlapping()
+    ->runInBackground();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Treatment;
 use App\Models\Doctor;
+use App\Models\User;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,6 @@ class BookingController extends Controller
 
     public function __construct(BookingService $bookingService)
     {
-        $this->middleware(['auth', 'role:admin']);
         $this->bookingService = $bookingService;
     }
 
@@ -68,8 +68,11 @@ class BookingController extends Controller
     {
         $treatments = Treatment::active()->get();
         $doctors = Doctor::active()->get();
+        $users = User::where('role', 'customer')
+                     ->orderBy('name')
+                     ->get();
         
-        return view('admin.bookings.create', compact('treatments', 'doctors'));
+        return view('admin.bookings.create', compact('treatments', 'doctors', 'users'));
     }
 
     public function store(Request $request)
@@ -88,7 +91,7 @@ class BookingController extends Controller
             'doctor_id' => $request->doctor_id,
             'booking_date' => $request->booking_date,
             'booking_time' => $request->booking_time,
-            'notes' => $request->notes,
+            'admin_notes' => $request->notes, // Changed from 'notes' to 'admin_notes'
             'is_manual_entry' => true,
         ]);
 

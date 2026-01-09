@@ -9,11 +9,6 @@ use Illuminate\Support\Str;
 
 class MemberController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     public function index(Request $request)
     {
         $query = User::customers();

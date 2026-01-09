@@ -49,8 +49,17 @@ class Deposit extends Model
 
     public function scopeExpired($query)
     {
-        return $query->where('status', 'pending')
-                     ->where('deadline_at', '<', now());
+        return $query->where('status', 'expired');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
     }
 
     /**

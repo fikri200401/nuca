@@ -192,4 +192,102 @@ class BookingController extends Controller
 
         return back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
     }
+
+    /**
+     * Check voucher validity (AJAX)
+     */
+    public function checkVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_code' => 'required|string',
+            'treatment_id' => 'required|exists:treatments,id',
+        ]);
+
+        try {
+            $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
+
+            if (!$voucher) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Kode voucher tidak ditemukan.',
+                ], 404);
+            }
+
+            // Check if voucher is valid
+            if (!$voucher->isValid()) {
+                $reason = 'Voucher tidak aktif atau sudah kadaluarsa.';
+                if ($voucher->max_usage && $voucher->usage_count >= $voucher->max_usage) {
+                    $reason = 'Voucher sudah mencapai batas penggunaan.';
+                }
+                
+                return response()->json([
+                    'valid' => false,
+                    'message' => $reason,
+                ], 422);
+            }
+
+            // Get treatment price
+            $treatment = \App\Models\Treatment::findOrFail($request->treatment_id);
+            $totalPrice = $treatment->price;
+
+            // Apply member discount if applicable
+            $user = Auth::user();
+            $memberDiscount = 0;
+            if ($user->is_member && $user->member_discount > 0) {
+                $memberDiscount = ($totalPrice * $user->member_discount) / 100;
+            }
+
+            $priceAfterMemberDiscount = $totalPrice - $memberDiscount;
+
+            // Check if can be used by this user
+            if (!$voucher->canBeUsedBy($user->id, $priceAfterMemberDiscount)) {
+                $reason = 'Voucher tidak dapat digunakan.';
+                
+                if ($priceAfterMemberDiscount < $voucher->min_transaction) {
+                    $reason = 'Minimal transaksi Rp ' . number_format($voucher->min_transaction, 0, ',', '.') . ' untuk menggunakan voucher ini.';
+                }
+                
+                if ($voucher->is_single_use) {
+                    $hasUsed = $voucher->usages()->where('user_id', $user->id)->exists();
+                    if ($hasUsed) {
+                        $reason = 'Anda sudah pernah menggunakan voucher ini.';
+                    }
+                }
+
+                return response()->json([
+                    'valid' => false,
+                    'message' => $reason,
+                ], 422);
+            }
+
+            // Calculate discount
+            $voucherDiscount = $voucher->calculateDiscount($priceAfterMemberDiscount);
+            $finalPrice = $priceAfterMemberDiscount - $voucherDiscount;
+
+            return response()->json([
+                'valid' => true,
+                'message' => 'Voucher berhasil diterapkan!',
+                'voucher' => [
+                    'code' => $voucher->code,
+                    'name' => $voucher->name,
+                    'type' => $voucher->type,
+                    'value' => $voucher->value,
+                    'formatted_value' => $voucher->formatted_value,
+                ],
+                'price_breakdown' => [
+                    'base_price' => $totalPrice,
+                    'member_discount' => $memberDiscount,
+                    'voucher_discount' => $voucherDiscount,
+                    'final_price' => $finalPrice,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+

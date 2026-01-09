@@ -13,12 +13,13 @@ class DashboardController extends Controller
         
         $totalBookings = $user->bookings()->count();
         $completedBookings = $user->bookings()->where('status', 'completed')->count();
-        $pendingBookings = $user->bookings()->whereIn('status', ['pending', 'confirmed', 'waiting_payment'])->count();
+        $pendingBookings = $user->bookings()
+            ->whereIn('status', ['auto_approved', 'waiting_deposit', 'deposit_confirmed'])
+            ->count();
         
         $recentBookings = $user->bookings()
             ->with(['treatment', 'doctor'])
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('booking_time', 'desc')
+            ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 

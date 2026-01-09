@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             DoctorSeeder::class,
             SettingSeeder::class,
             VoucherSeeder::class,
+            BookingSeeder::class,
+            FeedbackSeeder::class,
         ]);
     }
 }

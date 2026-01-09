@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\OtpVerification;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -10,12 +11,26 @@ class WhatsAppService
 {
     protected $apiUrl;
     protected $apiKey;
+    protected $device;
+    protected $enabled;
 
     public function __construct()
     {
-        // Bisa pakai Fonnte, Wablas, atau service WhatsApp lainnya
+        // Ambil dari database (Setting model) terlebih dahulu, fallback ke .env
+        $this->apiKey = Setting::get('fonnte_api_key', config('services.whatsapp.api_key', ''));
+        $this->device = Setting::get('fonnte_device', config('services.whatsapp.device', ''));
+        $this->enabled = Setting::get('whatsapp_enabled', config('services.whatsapp.enabled', true));
         $this->apiUrl = config('services.whatsapp.api_url', 'https://api.fonnte.com/send');
-        $this->apiKey = config('services.whatsapp.api_key', '');
+
+        // Log configuration for debugging
+        Log::info('WhatsAppService initialized', [
+            'api_url' => $this->apiUrl,
+            'api_key_exists' => !empty($this->apiKey),
+            'api_key_length' => strlen($this->apiKey),
+            'device' => $this->device,
+            'enabled' => $this->enabled,
+            'source' => 'database (Setting model)',
+        ]);
     }
 
     /**
@@ -150,9 +165,31 @@ class WhatsAppService
      */
     protected function sendMessage($phoneNumber, $message)
     {
+        // Check if WhatsApp is enabled
+        if (!$this->enabled) {
+            Log::warning('WhatsApp is disabled. Message not sent.', [
+                'phone' => $phoneNumber,
+            ]);
+            return false;
+        }
+
+        // Check if API key is configured
+        if (empty($this->apiKey)) {
+            Log::error('WhatsApp API key is not configured', [
+                'phone' => $phoneNumber,
+            ]);
+            return false;
+        }
+
         try {
             // Format nomor (pastikan dimulai dengan 62)
             $phoneNumber = $this->formatPhoneNumber($phoneNumber);
+
+            Log::info('Attempting to send WhatsApp message', [
+                'phone' => $phoneNumber,
+                'api_url' => $this->apiUrl,
+                'api_key_length' => strlen($this->apiKey),
+            ]);
 
             // Kirim via Fonnte (sesuaikan dengan API yang digunakan)
             $response = Http::withHeaders([
@@ -163,16 +200,21 @@ class WhatsAppService
                 'countryCode' => '62',
             ]);
 
+            Log::info('WhatsApp API Response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
             if ($response->successful()) {
                 Log::info('WhatsApp sent successfully', [
                     'phone' => $phoneNumber,
-                    'message' => $message
                 ]);
                 return true;
             }
 
             Log::error('WhatsApp send failed', [
                 'phone' => $phoneNumber,
+                'status' => $response->status(),
                 'response' => $response->body()
             ]);
             return false;
@@ -180,7 +222,8 @@ class WhatsAppService
         } catch (\Exception $e) {
             Log::error('WhatsApp send error', [
                 'phone' => $phoneNumber,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return false;
         }

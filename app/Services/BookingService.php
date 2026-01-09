@@ -145,6 +145,7 @@ class BookingService
                 'discount_amount' => $discountAmount,
                 'final_price' => $finalPrice,
                 'customer_notes' => $data['notes'] ?? null,
+                'admin_notes' => $data['admin_notes'] ?? null,
                 'is_manual_entry' => $data['is_manual_entry'] ?? false,
             ]);
 

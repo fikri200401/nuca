@@ -67,10 +67,36 @@ class SettingSeeder extends Seeder
                 'type' => 'number',
                 'description' => 'Diskon member default (%)',
             ],
+            // WhatsApp API Configuration
+            [
+                'key' => 'fonnte_api_key',
+                'value' => env('FONNTE_API_KEY', ''),
+                'type' => 'string',
+                'description' => 'Fonnte API Key untuk WhatsApp',
+            ],
+            [
+                'key' => 'fonnte_device',
+                'value' => env('FONNTE_DEVICE', ''),
+                'type' => 'string',
+                'description' => 'Fonnte Device / Nomor WhatsApp',
+            ],
+            [
+                'key' => 'whatsapp_enabled',
+                'value' => env('WHATSAPP_ENABLED', true) ? '1' : '0',
+                'type' => 'boolean',
+                'description' => 'Aktifkan notifikasi WhatsApp',
+            ],
         ];
 
         foreach ($settings as $setting) {
-            Setting::create($setting);
+            Setting::updateOrCreate(
+                ['key' => $setting['key']],
+                [
+                    'value' => $setting['value'],
+                    'type' => $setting['type'],
+                    'description' => $setting['description'],
+                ]
+            );
         }
     }
 }

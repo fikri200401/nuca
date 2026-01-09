@@ -16,10 +16,12 @@ class OtpVerification extends Model
         'expires_at',
         'attempts',
         'verified',
+        'last_resend_at',
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'last_resend_at' => 'datetime',
         'verified' => 'boolean',
     ];
 

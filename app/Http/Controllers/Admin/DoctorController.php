@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class DoctorController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     public function index()
     {
         $doctors = Doctor::withCount('bookings')->orderBy('name')->paginate(15);

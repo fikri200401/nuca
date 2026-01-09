@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class FeedbackController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     public function index(Request $request)
     {
         $query = Feedback::with(['user', 'treatment', 'doctor', 'booking']);

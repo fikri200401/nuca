@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\BeforeAfterPhotoController;
 use App\Http\Controllers\Admin\NoShowNoteController;
+use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,8 +26,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::post('/check-booking', [LandingController::class, 'checkBooking'])->name('check-booking');
 Route::get('/treatments', [LandingController::class, 'treatments'])->name('treatments');
-Route::get('/treatments/{id}', [LandingController::class, 'treatmentDetail'])->name('treatments.detail');
+Route::get('/treatments/{id}', [LandingController::class, 'treatmentDetail'])->name('landing.treatment-detail');
 Route::get('/vouchers', [LandingController::class, 'vouchers'])->name('vouchers');
 
 /*
@@ -69,6 +71,7 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'role:customer
     // AJAX endpoints
     Route::post('/bookings/available-slots', [CustomerBookingController::class, 'getAvailableSlots'])->name('bookings.available-slots');
     Route::post('/bookings/available-doctors', [CustomerBookingController::class, 'getAvailableDoctors'])->name('bookings.available-doctors');
+    Route::post('/bookings/check-voucher', [CustomerBookingController::class, 'checkVoucher'])->name('bookings.check-voucher');
     
     // Deposit
     Route::post('/bookings/{id}/upload-deposit', [CustomerBookingController::class, 'uploadDepositProof'])->name('bookings.upload-deposit');
@@ -145,6 +148,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
         // No-Show Notes
         Route::post('no-show-notes', [NoShowNoteController::class, 'store'])->name('no-show-notes.store');
         Route::delete('no-show-notes/{noShowNote}', [NoShowNoteController::class, 'destroy'])->name('no-show-notes.destroy');
+
+        // Settings (WhatsApp Configuration)
+        Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/test-connection', [SettingController::class, 'testConnection'])->name('settings.test-connection');
     });
 });
 

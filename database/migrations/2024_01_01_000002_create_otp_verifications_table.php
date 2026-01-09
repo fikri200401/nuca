@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->integer('attempts')->default(0);
             $table->boolean('verified')->default(false);
+            $table->timestamp('last_resend_at')->nullable(); // untuk cooldown kirim ulang
             $table->timestamps();
             
             $table->index(['whatsapp_number', 'purpose']);

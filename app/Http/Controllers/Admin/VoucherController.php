@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class VoucherController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
     public function index()
     {
         $vouchers = Voucher::orderBy('valid_from', 'desc')->paginate(15);
