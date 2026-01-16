@@ -156,6 +156,41 @@ class BookingController extends Controller
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Mark booking as no-show and forfeit deposit (for testing)
+     */
+    public function markAsNoShow(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        // Update booking status to no-show
+        $booking->update([
+            'status' => 'no-show',
+            'admin_notes' => $request->reason ?? 'Customer tidak datang (Testing)',
+        ]);
+
+        // Hanguskan deposit jika ada
+        if ($booking->deposit && $booking->deposit->status === 'approved') {
+            $booking->deposit->update([
+                'status' => 'forfeited',
+                'admin_notes' => 'DP hangus karena customer tidak datang',
+            ]);
+
+            // Create no-show note
+            $booking->noShowNote()->create([
+                'notes' => $request->reason ?? 'Customer tidak datang pada jadwal yang ditentukan',
+                'recorded_by' => auth()->id(),
+            ]);
+        }
+
+        return back()->with('success', 'Booking ditandai sebagai No-Show dan DP telah dihanguskan.');
+    }
+
+    /**
+>>>>>>> 37f6b61 (upload project)
      * Update admin notes
      */
     public function updateNotes(Request $request, Booking $booking)

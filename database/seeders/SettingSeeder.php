@@ -39,11 +39,36 @@ class SettingSeeder extends Seeder
             ],
             [
                 'key' => 'operating_hours',
+<<<<<<< HEAD
                 'value' => 'Senin - Sabtu: 09:00 - 18:00, Minggu: 10:00 - 16:00',
+=======
+                'value' => 'Senin - Sabtu: 09:00 - 20:00, Minggu: 10:00 - 20:00',
+>>>>>>> 37f6b61 (upload project)
                 'type' => 'string',
                 'description' => 'Jam operasional',
             ],
             [
+<<<<<<< HEAD
+=======
+                'key' => 'clinic_open_time',
+                'value' => '09:00',
+                'type' => 'string',
+                'description' => 'Jam buka klinik',
+            ],
+            [
+                'key' => 'clinic_close_time',
+                'value' => '20:00',
+                'type' => 'string',
+                'description' => 'Jam tutup klinik',
+            ],
+            [
+                'key' => 'max_booking_time',
+                'value' => '18:00',
+                'type' => 'string',
+                'description' => 'Jam maksimal booking (2 jam sebelum tutup)',
+            ],
+            [
+>>>>>>> 37f6b61 (upload project)
                 'key' => 'about',
                 'value' => 'Klinik Kecantikan Jelita adalah klinik terpercaya dengan dokter berpengalaman dan teknologi modern untuk perawatan kulit Anda.',
                 'type' => 'string',

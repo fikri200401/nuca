@@ -21,6 +21,7 @@ class Setting extends Model
      */
     public static function get($key, $default = null)
     {
+<<<<<<< HEAD
         $setting = self::where('key', $key)->first();
         
         if (!$setting) {
@@ -28,6 +29,20 @@ class Setting extends Model
         }
 
         return self::castValue($setting->value, $setting->type);
+=======
+        try {
+            $setting = self::where('key', $key)->first();
+            
+            if (!$setting) {
+                return $default;
+            }
+
+            return self::castValue($setting->value, $setting->type);
+        } catch (\Exception $e) {
+            // Return default if table doesn't exist yet (during migration)
+            return $default;
+        }
+>>>>>>> 37f6b61 (upload project)
     }
 
     /**

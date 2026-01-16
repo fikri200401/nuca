@@ -71,10 +71,28 @@ class BookingService
         $slots = [];
         $currentTime = Carbon::parse($startTime);
         $endTime = Carbon::parse($endTime);
+<<<<<<< HEAD
+=======
+        
+        // Get max booking time from settings (default 18:00)
+        $maxBookingTime = \App\Models\Setting::get('max_booking_time', '18:00');
+        $maxTime = Carbon::parse($maxBookingTime);
+>>>>>>> 37f6b61 (upload project)
 
         while ($currentTime->copy()->addMinutes($duration)->lte($endTime)) {
             $slotStart = $currentTime->format('H:i');
             $slotEnd = $currentTime->copy()->addMinutes($duration)->format('H:i');
+<<<<<<< HEAD
+=======
+            
+            // Check if slot exceeds max booking time (slot bisa dimulai sampai max booking time)
+            $slotStartTime = Carbon::parse($slotStart);
+            if ($slotStartTime->gt($maxTime)) {
+                // Skip slots that start AFTER max booking time
+                $currentTime->addMinutes(30);
+                continue;
+            }
+>>>>>>> 37f6b61 (upload project)
 
             // Check if slot is available
             $isAvailable = $doctor->isAvailable($date, $slotStart, $slotEnd);
