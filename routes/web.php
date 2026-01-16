@@ -114,10 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
         Route::post('bookings/{booking}/reschedule', [AdminBookingController::class, 'reschedule'])->name('bookings.reschedule');
         Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel');
         Route::post('bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
-<<<<<<< HEAD
-=======
         Route::post('bookings/{booking}/no-show', [AdminBookingController::class, 'markAsNoShow'])->name('bookings.no-show');
->>>>>>> 37f6b61 (upload project)
         Route::post('bookings/{booking}/update-notes', [AdminBookingController::class, 'updateNotes'])->name('bookings.update-notes');
 
         // Deposits

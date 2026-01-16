@@ -156,8 +156,6 @@ class BookingController extends Controller
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Mark booking as no-show and forfeit deposit (for testing)
      */
     public function markAsNoShow(Request $request, Booking $booking)
@@ -190,7 +188,6 @@ class BookingController extends Controller
     }
 
     /**
->>>>>>> 37f6b61 (upload project)
      * Update admin notes
      */
     public function updateNotes(Request $request, Booking $booking)

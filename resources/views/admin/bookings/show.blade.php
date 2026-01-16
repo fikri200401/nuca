@@ -472,10 +472,6 @@
             </form>
         </div>
     </div>
-<<<<<<< HEAD
-</div>
-@endsection
-=======
 
     <!-- No-Show Modal -->
     <div id="noShowModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -550,4 +546,3 @@ function hideNoShowModal() {
 }
 </script>
 @endpush
->>>>>>> 37f6b61 (upload project)

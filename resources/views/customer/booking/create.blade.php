@@ -19,10 +19,7 @@
                 <div class="flex-1">
                     <h3 class="font-bold text-blue-900 mb-1">Kebijakan Booking</h3>
                     <ul class="text-sm text-blue-800 space-y-1">
-<<<<<<< HEAD
-=======
                         <li>• Klinik:<strong> Open-close</strong> 08:00 pm-08:00 am</li>
->>>>>>> 37f6b61 (upload project)
                         <li>• Booking <strong>kurang dari 7 hari</strong>: Langsung dikonfirmasi (Auto Approved)</li>
                         <li>• Booking <strong>7 hari atau lebih</strong>: Perlu bayar deposit Rp 50.000 dalam 24 jam</li>
                     </ul>

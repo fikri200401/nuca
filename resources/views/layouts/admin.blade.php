@@ -114,10 +114,7 @@
             sidebar.classList.toggle('-ml-64');
         });
     </script>
-<<<<<<< HEAD
-=======
     
     @stack('scripts')
->>>>>>> 37f6b61 (upload project)
 </body>
 </html>
