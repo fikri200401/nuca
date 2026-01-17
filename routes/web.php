@@ -6,13 +6,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
-use App\Http\Controllers\Customer\ReservationController as CustomerReservationController;
 use App\Http\Controllers\Customer\FeedbackController as CustomerFeedbackController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TreatmentController;
-use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\DoctorController;
-use App\Http\Controllers\Admin\SaungController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\VoucherController;
@@ -82,20 +79,6 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'role:customer
     // Feedback
     Route::get('/bookings/{booking}/feedback', [CustomerFeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/bookings/{booking}/feedback', [CustomerFeedbackController::class, 'store'])->name('feedback.store');
-
-    // Reservation (Saung Nyonyah)
-    Route::get('/reservations', [CustomerReservationController::class, 'index'])->name('reservations.index');
-    Route::get('/reservations/create', [CustomerReservationController::class, 'create'])->name('reservations.create');
-    Route::post('/reservations', [CustomerReservationController::class, 'store'])->name('reservations.store');
-    Route::get('/reservations/{id}', [CustomerReservationController::class, 'show'])->name('reservations.show');
-    
-    // AJAX endpoints for reservations
-    Route::post('/reservations/available-time-slots', [CustomerReservationController::class, 'getAvailableTimeSlots'])->name('reservations.available-time-slots');
-    Route::post('/reservations/available-saungs', [CustomerReservationController::class, 'getAvailableSaungs'])->name('reservations.available-saungs');
-    Route::post('/reservations/check-voucher', [CustomerReservationController::class, 'checkVoucher'])->name('reservations.check-voucher');
-    
-    // Deposit for reservations
-    Route::post('/reservations/{id}/upload-deposit', [CustomerReservationController::class, 'uploadDepositProof'])->name('reservations.upload-deposit');
 });
 
 /*
@@ -109,9 +92,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
 
     // Only Admin (not Owner)
     Route::middleware('role:admin')->group(function () {
-        // Menus (Saung Nyonyah)
-        Route::resource('menus', MenuController::class);
-        Route::post('menus/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])->name('menus.toggle-status');
+        // Treatments
+        Route::resource('treatments', TreatmentController::class);
+        Route::post('treatments/{treatment}/toggle-status', [TreatmentController::class, 'toggleStatus'])->name('treatments.toggle-status');
 
         // Doctors
         Route::resource('doctors', DoctorController::class);
@@ -123,25 +106,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
         Route::delete('doctors/{doctor}/schedules/{schedule}', [DoctorController::class, 'deleteSchedule'])->name('doctors.schedules.delete');
         Route::post('doctors/{doctor}/schedules/{schedule}/toggle', [DoctorController::class, 'toggleScheduleStatus'])->name('doctors.schedules.toggle');
 
-        // Saungs (Saung Nyonyah)
-        Route::resource('saungs', SaungController::class);
-        Route::post('saungs/{saung}/toggle-status', [SaungController::class, 'toggleStatus'])->name('saungs.toggle-status');
-        
-        // Saung Schedules
-        Route::get('saungs/{saung}/schedules', [SaungController::class, 'schedules'])->name('saungs.schedules');
-        Route::post('saungs/{saung}/schedules', [SaungController::class, 'storeSchedule'])->name('saungs.schedules.store');
-        Route::delete('saungs/{saung}/schedules/{schedule}', [SaungController::class, 'deleteSchedule'])->name('saungs.schedules.delete');
-        Route::post('saungs/{saung}/schedules/{schedule}/toggle', [SaungController::class, 'toggleScheduleStatus'])->name('saungs.schedules.toggle');
-
         // Bookings
         Route::get('bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
         Route::get('bookings/create', [AdminBookingController::class, 'create'])->name('bookings.create');
         Route::post('bookings', [AdminBookingController::class, 'store'])->name('bookings.store');
-        Route::get('bookings/{id}', [AdminBookingController::class, 'show'])->name('bookings.show');
+        Route::get('bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
         Route::post('bookings/{booking}/reschedule', [AdminBookingController::class, 'reschedule'])->name('bookings.reschedule');
-        Route::post('bookings/{id}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel');
-        Route::post('bookings/{id}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
+        Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
+<<<<<<< HEAD
+=======
         Route::post('bookings/{booking}/no-show', [AdminBookingController::class, 'markAsNoShow'])->name('bookings.no-show');
+>>>>>>> 37f6b61 (upload project)
         Route::post('bookings/{booking}/update-notes', [AdminBookingController::class, 'updateNotes'])->name('bookings.update-notes');
 
         // Deposits

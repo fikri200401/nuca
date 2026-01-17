@@ -11,11 +11,8 @@ class Deposit extends Model
 
     protected $fillable = [
         'booking_id',
-        'reservation_id',
         'amount',
-        'proof_of_payment', // Legacy field for old bookings
-        'proof_image',       // New field for deposits
-        'uploaded_at',
+        'proof_of_payment',
         'status',
         'deadline_at',
         'verified_at',
@@ -27,7 +24,6 @@ class Deposit extends Model
         'amount' => 'decimal:2',
         'deadline_at' => 'datetime',
         'verified_at' => 'datetime',
-        'uploaded_at' => 'datetime',
     ];
 
     /**
@@ -36,11 +32,6 @@ class Deposit extends Model
     public function booking()
     {
         return $this->belongsTo(Booking::class);
-    }
-
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
     }
 
     public function verifier()

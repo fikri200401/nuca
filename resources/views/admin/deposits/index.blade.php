@@ -24,19 +24,19 @@
         <div class="hidden sm:block">
             <nav class="flex space-x-4" aria-label="Tabs">
                 <a href="{{ route('admin.deposits.index', ['status' => 'pending']) }}" 
-                   class="{{ (!request('status') || request('status') == 'pending') ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
+                   class="{{ (!request('status') || request('status') == 'pending') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
                     Pending
                 </a>
                 <a href="{{ route('admin.deposits.index', ['status' => 'approved']) }}" 
-                   class="{{ request('status') == 'approved' ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
+                   class="{{ request('status') == 'approved' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
                     Approved
                 </a>
                 <a href="{{ route('admin.deposits.index', ['status' => 'rejected']) }}" 
-                   class="{{ request('status') == 'rejected' ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
+                   class="{{ request('status') == 'rejected' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
                     Rejected
                 </a>
                 <a href="{{ route('admin.deposits.index', ['status' => 'expired']) }}" 
-                   class="{{ request('status') == 'expired' ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
+                   class="{{ request('status') == 'expired' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
                     Expired
                 </a>
             </nav>
@@ -50,7 +50,7 @@
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Reservasi</th>
+                                <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Booking</th>
                                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Customer</th>
                                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Jumlah DP</th>
                                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Deadline</th>
@@ -64,22 +64,12 @@
                             @forelse($deposits as $deposit)
                             <tr>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                                    @if($deposit->reservation)
-                                        <div class="font-medium text-gray-900">{{ $deposit->reservation->reservation_code }}</div>
-                                        <div class="text-xs text-gray-500">{{ $deposit->reservation->saung->name }}</div>
-                                    @elseif($deposit->booking)
-                                        <div class="font-medium text-gray-900">{{ $deposit->booking->booking_code }}</div>
-                                        <div class="text-xs text-gray-500">{{ $deposit->booking->treatment->name }}</div>
-                                    @endif
+                                    <div class="font-medium text-gray-900">{{ $deposit->booking->booking_code }}</div>
+                                    <div class="text-xs text-gray-500">{{ $deposit->booking->treatment->name }}</div>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @if($deposit->reservation)
-                                        <div class="font-medium text-gray-900">{{ $deposit->reservation->user->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $deposit->reservation->user->whatsapp_number }}</div>
-                                    @elseif($deposit->booking)
-                                        <div class="font-medium text-gray-900">{{ $deposit->booking->user->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $deposit->booking->user->whatsapp_number }}</div>
-                                    @endif
+                                    <div class="font-medium text-gray-900">{{ $deposit->booking->user->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $deposit->booking->user->whatsapp_number }}</div>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     Rp {{ number_format($deposit->amount, 0, ',', '.') }}

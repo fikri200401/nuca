@@ -3,29 +3,19 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-    <!-- Background Pattern -->
-    <div class="absolute inset-0 opacity-5">
-        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M30 0L60 30L30 60L0 30z" fill="%2322c55e" fill-opacity="0.4"/%3E%3C/svg%3E'); background-size: 60px 60px;"></div>
-    </div>
-    
-    <div class="max-w-md w-full relative z-10">
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
         <!-- Logo & Title -->
         <div class="text-center mb-8">
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-3 mb-6">
-                <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white shadow-xl">
-                    <i class="fas fa-umbrella-beach text-2xl"></i>
-                </div>
-                <div class="text-left">
-                    <span class="text-2xl font-serif font-bold text-gray-900 block">Saung Nyonyah</span>
-                    <span class="text-xs text-gray-500">Ciledug, Tangerang</span>
-                </div>
+            <a href="{{ url('/') }}" class="inline-flex items-center gap-2 mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-serif font-bold text-xl shadow-lg">N</div>
+                <span class="text-2xl font-serif font-bold text-gray-900">Nuca Beauty Skin</span>
             </a>
             <h2 class="mt-4 text-3xl font-serif font-bold text-gray-900">
                 Login ke Akun Anda
             </h2>
             <p class="mt-2 text-sm text-gray-600">
-                Nikmati kemudahan reservasi saung online
+                Gunakan WhatsApp, Username, atau Member Number
             </p>
         </div>
 
@@ -38,7 +28,7 @@
         </div>
         @endif
 
-        <form class="bg-white p-8 rounded-2xl shadow-xl border border-green-100" method="POST" action="{{ route('login.submit') }}">
+        <form class="bg-white p-8 rounded-2xl shadow-xl border border-pink-100" method="POST" action="{{ route('login.submit') }}">
             @csrf
 
             <div class="space-y-5">
@@ -52,7 +42,7 @@
                            type="text" 
                            required 
                            value="{{ old('identifier') }}"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition @error('identifier') border-red-500 @enderror"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('identifier') border-red-500 @enderror"
                            placeholder="081234567890 / username / MBR-001">
                     @error('identifier')
                     <p class="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -73,7 +63,7 @@
                            name="password" 
                            type="password" 
                            required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition @error('password') border-red-500 @enderror">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('password') border-red-500 @enderror">
                     @error('password')
                     <p class="mt-1 text-sm text-red-600 flex items-center gap-1">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -90,14 +80,14 @@
                         <input id="remember" 
                                name="remember" 
                                type="checkbox" 
-                               class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                               class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
                         <label for="remember" class="ml-2 block text-sm text-gray-700">
                             Ingat Saya
                         </label>
                     </div>
 
                     <div class="text-sm">
-                        <a href="{{ route('forgot-password') }}" class="font-medium text-green-600 hover:text-green-700 transition">
+                        <a href="{{ route('forgot-password') }}" class="font-medium text-pink-600 hover:text-pink-700 transition">
                             Lupa Password?
                         </a>
                     </div>
@@ -105,7 +95,7 @@
 
                 <!-- Login Button -->
                 <div class="pt-2">
-                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition transform hover:-translate-y-0.5">
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition transform hover:-translate-y-0.5">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
@@ -118,7 +108,7 @@
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
                     Belum punya akun?
-                    <a href="{{ route('register') }}" class="font-semibold text-green-600 hover:text-green-700 transition">
+                    <a href="{{ route('register') }}" class="font-semibold text-pink-600 hover:text-pink-700 transition">
                         Daftar Sekarang
                     </a>
                 </p>
@@ -127,16 +117,16 @@
             <!-- Demo Credentials -->
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <p class="text-xs text-gray-500 text-center mb-3">
-                    <strong class="text-green-600">Demo Login:</strong>
+                    <strong class="text-pink-600">Demo Login:</strong>
                 </p>
                 <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div class="bg-green-50 border border-green-100 rounded-lg p-3">
-                        <p class="font-semibold text-green-700 mb-1">Customer</p>
+                    <div class="bg-pink-50 border border-pink-100 rounded-lg p-3">
+                        <p class="font-semibold text-pink-700 mb-1">Customer</p>
                         <p class="text-gray-600">WA: <code class="bg-white px-1.5 py-0.5 rounded">081234567892</code></p>
                         <p class="text-gray-600">Pass: <code class="bg-white px-1.5 py-0.5 rounded">password</code></p>
                     </div>
-                    <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
-                        <p class="font-semibold text-emerald-700 mb-1">Admin</p>
+                    <div class="bg-purple-50 border border-purple-100 rounded-lg p-3">
+                        <p class="font-semibold text-purple-700 mb-1">Admin</p>
                         <p class="text-gray-600">WA: <code class="bg-white px-1.5 py-0.5 rounded">081234567890</code></p>
                         <p class="text-gray-600">Pass: <code class="bg-white px-1.5 py-0.5 rounded">password</code></p>
                     </div>
@@ -146,7 +136,7 @@
 
         <!-- Back to Home -->
         <div class="mt-6 text-center">
-            <a href="{{ url('/') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-green-600 transition">
+            <a href="{{ url('/') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-pink-600 transition">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>

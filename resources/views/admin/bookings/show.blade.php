@@ -1,18 +1,12 @@
 @extends('layouts.admin')
 
-@php
-    // Detect if this is Reservation (new) or Booking (old)
-    $isReservation = isset($booking->reservation_code);
-    $displayCode = $isReservation ? $booking->reservation_code : $booking->booking_number;
-@endphp
-
-@section('title', 'Detail Reservasi - ' . $displayCode)
+@section('title', 'Detail Booking - ' . $booking->booking_number)
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-8">
     <div class="mb-6">
-        <a href="{{ route('admin.bookings.index') }}" class="text-sm text-green-600 hover:text-green-900">
-            ← Kembali ke Daftar Reservasi
+        <a href="{{ route('admin.bookings.index') }}" class="text-sm text-indigo-600 hover:text-indigo-900">
+            ← Kembali ke Daftar Booking
         </a>
     </div>
 
@@ -21,7 +15,7 @@
         <div class="md:flex md:items-center md:justify-between">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    {{ $displayCode }}
+                    {{ $booking->booking_number }}
                 </h2>
                 <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
                     <div class="mt-2 flex items-center text-sm text-gray-500">
@@ -58,8 +52,12 @@
                 </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4">
+<<<<<<< HEAD
+                @if($booking->status === 'confirmed')
+=======
                 @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
-                    <form action="{{ route('admin.bookings.complete', $booking->id) }}" method="POST" class="inline">
+>>>>>>> 37f6b61 (upload project)
+                    <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
                                 onclick="return confirm('Tandai booking ini sebagai selesai?')"
@@ -67,6 +65,10 @@
                             ✓ Selesai
                         </button>
                     </form>
+<<<<<<< HEAD
+                @endif
+                @if(in_array($booking->status, ['pending', 'waiting_dp', 'deposit_confirmed', 'confirmed']))
+=======
                     <!-- Testing: Mark as No-Show -->
                     <button type="button" 
                             onclick="showNoShowModal()"
@@ -75,7 +77,8 @@
                     </button>
                 @endif
                 @if(in_array($booking->status, ['pending', 'waiting_deposit', 'deposit_confirmed', 'confirmed', 'auto_approved']))
-                    <form action="{{ route('admin.bookings.cancel', $isReservation ? $booking->id : $booking->id) }}" method="POST" class="inline">
+>>>>>>> 37f6b61 (upload project)
+                    <form action="{{ route('admin.bookings.cancel', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
                                 onclick="return confirm('Yakin batalkan booking ini?')"
@@ -104,93 +107,41 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Tanggal</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
-                                {{ \Carbon\Carbon::parse($isReservation ? $booking->reservation_date : $booking->booking_date)->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') }}
                             </dd>
                         </div>
 
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Waktu</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
-                                {{ $isReservation ? $booking->reservation_time : $booking->booking_time }}
-                                @if($isReservation && $booking->end_time)
-                                    - {{ $booking->end_time }}
+                                {{ $booking->booking_time }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Treatment</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $booking->treatment->name }}
+                                <span class="text-gray-500">({{ $booking->treatment->duration }} menit)</span>
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Dokter</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $booking->doctor->name }}
+                                @if($booking->doctor->specialization)
+                                    <span class="text-gray-500">- {{ $booking->doctor->specialization }}</span>
                                 @endif
                             </dd>
                         </div>
 
-                        @if($isReservation)
-                            {{-- RESERVATION SYSTEM --}}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Saung</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $booking->saung->name ?? '-' }}
-                                    @if($booking->saung)
-                                        <span class="text-gray-500">(Kapasitas: {{ $booking->saung->capacity }} orang)</span>
-                                    @endif
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Jumlah Tamu</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $booking->number_of_people }} orang
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Menu Pesanan</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    @if($booking->menus && $booking->menus->count() > 0)
-                                        <ul class="list-disc list-inside">
-                                            @foreach($booking->menus as $menu)
-                                                <li>{{ $menu->name }} ({{ $menu->pivot->quantity }}x) - Rp {{ number_format($menu->pivot->price * $menu->pivot->quantity, 0, ',', '.') }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <span class="text-gray-500">Belum ada pesanan menu</span>
-                                    @endif
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Total Harga</dt>
-                                <dd class="mt-1 text-lg font-semibold text-gray-900">
-                                    Rp {{ number_format($booking->final_price, 0, ',', '.') }}
-                                    @if($booking->discount_amount > 0)
-                                        <div class="text-xs text-gray-500">
-                                            <span class="line-through">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
-                                            <span class="text-green-600 ml-1">Diskon: Rp {{ number_format($booking->discount_amount, 0, ',', '.') }}</span>
-                                        </div>
-                                    @endif
-                                </dd>
-                            </div>
-                        @else
-                            {{-- BOOKING SYSTEM (OLD) --}}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Treatment</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $booking->treatment->name }}
-                                    <span class="text-gray-500">({{ $booking->treatment->duration }} menit)</span>
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Dokter</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $booking->doctor->name }}
-                                    @if($booking->doctor->specialization)
-                                        <span class="text-gray-500">- {{ $booking->doctor->specialization }}</span>
-                                    @endif
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Harga</dt>
-                                <dd class="mt-1 text-lg font-semibold text-gray-900">
-                                    Rp {{ number_format($booking->treatment->price, 0, ',', '.') }}
-                                </dd>
-                            </div>
-                        @endif
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Harga</dt>
+                            <dd class="mt-1 text-lg font-semibold text-gray-900">
+                                Rp {{ number_format($booking->treatment->price, 0, ',', '.') }}
+                            </dd>
+                        </div>
 
                         @if($booking->is_manual_entry)
                         <div>
@@ -203,27 +154,11 @@
                         </div>
                         @endif
 
-                        @if($isReservation ? $booking->customer_notes : $booking->notes)
+                        @if($booking->notes)
                         <div class="sm:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500">Catatan Customer</dt>
-                            <dd class="mt-1">
-                                @if($isReservation)
-                                    <div class="text-sm text-gray-900 bg-gray-50 p-3 rounded">
-                                        {{ $booking->customer_notes }}
-                                    </div>
-                                @else
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
-                                        <div class="flex items-center gap-2 text-sm">
-                                            <i class="fas fa-university text-green-600"></i>
-                                            <span class="font-semibold">No. Rekening BCA:</span>
-                                            <span class="font-bold text-green-700">55447760</span>
-                                            <span class="text-gray-600">a/n Saung Nyonyah</span>
-                                        </div>
-                                    </div>
-                                    <div class="text-sm text-gray-900 bg-gray-50 p-3 rounded">
-                                        {{ $booking->notes }}
-                                    </div>
-                                @endif
+                            <dt class="text-sm font-medium text-gray-500">Catatan</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $booking->notes }}
                             </dd>
                         </div>
                         @endif
@@ -231,8 +166,7 @@
                         <div class="sm:col-span-2">
                             <dt class="text-sm font-medium text-gray-500">Dibuat pada</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-blue-600">{{ $booking->created_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $booking->created_at->format('d/m/Y H:i') }}</div>
+                                {{ $booking->created_at->format('d/m/Y H:i') }}
                             </dd>
                         </div>
                     </dl>
@@ -282,17 +216,7 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Deadline</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-orange-600">{{ $booking->deposit->deadline_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $booking->deposit->deadline_at->format('d/m/Y H:i') }}</div>
-                                @if($booking->deposit->deadline_at < now() && $booking->deposit->status === 'pending')
-                                    <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        EXPIRED
-                                    </span>
-                                @elseif($booking->deposit->deadline_at < now()->addHours(6) && $booking->deposit->status === 'pending')
-                                    <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        Segera Expired
-                                    </span>
-                                @endif
+                                {{ $booking->deposit->deadline_at->format('d/m/Y H:i') }}
                             </dd>
                         </div>
 
@@ -300,64 +224,8 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Diverifikasi</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-green-600">{{ $booking->deposit->verified_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $booking->deposit->verified_at->format('d/m/Y H:i') }}</div>
+                                {{ $booking->deposit->verified_at->format('d/m/Y H:i') }}
                             </dd>
-                        </div>
-                        @endif
-
-                        @if($booking->deposit->proof_image)
-                        <div class="sm:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500 mb-2">Bukti Transfer DP</dt>
-                            <dd class="mt-1">
-                                <a href="{{ asset('storage/' . $booking->deposit->proof_image) }}" 
-                                   target="_blank" 
-                                   class="inline-block">
-                                    <img src="{{ asset('storage/' . $booking->deposit->proof_image) }}" 
-                                         alt="Bukti DP" 
-                                         class="max-w-sm rounded-lg border border-gray-300 hover:opacity-90 transition">
-                                </a>
-                                <p class="text-xs text-gray-500 mt-1">Klik untuk melihat ukuran penuh</p>
-                            </dd>
-                        </div>
-                        @endif
-
-                        {{-- Action Buttons for Deposit --}}
-                        @if($booking->deposit->status === 'pending' && $booking->deposit->proof_image)
-                        <div class="sm:col-span-2 flex gap-3 pt-4 border-t border-gray-200">
-                            <form action="{{ route('admin.deposits.approve', $booking->deposit) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" 
-                                        onclick="return confirm('Approve bukti DP ini? Reservasi akan dikonfirmasi.')"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Approve DP
-                                </button>
-                            </form>
-                            <form action="{{ route('admin.deposits.reject', $booking->deposit) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" 
-                                        onclick="return confirm('Reject bukti DP ini? Customer perlu upload ulang.')"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                    Reject DP
-                                </button>
-                            </form>
-                        </div>
-                        @elseif($booking->deposit->status === 'pending' && !$booking->deposit->proof_image)
-                        <div class="sm:col-span-2 pt-4 border-t border-gray-200">
-                            <div class="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                    </svg>
-                                    <p class="text-sm font-medium text-yellow-800">Menunggu customer upload bukti transfer</p>
-                                </div>
-                            </div>
                         </div>
                         @endif
 
@@ -604,6 +472,10 @@
             </form>
         </div>
     </div>
+<<<<<<< HEAD
+</div>
+@endsection
+=======
 
     <!-- No-Show Modal -->
     <div id="noShowModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -678,3 +550,4 @@ function hideNoShowModal() {
 }
 </script>
 @endpush
+>>>>>>> 37f6b61 (upload project)

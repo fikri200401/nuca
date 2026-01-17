@@ -191,11 +191,11 @@
                             </span>
                         </div>
 
-                        @if($booking->deposit->proof_image)
+                        @if($booking->deposit->proof_of_payment)
                         <div class="mt-4">
                             <label class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2 block">Bukti Transfer</label>
-                            <a href="{{ asset('storage/' . $booking->deposit->proof_image) }}" target="_blank" class="block">
-                                <img src="{{ asset('storage/' . $booking->deposit->proof_image) }}" alt="Bukti Transfer" class="w-full rounded-xl border-2 border-pink-200 shadow-lg hover:shadow-xl transition cursor-pointer hover:border-pink-400">
+                            <a href="{{ asset('storage/' . $booking->deposit->proof_of_payment) }}" target="_blank" class="block">
+                                <img src="{{ asset('storage/' . $booking->deposit->proof_of_payment) }}" alt="Bukti Transfer" class="w-full rounded-xl border-2 border-pink-200 shadow-lg hover:shadow-xl transition cursor-pointer hover:border-pink-400">
                             </a>
                             <p class="text-xs text-gray-500 mt-2 text-center">Klik gambar untuk memperbesar</p>
                         </div>
@@ -217,22 +217,10 @@
                         </div>
                         @endif
 
-                        {{-- Placeholder for missing deposit proof --}}
-                        @if(!$booking->deposit->proof_image)
-                        <div class="mt-4 bg-amber-50 rounded-xl p-4 border border-amber-200">
-                            <div class="text-center text-amber-700">
-                                <svg class="w-12 h-12 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
-                                </svg>
-                                <p class="text-sm font-medium text-amber-800">Menunggu Upload Bukti Transfer</p>
-                                <p class="text-xs text-amber-600 mt-1">Silahkan hubungi admin untuk upload bukti pembayaran deposit</p>
-                                <div class="mt-3 text-xs text-amber-700">
-                                    <p class="font-semibold">📋 Info Transfer:</p>
-                                    <p>BCA: 1234567890</p>
-                                    <p>A.n: Beauty Clinic</p>
-                                </div>
-                            </div>
-                        </div>
+                        @if($booking->deposit->status === 'pending' || $booking->deposit->status === 'rejected')
+                        <button onclick="showUploadModal()" class="w-full mt-4 px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:-translate-y-0.5">
+                            {{ $booking->deposit->status === 'rejected' ? 'Upload Ulang Bukti Transfer' : 'Upload Bukti Transfer' }}
+                        </button>
                         @endif
                     </div>
                 </div>
@@ -330,4 +318,80 @@
     </div>
 </div>
 
+{{-- Upload Deposit Modal --}}
+<div id="uploadDepositModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all border border-pink-100">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Upload Bukti Deposit</h3>
+            <button onclick="closeUploadModal()" class="text-gray-400 hover:text-pink-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('customer.bookings.upload-deposit', $booking->id) }}" enctype="multipart/form-data">
+            @csrf
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Bukti Transfer</label>
+                <div class="relative border-2 border-dashed border-pink-300 rounded-xl p-6 text-center hover:border-pink-400 transition bg-pink-50">
+                    <input type="file" name="proof_of_payment" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage(this)">
+                    <div id="uploadPlaceholder">
+                        <svg class="w-12 h-12 text-pink-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <p class="text-sm text-pink-700 font-medium">Klik untuk upload gambar</p>
+                        <p class="text-xs text-pink-500 mt-1">JPG, PNG (Max: 2MB)</p>
+                    </div>
+                    <div id="imagePreview" class="hidden">
+                        <img src="" alt="Preview" class="max-h-48 mx-auto rounded-xl shadow-lg">
+                        <p class="text-xs text-gray-500 mt-2">Klik lagi untuk mengganti</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeUploadModal()" class="flex-1 px-5 py-3 border-2 border-pink-300 text-gray-700 font-semibold rounded-xl hover:bg-pink-50 transition">
+                    Batal
+                </button>
+                <button type="submit" class="flex-1 px-5 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:-translate-y-0.5">
+                    Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function showUploadModal() {
+    document.getElementById('uploadDepositModal').classList.remove('hidden');
+}
+
+function closeUploadModal() {
+    document.getElementById('uploadDepositModal').classList.add('hidden');
+    document.getElementById('uploadPlaceholder').classList.remove('hidden');
+    document.getElementById('imagePreview').classList.add('hidden');
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('imagePreview').querySelector('img').src = e.target.result;
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+            document.getElementById('imagePreview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('uploadDepositModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeUploadModal();
+    }
+});
+</script>
+@endpush
 @endsection

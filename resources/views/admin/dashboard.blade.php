@@ -8,14 +8,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                     </div>
                     <div class="ml-5">
-                        <p class="text-sm font-medium text-gray-500">Reservasi Hari Ini</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['total_reservations_today'] }}</p>
+                        <p class="text-sm font-medium text-gray-500">Booking Hari Ini</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['total_bookings_today'] }}</p>
                     </div>
                 </div>
             </div>
@@ -80,16 +80,16 @@
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <a href="{{ route('admin.bookings.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Reservasi</h3>
-                <p class="text-sm text-gray-600">Lihat dan kelola semua reservasi</p>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Booking</h3>
+                <p class="text-sm text-gray-600">Lihat dan kelola semua booking</p>
             </a>
-            <a href="{{ route('admin.menus.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Menu</h3>
-                <p class="text-sm text-gray-600">Tambah dan edit menu saung</p>
+            <a href="{{ route('admin.treatments.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Treatment</h3>
+                <p class="text-sm text-gray-600">Tambah dan edit treatment</p>
             </a>
-            <a href="{{ route('admin.saungs.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Saung</h3>
-                <p class="text-sm text-gray-600">Atur saung dan jadwal</p>
+            <a href="{{ route('admin.doctors.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Kelola Dokter</h3>
+                <p class="text-sm text-gray-600">Atur jadwal dokter</p>
             </a>
             <a href="{{ route('admin.deposits.index') }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Verifikasi DP</h3>
@@ -98,37 +98,37 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Upcoming Reservations -->
+            <!-- Upcoming Bookings -->
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Reservasi Mendatang</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Booking Mendatang</h2>
                 </div>
                 <div class="p-6">
-                    @if($upcomingReservations->count() > 0)
+                    @if($upcomingBookings->count() > 0)
                     <div class="space-y-4">
-                        @foreach($upcomingReservations as $reservation)
+                        @foreach($upcomingBookings as $booking)
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                             <div class="flex-1">
-                                <p class="font-medium text-gray-900">{{ $reservation->user->name }}</p>
-                                <p class="text-sm text-gray-600">{{ $reservation->saung->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $reservation->menus->count() }} menu</p>
+                                <p class="font-medium text-gray-900">{{ $booking->user->name }}</p>
+                                <p class="text-sm text-gray-600">{{ $booking->treatment->name }}</p>
+                                <p class="text-sm text-gray-500">Dr. {{ $booking->doctor->name }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</p>
-                                <p class="text-sm text-gray-600">{{ $reservation->reservation_time }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}</p>
+                                <p class="text-sm text-gray-600">{{ $booking->booking_time }}</p>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($reservation->status == 'auto_approved') bg-green-100 text-green-800
-                                    @elseif($reservation->status == 'waiting_deposit') bg-yellow-100 text-yellow-800
+                                    @if($booking->status == 'auto_approved') bg-green-100 text-green-800
+                                    @elseif($booking->status == 'waiting_deposit') bg-yellow-100 text-yellow-800
                                     @else bg-gray-100 text-gray-800
                                     @endif">
-                                    {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
+                                    {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
                                 </span>
                             </div>
                         </div>
                         @endforeach
                     </div>
                     @else
-                    <p class="text-gray-500 text-center py-8">Tidak ada reservasi mendatang</p>
+                    <p class="text-gray-500 text-center py-8">Tidak ada booking mendatang</p>
                     @endif
                 </div>
             </div>
@@ -144,20 +144,15 @@
                         @foreach($pendingDeposits as $deposit)
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                             <div class="flex-1">
-                                @if($deposit->reservation)
-                                    <p class="font-medium text-gray-900">{{ $deposit->reservation->user->name }}</p>
-                                    <p class="text-sm text-gray-600">{{ $deposit->reservation->saung->name }}</p>
-                                @elseif($deposit->booking)
-                                    <p class="font-medium text-gray-900">{{ $deposit->booking->user->name }}</p>
-                                    <p class="text-sm text-gray-600">{{ $deposit->booking->treatment->name }}</p>
-                                @endif
+                                <p class="font-medium text-gray-900">{{ $deposit->booking->user->name }}</p>
+                                <p class="text-sm text-gray-600">{{ $deposit->booking->treatment->name }}</p>
                                 <p class="text-sm text-gray-500">Rp {{ number_format($deposit->amount, 0, ',', '.') }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-medium text-red-600">
                                     Deadline: {{ \Carbon\Carbon::parse($deposit->deadline_at)->format('d M H:i') }}
                                 </p>
-                                <a href="{{ route('admin.deposits.index') }}" class="text-sm text-green-600 hover:text-green-800">
+                                <a href="{{ route('admin.deposits.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800">
                                     Verifikasi →
                                 </a>
                             </div>

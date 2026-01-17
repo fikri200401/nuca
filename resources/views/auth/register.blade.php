@@ -3,7 +3,7 @@
 @section('title', 'Daftar Akun Baru')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -11,7 +11,7 @@
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
                 Atau
-                <a href="{{ route('login') }}" class="font-medium text-green-600 hover:text-green-700">
+                <a href="{{ route('login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
                     login ke akun Anda
                 </a>
             </p>
@@ -21,18 +21,18 @@
             <!-- Step Indicator -->
             <div class="flex items-center justify-center space-x-2">
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 1 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'">1</div>
-                    <span class="ml-2 text-xs font-medium" :class="step >= 1 ? 'text-green-600' : 'text-gray-500'">WhatsApp</span>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'">1</div>
+                    <span class="ml-2 text-xs font-medium" :class="step >= 1 ? 'text-indigo-600' : 'text-gray-500'">WhatsApp</span>
                 </div>
-                <div class="w-8 h-0.5" :class="step >= 2 ? 'bg-green-600' : 'bg-gray-200'"></div>
+                <div class="w-8 h-0.5" :class="step >= 2 ? 'bg-indigo-600' : 'bg-gray-200'"></div>
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 2 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'">2</div>
-                    <span class="ml-2 text-xs font-medium" :class="step >= 2 ? 'text-green-600' : 'text-gray-500'">OTP</span>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'">2</div>
+                    <span class="ml-2 text-xs font-medium" :class="step >= 2 ? 'text-indigo-600' : 'text-gray-500'">OTP</span>
                 </div>
-                <div class="w-8 h-0.5" :class="step >= 3 ? 'bg-green-600' : 'bg-gray-200'"></div>
+                <div class="w-8 h-0.5" :class="step >= 3 ? 'bg-indigo-600' : 'bg-gray-200'"></div>
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 3 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'">3</div>
-                    <span class="ml-2 text-xs font-medium" :class="step >= 3 ? 'text-green-600' : 'text-gray-500'">Data</span>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" :class="step >= 3 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'">3</div>
+                    <span class="ml-2 text-xs font-medium" :class="step >= 3 ? 'text-indigo-600' : 'text-gray-500'">Data</span>
                 </div>
             </div>
 
@@ -50,11 +50,11 @@
                     <label for="whatsapp_number" class="block text-sm font-medium text-gray-700">Nomor WhatsApp</label>
                     <div class="mt-1 flex rounded-md shadow-sm">
                         <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+62</span>
-                        <input type="text" v-model="whatsappNumber" id="whatsapp_number" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="81234567890" @input="whatsappNumber = whatsappNumber.replace(/[^0-9]/g, '')" required>
+                        <input type="text" v-model="whatsappNumber" id="whatsapp_number" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="81234567890" @input="whatsappNumber = whatsappNumber.replace(/[^0-9]/g, '')" required>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Contoh: 81234567890 (tanpa +62 atau 0)</p>
                 </div>
-                <button type="submit" :disabled="loading || !whatsappNumber" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50">
+                <button type="submit" :disabled="loading || !whatsappNumber" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
                     <span v-if="loading">Mengirim...</span>
                     <span v-else>Kirim OTP</span>
                 </button>
@@ -65,17 +65,17 @@
                 <div>
                     <label for="otp_code" class="block text-sm font-medium text-gray-700">Kode OTP</label>
                     <p class="text-sm text-gray-600 mb-2">Kode OTP telah dikirim ke <strong>+62@{{ whatsappNumber }}</strong></p>
-                    <input type="text" v-model="otpCode" id="otp_code" maxlength="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-center text-2xl tracking-widest focus:ring-green-500 focus:border-green-500" placeholder="123456" @input="otpCode = otpCode.replace(/[^0-9]/g, '')" required>
+                    <input type="text" v-model="otpCode" id="otp_code" maxlength="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-center text-2xl tracking-widest focus:ring-indigo-500 focus:border-indigo-500" placeholder="123456" @input="otpCode = otpCode.replace(/[^0-9]/g, '')" required>
                 </div>
                 <div class="text-center">
-                    <button type="button" @click="resendOtp" :disabled="!canResend || loading" class="text-sm text-green-600 hover:text-green-700 disabled:text-gray-400">
+                    <button type="button" @click="resendOtp" :disabled="!canResend || loading" class="text-sm text-indigo-600 hover:text-indigo-500 disabled:text-gray-400">
                         <span v-if="!canResend">Kirim ulang dalam @{{ countdown }}s</span>
                         <span v-else>Kirim Ulang OTP</span>
                     </button>
                 </div>
                 <div class="flex space-x-2">
                     <button type="button" @click="step = 1" class="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Kembali</button>
-                    <button type="submit" :disabled="loading || otpCode.length !== 6" class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+                    <button type="submit" :disabled="loading || otpCode.length !== 6" class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
                         <span v-if="loading">Memverifikasi...</span>
                         <span v-else>Verifikasi</span>
                     </button>
@@ -86,15 +86,15 @@
             <form v-if="step === 3" @submit.prevent="register" class="space-y-4">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap *</label>
-                    <input type="text" v-model="formData.name" id="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" required>
+                    <input type="text" v-model="formData.name" id="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700">Username *</label>
-                    <input type="text" v-model="formData.username" id="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" required>
+                    <input type="text" v-model="formData.username" id="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
-                    <input type="email" v-model="formData.email" id="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" required>
+                    <input type="email" v-model="formData.email" id="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password * (min. 8 karakter)</label>

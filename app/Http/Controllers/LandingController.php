@@ -11,15 +11,6 @@ class LandingController extends Controller
 {
     public function index()
     {
-        // Use Saung Nyonyah landing page
-        return view('landing.saung');
-    }
-
-    /**
-     * Landing page untuk klinik (old)
-     */
-    public function clinic()
-    {
         // Get popular treatments
         $popularTreatments = Treatment::active()
             ->popular()

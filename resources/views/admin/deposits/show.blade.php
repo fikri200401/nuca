@@ -1,12 +1,6 @@
 @extends('layouts.admin')
 
-@php
-    // Detect if this deposit belongs to Reservation (new) or Booking (old)
-    $isReservation = $deposit->reservation_id !== null;
-    $bookingCode = $isReservation ? $deposit->reservation->reservation_code : $deposit->booking->booking_number;
-@endphp
-
-@section('title', 'Detail Deposit - ' . $bookingCode)
+@section('title', 'Detail Deposit - ' . $deposit->booking->booking_number)
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-8">
@@ -51,11 +45,7 @@
                     Detail Deposit
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">
-                    @if($isReservation)
-                        Reservasi #{{ $deposit->reservation->reservation_code }}
-                    @else
-                        Booking #{{ $deposit->booking->booking_number }}
-                    @endif
+                    Booking #{{ $deposit->booking->booking_number }}
                 </p>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
@@ -122,25 +112,12 @@
                         </div>
 
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">Dibuat Pada</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-blue-600">{{ $deposit->created_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $deposit->created_at->format('d/m/Y H:i') }}</div>
-                            </dd>
-                        </div>
-
-                        <div>
                             <dt class="text-sm font-medium text-gray-500">Deadline</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-orange-600">{{ $deposit->deadline_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $deposit->deadline_at->format('d/m/Y H:i') }}</div>
-                                @if($deposit->deadline_at < now() && $deposit->status === 'pending')
-                                    <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        EXPIRED
-                                    </span>
-                                @elseif($deposit->deadline_at < now()->addHours(6) && $deposit->status === 'pending')
-                                    <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        Segera Expired
+                                {{ $deposit->deadline_at->format('d/m/Y H:i') }}
+                                @if($deposit->isExpired())
+                                    <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Expired
                                     </span>
                                 @endif
                             </dd>
@@ -164,8 +141,7 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Diverifikasi Pada</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <div class="font-medium text-green-600">{{ $deposit->verified_at->diffForHumans() }}</div>
-                                <div class="text-xs text-gray-500">{{ $deposit->verified_at->format('d/m/Y H:i') }}</div>
+                                {{ $deposit->verified_at->format('d/m/Y H:i') }}
                             </dd>
                         </div>
                         @endif
@@ -211,154 +187,70 @@
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
-                        @if($isReservation)
-                            Informasi Reservasi
-                        @else
-                            Informasi Booking
-                        @endif
+                        Informasi Booking
                     </h3>
                 </div>
                 <div class="px-4 py-5 sm:p-6">
                     <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">
-                                @if($isReservation)
-                                    Kode Reservasi
-                                @else
-                                    No. Booking
-                                @endif
-                            </dt>
+                            <dt class="text-sm font-medium text-gray-500">No. Booking</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
-                                @if($isReservation)
-                                    {{ $deposit->reservation->reservation_code }}
-                                @else
-                                    {{ $deposit->booking->booking_number }}
-                                @endif
+                                {{ $deposit->booking->booking_number }}
                             </dd>
                         </div>
 
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Tanggal & Waktu</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                @if($isReservation)
-                                    {{ \Carbon\Carbon::parse($deposit->reservation->reservation_date)->format('d/m/Y') }} 
-                                    {{ $deposit->reservation->reservation_time }}
-                                    @if($deposit->reservation->end_time)
-                                        - {{ $deposit->reservation->end_time }}
-                                    @endif
-                                @else
-                                    {{ \Carbon\Carbon::parse($deposit->booking->booking_date)->format('d/m/Y') }} 
-                                    {{ $deposit->booking->booking_time }}
-                                @endif
+                                {{ \Carbon\Carbon::parse($deposit->booking->booking_date)->format('d/m/Y') }} 
+                                {{ $deposit->booking->booking_time }}
                             </dd>
                         </div>
 
-                        @if($isReservation)
-                            {{-- RESERVATION SYSTEM --}}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Saung</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $deposit->reservation->saung->name ?? '-' }}
-                                    @if($deposit->reservation->saung)
-                                        <span class="text-gray-500">({{ $deposit->reservation->saung->capacity }} orang)</span>
-                                    @endif
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Jumlah Tamu</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $deposit->reservation->number_of_people }} orang
-                                </dd>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <dt class="text-sm font-medium text-gray-500">Menu Pesanan</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    @if($deposit->reservation->menus && $deposit->reservation->menus->count() > 0)
-                                        <ul class="list-disc list-inside">
-                                            @foreach($deposit->reservation->menus as $menu)
-                                                <li>{{ $menu->name }} ({{ $menu->pivot->quantity }}x) - Rp {{ number_format($menu->pivot->price * $menu->pivot->quantity, 0, ',', '.') }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <span class="text-gray-500">Belum ada pesanan menu</span>
-                                    @endif
-                                </dd>
-                            </div>
-                        @else
-                            {{-- BOOKING SYSTEM (OLD) --}}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Treatment</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $deposit->booking->treatment->name }}
-                                    <span class="text-gray-500">({{ $deposit->booking->treatment->duration }} menit)</span>
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Dokter</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    {{ $deposit->booking->doctor->name }}
-                                    @if($deposit->booking->doctor->specialization)
-                                        <span class="text-gray-500">- {{ $deposit->booking->doctor->specialization }}</span>
-                                    @endif
-                                </dd>
-                            </div>
-                        @endif
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Treatment</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $deposit->booking->treatment->name }}
+                                <span class="text-gray-500">({{ $deposit->booking->treatment->duration }} menit)</span>
+                            </dd>
+                        </div>
 
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">Total Harga</dt>
+                            <dt class="text-sm font-medium text-gray-500">Dokter</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $deposit->booking->doctor->name }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Harga Treatment</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
-                                @if($isReservation)
-                                    Rp {{ number_format($deposit->reservation->final_price, 0, ',', '.') }}
-                                    @if($deposit->reservation->discount_amount > 0)
-                                        <div class="text-xs text-gray-500">
-                                            <span class="line-through">Rp {{ number_format($deposit->reservation->total_price, 0, ',', '.') }}</span>
-                                            <span class="text-green-600 ml-1">Diskon: Rp {{ number_format($deposit->reservation->discount_amount, 0, ',', '.') }}</span>
-                                        </div>
-                                    @endif
-                                @else
-                                    Rp {{ number_format($deposit->booking->treatment->price, 0, ',', '.') }}
-                                @endif
+                                Rp {{ number_format($deposit->booking->treatment->price, 0, ',', '.') }}
                             </dd>
                         </div>
 
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">Status 
-                                @if($isReservation)
-                                    Reservasi
-                                @else
-                                    Booking
-                                @endif
-                            </dt>
+                            <dt class="text-sm font-medium text-gray-500">Status Booking</dt>
                             <dd class="mt-1">
-                                @php
-                                    $status = $isReservation ? $deposit->reservation->status : $deposit->booking->status;
-                                @endphp
-                                @if($status === 'pending')
+                                @if($deposit->booking->status === 'pending')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                         Pending
                                     </span>
-                                @elseif($status === 'waiting_deposit' || $status === 'waiting_dp')
+                                @elseif($deposit->booking->status === 'waiting_dp')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
                                         Waiting DP
                                     </span>
-                                @elseif($status === 'deposit_confirmed')
+                                @elseif($deposit->booking->status === 'deposit_confirmed')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         DP Confirmed
                                     </span>
-                                @elseif($status === 'confirmed' || $status === 'auto_approved')
+                                @elseif($deposit->booking->status === 'confirmed')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Confirmed
                                     </span>
-                                @elseif($status === 'completed')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Completed
-                                    </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        {{ ucfirst($status) }}
+                                        {{ ucfirst($deposit->booking->status) }}
                                     </span>
                                 @endif
                             </dd>
@@ -384,32 +276,22 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Nama</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
-                                @if($isReservation)
-                                    {{ $deposit->reservation->user->name }}
-                                @else
-                                    {{ $deposit->booking->user->name }}
-                                @endif
+                                {{ $deposit->booking->user->name }}
                             </dd>
                         </div>
 
                         <div>
                             <dt class="text-sm font-medium text-gray-500">WhatsApp</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                @php
-                                    $whatsapp = $isReservation ? $deposit->reservation->user->whatsapp_number : $deposit->booking->user->whatsapp_number;
-                                @endphp
-                                <a href="https://wa.me/{{ $whatsapp }}" 
+                                <a href="https://wa.me/{{ $deposit->booking->user->whatsapp_number }}" 
                                    target="_blank"
                                    class="text-indigo-600 hover:text-indigo-900">
-                                    {{ $whatsapp }}
+                                    {{ $deposit->booking->user->whatsapp_number }}
                                 </a>
                             </dd>
                         </div>
 
-                        @php
-                            $isMember = $isReservation ? $deposit->reservation->user->is_member : $deposit->booking->user->is_member;
-                        @endphp
-                        @if($isMember)
+                        @if($deposit->booking->user->is_member)
                         <div>
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                 Member

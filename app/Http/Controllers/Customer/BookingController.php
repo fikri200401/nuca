@@ -160,18 +160,6 @@ class BookingController extends Controller
      */
     public function show($id)
     {
-        // Try Reservation first (new system)
-        $reservation = \App\Models\Reservation::where('user_id', Auth::id())
-            ->with(['saung', 'menus', 'deposit'])
-            ->find($id);
-
-        if ($reservation) {
-            // New system: pass as $booking for view compatibility
-            $booking = $reservation;
-            return view('customer.booking.show', compact('booking'));
-        }
-
-        // Fallback to Booking (old system)
         $booking = Booking::where('user_id', Auth::id())
             ->with(['treatment', 'doctor', 'deposit', 'feedback', 'beforeAfterPhotos'])
             ->findOrFail($id);

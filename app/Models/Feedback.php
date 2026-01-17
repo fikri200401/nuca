@@ -13,12 +13,9 @@ class Feedback extends Model
 
     protected $fillable = [
         'booking_id',
-        'reservation_id',
         'user_id',
         'treatment_id',
-        'menu_id',
         'doctor_id',
-        'saung_id',
         'rating',
         'comment',
         'is_visible',
@@ -37,11 +34,6 @@ class Feedback extends Model
         return $this->belongsTo(Booking::class);
     }
 
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -52,19 +44,9 @@ class Feedback extends Model
         return $this->belongsTo(Treatment::class);
     }
 
-    public function menu()
-    {
-        return $this->belongsTo(Menu::class);
-    }
-
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function saung()
-    {
-        return $this->belongsTo(Saung::class);
     }
 
     /**

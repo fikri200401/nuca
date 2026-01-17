@@ -1,163 +1,103 @@
-# Sistem Reservasi Saung Nyonyah Ciledug
+# Reservasi — Nuca Beauty Skin Booking System
 
-Sistem reservasi berbasis Laravel untuk Saung Nyonyah Ciledug - Restoran dengan konsep saung tradisional di tepi sungai.
+Laravel-based booking/reservation system for Nuca Beauty Skin.
 
-**Judul Penelitian:** "Pengembangan Sistem Reservasi Berbasis Web dengan Notifikasi WhatsApp pada Saung Nyonyah Ciledug"
+This repository contains the backend Laravel application, frontend assets using Tailwind CSS and Vue 3, and services for handling bookings, deposits, and WhatsApp notifications.
 
-Repository ini berisi backend Laravel, frontend dengan Tailwind CSS dan Vue 3, serta layanan untuk mengelola reservasi, deposit, dan notifikasi WhatsApp.
+## Features
 
-## Fitur Utama
+- Customer booking flow (treatments, date/time, doctor selection)
+- Deposit logic and booking statuses (auto-approved vs waiting deposit)
+- Admin and customer booking management
+- WhatsApp notification integration
+- Tailwind CSS + Vue 3 frontend components
 
-- **Customer Reservation Flow:**
-  - Pilih tanggal kunjungan
-  - Pilih jam & durasi
-  - Pilih saung yang tersedia
-  - Input jumlah orang
-  - Pilih menu makanan/minuman (opsional)
-  - Konfirmasi reservasi
-  
-- **Manajemen Saung:**
-  - Kelola data saung (nama, kapasitas, lokasi, harga per jam)
-  - Jadwal operasional saung
-  - Status ketersediaan real-time
-  
-- **Manajemen Menu:**
-  - Menu makanan & minuman
-  - Kategori (makanan utama, minuman, snack)
-  - Harga & ketersediaan
-  
-- **Sistem Deposit:**
-  - Auto-approved untuk reservasi < 7 hari
-  - Deposit required untuk reservasi >= 7 hari
-  - Upload & verifikasi bukti pembayaran
-  
-- **Notifikasi WhatsApp:**
-  - Konfirmasi reservasi
-  - Reminder H-1
-  - Status deposit
-  - Integrasi Fonnte API
-  
-- **Admin Dashboard:**
-  - Kelola reservasi
-  - Kelola saung & menu
-  - Verifikasi deposit
-  - Laporan & statistik
+## Tech stack
 
-## Tech Stack
-
-- **Backend:** PHP (Laravel 11)
-- **Database:** MySQL / MariaDB / SQLite
-- **Frontend:** Tailwind CSS + Vue 3 (Composition API)
-- **Build Tools:** Vite
-- **WhatsApp API:** Fonnte
-- **Node.js:** v18+
+- PHP (Laravel)
+- MySQL / MariaDB
+- Tailwind CSS
+- Vue 3 (Composition API)
+- Node.js + npm
 
 ## Prerequisites
 
-- PHP 8.2+
+- PHP 8.1+
 - Composer
-- Node.js 18+ dan npm
+- Node.js and npm
 - MySQL / MariaDB
 - Git
 
-Untuk Windows, disarankan menggunakan **Laragon** atau **XAMPP** untuk setup lokal yang cepat.
+On Windows, Laragon is recommended for a fast local setup.
 
-## Quick Setup (Development)
+## Quick setup (development)
 
-1. **Clone repository**
+1. Clone repository
 
 ```bat
 git clone https://github.com/fikri200401/Reservasi.git
 cd Reservasi
 ```
 
-2. **Copy environment file**
+2. Copy environment file
 
 ```bat
 copy .env.example .env
 ```
 
-Edit `.env` dan sesuaikan:
-- Database credentials
-- WhatsApp API (Fonnte) credentials
-- Mail settings (opsional)
+Edit `.env` and set DB credentials, mail settings, and any third-party keys (WhatsApp API credentials).
 
-3. **Install PHP dependencies**
+3. Install PHP dependencies
 
 ```bat
 composer install
 ```
 
-4. **Generate application key**
+4. Generate application key
 
 ```bat
 php artisan key:generate
 ```
 
-5. **Run migrations dan seeders**
+5. Run migrations and seeders
 
 ```bat
 php artisan migrate --seed
 ```
 
-Seeder akan membuat:
-- Admin user (admin@saungnyonyah.com / password)
-- 5 Saung dengan berbagai kapasitas
-- Menu makanan & minuman
-- Sample data
-
-6. **Install frontend dependencies dan build assets**
+6. Install frontend dependencies and build assets
 
 ```bat
 npm install
-npm run dev   # atau npm run build untuk production
+npm run dev   # use npm run build for production
 ```
 
-7. **Create storage symlink**
+7. Create storage symlink
 
 ```bat
 php artisan storage:link
 ```
 
-8. **Start development server**
+8. Start server
 
 ```bat
 php artisan serve
 ```
 
-Akses aplikasi di: `http://localhost:8000`
+Alternatively use Laragon to serve the project and manage the database.
 
-Atau gunakan Laragon/XAMPP untuk menjalankan server.
-
-## Login Credentials
-
-**Admin:**
-- Email: admin@saungnyonyah.com
-- Password: password
-
-**Customer:** (daftar melalui halaman registrasi)
-
-## Deposit Policy
-
-- Reservasi dengan `reservation_date` < 7 hari dari sekarang: **Auto-approved** (tidak perlu deposit)
-- Reservasi dengan `reservation_date` >= 7 hari: **Memerlukan deposit** (30% dari total atau minimal Rp 50.000)
-- Batas upload deposit: 24 jam setelah reservasi dibuat
-
-## Testing
+## Running tests
 
 ```bat
 php artisan test
 ```
 
-## Kontribusi Penelitian
+## Deposit policy
 
-Sistem ini dikembangkan sebagai bagian dari penelitian tentang implementasi sistem reservasi online dengan notifikasi WhatsApp pada bisnis kuliner berbasis saung tradisional.
+- Bookings with `booking_date` less than 7 days from the current date are auto-approved (no deposit required).
+- Bookings with `booking_date` greater than or equal to 7 days require a deposit and will show `WAITING_DEPOSIT` status until deposit is made.
 
-**Fitur Penelitian:**
-- Analisis kebutuhan sistem reservasi real-time
-- Implementasi WhatsApp Business API untuk notifikasi
-- Manajemen ketersediaan saung dengan algoritma slot waktu
-- User experience flow: tanggal → jam → saung → konfirmasi
+To test the `WAITING_DEPOSIT` flow, create a booking where the appointment date is >= today + 7 days.
 
 ## Notes on theme and UI
 

@@ -20,7 +20,7 @@ class DepositController extends Controller
 
     public function index(Request $request)
     {
-        $query = Deposit::with(['reservation.user', 'reservation.saung', 'booking.user', 'booking.treatment']);
+        $query = Deposit::with(['booking.user', 'booking.treatment']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -33,7 +33,7 @@ class DepositController extends Controller
 
     public function show(Deposit $deposit)
     {
-        $deposit->load(['reservation.user', 'reservation.saung', 'booking.user', 'booking.treatment', 'booking.doctor', 'verifier']);
+        $deposit->load(['booking.user', 'booking.treatment', 'booking.doctor', 'verifier']);
         
         return view('admin.deposits.show', compact('deposit'));
     }
@@ -49,16 +49,11 @@ class DepositController extends Controller
 
         $deposit->approve(Auth::id());
         
-        // Update booking/reservation status
-        if ($deposit->reservation) {
-            $deposit->reservation->update(['status' => 'deposit_confirmed']);
-            // Send notification
-            $this->whatsappService->sendDepositApproved($deposit->reservation);
-        } elseif ($deposit->booking) {
-            $deposit->booking->update(['status' => 'deposit_confirmed']);
-            // Send notification
-            $this->whatsappService->sendDepositApproved($deposit->booking);
-        }
+        // Update booking status
+        $deposit->booking->update(['status' => 'deposit_confirmed']);
+
+        // Send notification
+        $this->whatsappService->sendDepositApproved($deposit->booking);
 
         return back()->with('success', 'Deposit berhasil diapprove.');
     }
@@ -78,16 +73,11 @@ class DepositController extends Controller
 
         $deposit->reject(Auth::id(), $request->rejection_reason);
         
-        // Update booking/reservation status
-        if ($deposit->reservation) {
-            $deposit->reservation->update(['status' => 'deposit_rejected']);
-            // Send notification
-            $this->whatsappService->sendDepositRejected($deposit->reservation, $deposit);
-        } elseif ($deposit->booking) {
-            $deposit->booking->update(['status' => 'deposit_rejected']);
-            // Send notification
-            $this->whatsappService->sendDepositRejected($deposit->booking, $deposit);
-        }
+        // Update booking status
+        $deposit->booking->update(['status' => 'deposit_rejected']);
+
+        // Send notification
+        $this->whatsappService->sendDepositRejected($deposit->booking, $deposit);
 
         return back()->with('success', 'Deposit berhasil direject.');
     }

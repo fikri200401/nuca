@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Reservation;
+use App\Models\Booking;
 use App\Models\Feedback;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
@@ -14,41 +14,58 @@ class FeedbackSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get completed reservations
-        $completedReservations = Reservation::where('status', 'completed')->get();
+        // Get completed bookings
+        $completedBookings = Booking::where('status', 'completed')->get();
 
-        if ($completedReservations->count() >= 1) {
-            $reservation = $completedReservations[0];
-            
+        if ($completedBookings->count() >= 1) {
+            $booking = $completedBookings[0];
             // Feedback 1 - Excellent rating
             Feedback::create([
-                'reservation_id' => $reservation->id,
-                'user_id' => $reservation->user_id,
-                'saung_id' => $reservation->saung_id,
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'treatment_id' => $booking->treatment_id,
+                'doctor_id' => $booking->doctor_id,
                 'rating' => 5,
-                'comment' => 'Saungnya bagus banget! Suasana asri dan tenang, cocok untuk acara keluarga. Menu makanannya enak-enak, terutama ayam bakar madunya juara. Pelayanan juga ramah. Pasti balik lagi!',
+                'comment' => 'Pelayanan sangat memuaskan! Dokternya ramah dan profesional. Hasil facial treatment bikin wajah glowing banget. Tempatnya juga bersih dan nyaman. Pasti balik lagi!',
                 'is_visible' => true,
-                'created_at' => Carbon::now()->subDays(4),
-                'updated_at' => Carbon::now()->subDays(4),
+                'created_at' => Carbon::now()->subDays(9),
+                'updated_at' => Carbon::now()->subDays(9),
             ]);
         }
 
-        if ($completedReservations->count() >= 2) {
-            $reservation = $completedReservations[1];
-            
-            // Feedback 2 - Very good rating  
+        if ($completedBookings->count() >= 2) {
+            $booking = $completedBookings[1];
+            // Feedback 2 - Very good rating
             Feedback::create([
-                'reservation_id' => $reservation->id,
-                'user_id' => $reservation->user_id,
-                'saung_id' => $reservation->saung_id,
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'treatment_id' => $booking->treatment_id,
+                'doctor_id' => $booking->doctor_id,
                 'rating' => 5,
-                'comment' => 'Tempatnya recommended banget! Saung VIP nya luas, bisa muat 15 orang dengan nyaman. Makanannya porsi besar dan rasanya autentik. Staff nya helpful banget. Worth it!',
+                'comment' => 'Whitening treatment nya bagus banget! Kulitku jadi lebih cerah dalam sekali treatment. Staff nya helpful dan explain step by step. Recommended!',
                 'is_visible' => true,
-                'created_at' => Carbon::now()->subDays(3),
-                'updated_at' => Carbon::now()->subDays(3),
+                'created_at' => Carbon::now()->subDays(13),
+                'updated_at' => Carbon::now()->subDays(13),
             ]);
         }
 
-        $this->command->info('✅ Created ' . Feedback::count() . ' feedback untuk reservasi saung');
+        if ($completedBookings->count() >= 3) {
+            $booking = $completedBookings[2];
+            // Feedback 3 - Good rating with minor complaint
+            Feedback::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'treatment_id' => $booking->treatment_id,
+                'doctor_id' => $booking->doctor_id,
+                'rating' => 4,
+                'comment' => 'Treatment nya oke, hasilnya juga bagus. Cuma agak nunggu lama karena dokter telat 15 menit. Overall puas sih, cuma tolong lebih tepat waktu ya.',
+                'is_visible' => true,
+                'created_at' => Carbon::now()->subDays(29),
+                'updated_at' => Carbon::now()->subDays(29),
+            ]);
+        }
+
+        echo "✓ Created " . Feedback::count() . " feedback records\n";
+        echo "✓ All feedback visible on landing page\n";
     }
 }

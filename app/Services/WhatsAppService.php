@@ -68,69 +68,6 @@ class WhatsAppService
     }
 
     /**
-     * Send reservation confirmation for Saung Nyonyah Ciledug
-     */
-    public function sendReservationConfirmation($reservation)
-    {
-        $user = $reservation->user;
-        $saung = $reservation->saung;
-
-        $message = "*KONFIRMASI RESERVASI SAUNG NYONYAH CILEDUG* 🎉\n\n";
-        $message .= "Halo {$user->name},\n\n";
-        $message .= "Reservasi Anda telah dikonfirmasi!\n\n";
-        $message .= "*Detail Reservasi:*\n";
-        $message .= "📋 Kode: {$reservation->reservation_code}\n";
-        $message .= "🏠 Saung: {$saung->name}\n";
-        $message .= "👥 Kapasitas: {$saung->capacity} orang\n";
-        $message .= "👤 Jumlah Tamu: {$reservation->number_of_people} orang\n";
-        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($reservation->reservation_date)->format('d/m/Y') . "\n";
-        $message .= "🕐 Jam: {$reservation->reservation_time} - {$reservation->end_time}\n";
-        
-        // Tampilkan menu jika ada
-        if ($reservation->menus && $reservation->menus->count() > 0) {
-            $message .= "\n*Menu Pesanan:*\n";
-            foreach ($reservation->menus as $menu) {
-                $message .= "• {$menu->name} ({$menu->pivot->quantity}x) - Rp " . number_format($menu->pivot->price * $menu->pivot->quantity, 0, ',', '.') . "\n";
-            }
-        }
-        
-        $message .= "\n💰 Total: Rp " . number_format($reservation->final_price, 0, ',', '.') . "\n\n";
-        
-        if ($reservation->status === 'waiting_deposit') {
-            $deposit = $reservation->deposit;
-            $message .= "⚠️ *Perlu DP:* Rp " . number_format($deposit->amount, 0, ',', '.') . "\n";
-            $message .= "⏰ *Batas:* " . $deposit->deadline_at->format('d/m/Y H:i') . "\n\n";
-        }
-        
-        $message .= "📍 *Alamat:*\n";
-        $message .= "Saung Nyonyah Ciledug\n";
-        $message .= "Jl. Raya Ciledug, Tangerang\n\n";
-        $message .= "Terima kasih telah memilih Saung Nyonyah! 😊🍽️";
-
-        return $this->sendMessage($user->phone, $message);
-    }
-
-    /**
-     * Send reservation reminder (H-1) for Saung Nyonyah
-     */
-    public function sendReservationReminder($reservation)
-    {
-        $user = $reservation->user;
-        $saung = $reservation->saung;
-
-        $message = "*REMINDER RESERVASI SAUNG NYONYAH* ⏰\n\n";
-        $message .= "Halo {$user->name},\n\n";
-        $message .= "Mengingatkan reservasi Anda besok:\n\n";
-        $message .= "🏠 Saung: {$saung->name}\n";
-        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($reservation->reservation_date)->format('d/m/Y') . "\n";
-        $message .= "🕐 Jam: {$reservation->reservation_time}\n";
-        $message .= "👥 Jumlah Tamu: {$reservation->number_of_people} orang\n\n";
-        $message .= "Sampai jumpa besok di Saung Nyonyah Ciledug! 👋🍽️";
-
-        return $this->sendMessage($user->phone, $message);
-    }
-
-    /**
      * Send booking reminder (H-1)
      */
     public function sendBookingReminder($booking)
@@ -255,7 +192,6 @@ class WhatsAppService
             ]);
 
             // Kirim via Fonnte (sesuaikan dengan API yang digunakan)
-            /** @var \Illuminate\Http\Client\Response $response */
             $response = Http::withHeaders([
                 'Authorization' => $this->apiKey,
             ])->post($this->apiUrl, [
