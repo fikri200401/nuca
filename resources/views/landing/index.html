@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuca Beauty Skin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#ff8fa3',
+                            DEFAULT: '#ff4d88', // Pink Utama
+                            dark: '#e03e73',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth Scrolling */
+        html { scroll-behavior: smooth; }
+        .hero-overlay { background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-700">
+
+    <nav class="bg-white py-4 shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white font-serif font-bold">N</div>
+                <span class="text-xl font-serif font-bold text-gray-800">Nuca Beauty Skin</span>
+            </div>
+
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
+                <a href="#" class="hover:text-brand transition">Home</a>
+                <a href="#" class="hover:text-brand transition">Perawatan</a>
+                <a href="#" class="hover:text-brand transition">Promo</a>
+                <a href="#" class="hover:text-brand transition">Klinik</a>
+                <a href="#" class="hover:text-brand transition">Info</a>
+            </div>
+
+            <div class="hidden md:flex space-x-3">
+                <button class="px-5 py-2 border border-brand text-brand rounded-full text-sm font-medium hover:bg-pink-50 transition">Masuk Akun</button>
+                <button class="px-5 py-2 bg-brand text-white rounded-full text-sm font-medium hover:bg-brand-dark transition shadow-lg shadow-pink-200">Reservasi Sekarang</button>
+            </div>
+            
+            <button class="md:hidden text-gray-600 text-2xl"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <header class="relative h-[500px] flex items-center justify-center bg-gray-100 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2070&auto=format&fit=crop" alt="Beauty Clinic" class="absolute w-full h-full object-cover opacity-90">
+        
+        <div class="absolute inset-0 bg-white/30"></div>
+
+        <div class="relative z-10 text-center px-4 max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-4 leading-tight">
+                Klinik Kecantikan Terbaik untukmu
+            </h1>
+            <p class="text-gray-700 mb-8 text-lg font-light">Wujudkan kulit sehat impianmu bersama Nuca Beauty Skin</p>
+            <button class="px-8 py-3 bg-brand text-white rounded-full font-medium hover:bg-brand-dark transition shadow-xl transform hover:-translate-y-1">
+                Pesan Sekarang
+            </button>
+        </div>
+    </header>
+
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-serif font-bold text-gray-900">Perawatan Populer</h2>
+                <p class="text-gray-500 mt-2 text-sm">Pilihan perawatan favorit yang sering dipilih oleh klien Nuca Beauty Skin</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-4 left-4 bg-pink-100 text-brand text-xs font-bold px-3 py-1 rounded-full">Diskon 10%</span>
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Glowing Facial</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Perawatan wajah menyeluruh untuk mengangkat sel kulit mati dan mencerahkan wajah seketika.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+
+                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Anti Aging Treatment</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Mengembalikan elastisitas kulit dan menyamarkan garis halus dengan teknologi modern.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+
+                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-4 left-4 bg-pink-100 text-brand text-xs font-bold px-3 py-1 rounded-full">Promo Bundling</span>
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Acne Fighter</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Kombinasi facial dan blue light therapy untuk membasmi bakteri penyebab jerawat.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+                
+                 <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Skin Brightening</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Treatment khusus untuk mengatasi kulit kusam dan noda hitam membandel.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+                
+                 <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Laser Rejuvenation</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Teknologi laser terbaru untuk meremajakan kulit tanpa rasa sakit.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+
+                 <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af93?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                         <span class="absolute top-4 left-4 bg-pink-100 text-brand text-xs font-bold px-3 py-1 rounded-full">Hemat 20%</span>
+                    </div>
+                    <div class="p-6 text-center">
+                        <h3 class="font-serif font-bold text-lg mb-2">Micro Needling + PRP</h3>
+                        <p class="text-gray-500 text-xs mb-4 leading-relaxed">Terapi kolagen alami untuk memperbaiki tekstur kulit yang kasar dan bopeng.</p>
+                        <button class="w-full py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-pink-50">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-serif font-bold text-gray-900">Promo Klinik Kecantikan Nuca Bulan Ini</h2>
+                <a href="#" class="text-brand text-sm font-medium hover:underline flex items-center gap-1">Lihat Semua Promo <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=200" class="w-24 h-24 rounded-lg object-cover">
+                    <div>
+                        <h4 class="font-serif font-bold text-gray-800">Diskon 50% Perawatan Pertama</h4>
+                        <p class="text-xs text-gray-500 mt-1">Khusus member pengguna baru.</p>
+                        <p class="text-xs text-brand mt-2 font-medium">Berakhir 30 Nov</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1596472247752-1d5311e7b2a4?auto=format&fit=crop&q=80&w=200" class="w-24 h-24 rounded-lg object-cover">
+                    <div>
+                        <h4 class="font-serif font-bold text-gray-800">Gratis Konsultasi Dokter</h4>
+                        <p class="text-xs text-gray-500 mt-1">Setiap pembelian paket brightening.</p>
+                        <p class="text-xs text-brand mt-2 font-medium">Berakhir 15 Des</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1556760544-74068565f05c?auto=format&fit=crop&q=80&w=200" class="w-24 h-24 rounded-lg object-cover">
+                    <div>
+                        <h4 class="font-serif font-bold text-gray-800">Cashback Paylater 100rb</h4>
+                        <p class="text-xs text-gray-500 mt-1">Min. transaksi Rp 500.000</p>
+                        <p class="text-xs text-brand mt-2 font-medium">Kuota Terbatas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-serif font-bold text-gray-900 mb-12">Keunggulan Nuca Beauty Skin Dibanding Klinik Lain</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-user-md"></i></div>
+                    <h4 class="font-bold text-sm mb-1">Tenaga Medis Profesional</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-microscope"></i></div>
+                    <h4 class="font-bold text-sm mb-1">Teknologi Modern</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-certificate"></i></div>
+                    <h4 class="font-bold text-sm mb-1">Pelayanan Terbaik</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-smile"></i></div>
+                    <h4 class="font-bold text-sm mb-1">Treatment Wajah Holistik</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-wallet"></i></div>
+                    <h4 class="font-bold text-sm mb-1">Harga Terjangkau</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-brand text-xl mb-4"><i class="fas fa-map-marker-alt"></i></div>
+                    <h4 class="font-bold text-sm mb-1">15 Cabang di Kota Besar</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row gap-12 items-start">
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-3xl font-serif font-bold text-gray-900 mb-2">Alur Pendaftaran & Booking Mudah</h2>
+                    <p class="text-gray-500 text-sm mb-8">Kamu tidak perlu antri lama lagi. Lakukan reservasi online dari rumah, datang sesuai jadwal, dan nikmati perawatan.</p>
+                    
+                    <div class="space-y-6 relative">
+                         <div class="absolute left-3.5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+                        <div class="relative flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold shrink-0 z-10">1</div>
+                            <p class="text-sm text-gray-700">Kunjungi website/aplikasi Nuca dan pilih menu reservasi</p>
+                        </div>
+                        <div class="relative flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold shrink-0 z-10">2</div>
+                            <p class="text-sm text-gray-700">Pilih jenis perawatan, dokter, dan jadwal</p>
+                        </div>
+                        <div class="relative flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold shrink-0 z-10">3</div>
+                            <p class="text-sm text-gray-700">Tunggu konfirmasi via WhatsApp/Email</p>
+                        </div>
+                        <div class="relative flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold shrink-0 z-10">4</div>
+                            <p class="text-sm text-gray-700">Datang 15 menit sebelum jadwal yang ditentukan</p>
+                        </div>
+                        <div class="relative flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold shrink-0 z-10">5</div>
+                            <p class="text-sm text-gray-700">Verifikasi reservasi di meja resepsionis</p>
+                        </div>
+                    </div>
+                    <button class="mt-8 px-6 py-3 bg-brand text-white rounded-full text-sm font-medium shadow-lg hover:bg-brand-dark transition">Mulai Reservasi Sekarang</button>
+                </div>
+
+                <div class="w-full md:w-1/2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                    <h3 class="font-serif font-bold text-xl mb-6 text-center">Alur Pemesanan Cepat</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-3 bg-pink-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-xs"><i class="fas fa-check"></i></div>
+                            <span class="text-sm font-medium">1. Isi Data Diri</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-white border border-gray-100 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs">2</div>
+                            <span class="text-sm font-medium text-gray-500">2. Pilih Tanggal</span>
+                        </div>
+                         <div class="flex items-center gap-4 p-3 bg-white border border-gray-100 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs">3</div>
+                            <span class="text-sm font-medium text-gray-500">3. Pilih Dokter</span>
+                        </div>
+                         <div class="flex items-center gap-4 p-3 bg-white border border-gray-100 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs">4</div>
+                            <span class="text-sm font-medium text-gray-500">4. Konfirmasi & Datang</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+             <div class="text-center mb-8">
+                <h2 class="text-2xl font-serif font-bold text-gray-900">Status Pemesanan & Janji Temu Mendatang</h2>
+                <p class="text-gray-500 text-sm mt-2">Cek status janji temu Anda dengan memasukkan kode booking.</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-brand uppercase mb-2">Kode Booking</label>
+                    <input type="text" placeholder="Misal: NB-2023001" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand">
+                    <p class="text-xs text-gray-400 mt-1">*Cek WhatsApp anda untuk kode booking</p>
+                </div>
+                 <div class="flex-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Tanggal Janji Temu</label>
+                     <div class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-500">
+                        --/--/----
+                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+             <h2 class="text-3xl font-serif font-bold text-gray-900 text-center mb-12">Apa Kata Klien Kami?</h2>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <h5 class="font-bold text-sm">Sarah P.</h5>
+                            <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm italic">"Pelayanan sangat ramah. Tempatnya bersih dan nyaman. Hasil glowing facialnya langsung terlihat dalam sekali treatment!"</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <h5 class="font-bold text-sm">Rina M.</h5>
+                            <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm italic">"Dokternya sangat informatif. Tidak memaksakan produk yang tidak perlu. Jerawat saya sembuh total disini."</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <h5 class="font-bold text-sm">Tania K.</h5>
+                            <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm italic">"Harga terjangkau untuk kualitas sebagus ini. Suka banget sama interior kliniknya yang instagramable."</p>
+                </div>
+             </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-serif font-bold text-gray-900 text-center mb-12">Artikel Kecantikan</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="group cursor-pointer">
+                    <div class="rounded-xl overflow-hidden mb-4 relative">
+                        <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Kulit</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Tips Wajah Glowing Alami Tanpa Makeup</h3>
+                    <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
+                </div>
+                 <div class="group cursor-pointer">
+                    <div class="rounded-xl overflow-hidden mb-4 relative">
+                        <img src="https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Rambut</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Rambut Rontok? Ini Solusi Ampuhnya!</h3>
+                    <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
+                </div>
+                 <div class="group cursor-pointer">
+                    <div class="rounded-xl overflow-hidden mb-4 relative">
+                        <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Tips</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Pola Makan Sehat untuk Kulit Awet Muda</h3>
+                    <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
+                </div>
+            </div>
+             <div class="text-center mt-12">
+                <button class="px-6 py-2 border border-brand text-brand rounded-full text-sm font-medium hover:bg-pink-50">LIHAT SEMUA ARTIKEL</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row gap-12">
+            <div class="w-full md:w-1/3">
+                <h2 class="text-3xl font-serif font-bold text-gray-900 mb-4">FAQ (Frequently Asked Questions)</h2>
+                <p class="text-brand font-bold mb-2">Nuca Beauty Skin Terbaik</p>
+                <p class="text-gray-500 text-sm mb-6">Pertanyaan yang sering diajukan oleh calon klien kami. Jika tidak menemukan jawaban, hubungi kami.</p>
+                <button class="px-6 py-3 bg-brand text-white rounded-full text-sm hover:bg-brand-dark transition"><i class="fab fa-whatsapp mr-2"></i> Hubungi Kami</button>
+            </div>
+            <div class="w-full md:w-2/3 space-y-4">
+                <details class="bg-white rounded-lg shadow-sm group">
+                    <summary class="list-none flex justify-between items-center cursor-pointer p-4 font-medium text-gray-800">
+                        Apa itu Nuca Beauty Skin?
+                        <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down text-gray-400"></i></span>
+                    </summary>
+                    <div class="p-4 pt-0 text-gray-500 text-sm leading-relaxed border-t border-gray-100 mt-2">
+                        Nuca Beauty Skin adalah klinik kecantikan modern yang menyediakan berbagai perawatan kulit dan wajah dengan teknologi terkini dan dokter profesional.
+                    </div>
+                </details>
+                 <details class="bg-white rounded-lg shadow-sm group">
+                    <summary class="list-none flex justify-between items-center cursor-pointer p-4 font-medium text-gray-800">
+                        Mengapa memilih klinik kecantikan Nuca Beauty Skin?
+                        <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down text-gray-400"></i></span>
+                    </summary>
+                    <div class="p-4 pt-0 text-gray-500 text-sm leading-relaxed border-t border-gray-100 mt-2">
+                        Kami mengutamakan kualitas, kebersihan, dan kenyamanan. Dengan harga yang transparan dan kompetitif.
+                    </div>
+                </details>
+                <details class="bg-white rounded-lg shadow-sm group">
+                    <summary class="list-none flex justify-between items-center cursor-pointer p-4 font-medium text-gray-800">
+                        Apakah krim klinik bikin ketergantungan Nuca Beauty Skin?
+                        <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down text-gray-400"></i></span>
+                    </summary>
+                    <div class="p-4 pt-0 text-gray-500 text-sm leading-relaxed border-t border-gray-100 mt-2">
+                        Tidak. Produk kami diformulasikan oleh dokter ahli dan aman digunakan jangka panjang maupun dihentikan.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-brand text-white pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                         <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-brand font-serif font-bold">N</div>
+                        <h3 class="text-xl font-serif font-bold">Nuca Beauty Skin</h3>
+                    </div>
+                    <p class="text-pink-100 text-sm mb-4">Jl. Kesehatan Raya No. 123, Jakarta Selatan, 12345</p>
+                    <p class="text-pink-100 text-sm"><i class="fas fa-phone mr-2"></i> +62 812 3456 7890</p>
+                    <p class="text-pink-100 text-sm"><i class="fas fa-envelope mr-2"></i> hello@nucaskin.com</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Menu Cepat</h4>
+                    <ul class="space-y-2 text-sm text-pink-100">
+                        <li><a href="#" class="hover:text-white">Tentang Kami</a></li>
+                        <li><a href="#" class="hover:text-white">Perawatan</a></li>
+                        <li><a href="#" class="hover:text-white">Dokter Kami</a></li>
+                        <li><a href="#" class="hover:text-white">Lokasi Cabang</a></li>
+                        <li><a href="#" class="hover:text-white">Karir</a></li>
+                    </ul>
+                </div>
+                 <div>
+                    <h4 class="font-bold mb-4">Ikuti Kami</h4>
+                    <ul class="space-y-2 text-sm text-pink-100">
+                        <li><a href="#" class="hover:text-white"><i class="fab fa-instagram mr-2"></i> Instagram</a></li>
+                        <li><a href="#" class="hover:text-white"><i class="fab fa-facebook mr-2"></i> Facebook</a></li>
+                        <li><a href="#" class="hover:text-white"><i class="fab fa-tiktok mr-2"></i> TikTok</a></li>
+                        <li><a href="#" class="hover:text-white"><i class="fab fa-youtube mr-2"></i> YouTube</a></li>
+                    </ul>
+                </div>
+                 <div>
+                    <h4 class="font-bold mb-4">Jadwalkan Konsultasi</h4>
+                    <p class="text-xs text-pink-100 mb-4">Dapatkan kulit sehat impianmu sekarang juga.</p>
+                    <button class="w-full py-2 bg-white text-brand font-bold rounded-lg hover:bg-pink-50 transition">Chat WhatsApp</button>
+                </div>
+            </div>
+            <div class="border-t border-pink-400 pt-8 text-center text-sm text-pink-100">
+                &copy; 2023 Nuca Beauty Skin. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
