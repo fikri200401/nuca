@@ -57,9 +57,9 @@ class BookingSeeder extends Seeder
         // Add Before/After Photos
         BeforeAfterPhoto::create([
             'booking_id' => $booking1->id,
-            'before_photo' => 'before-after/before1.jpg',
-            'after_photo' => 'before-after/after1.jpg',
-            'notes' => 'Hasil facial treatment terlihat wajah lebih cerah dan glowing',
+            'before_photo' => null, // Will be uploaded by admin
+            'after_photo' => null,
+            'notes' => 'Foto before after akan diupload setelah treatment selesai',
             'uploaded_by' => 1, // admin
             'created_at' => Carbon::now()->subDays(10),
         ]);
@@ -86,9 +86,9 @@ class BookingSeeder extends Seeder
 
         BeforeAfterPhoto::create([
             'booking_id' => $booking2->id,
-            'before_photo' => 'before-after/before2.jpg',
-            'after_photo' => 'before-after/after2.jpg',
-            'notes' => 'Kulit terlihat lebih putih dan cerah setelah whitening treatment',
+            'before_photo' => null, // Will be uploaded
+            'after_photo' => null,
+            'notes' => 'Foto before after akan diupload',
             'uploaded_by' => 1,
             'created_at' => Carbon::now()->subDays(14),
         ]);

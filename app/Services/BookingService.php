@@ -29,17 +29,20 @@ class BookingService
         // Get doctors available on this day
         $doctors = Doctor::active()
             ->whereHas('schedules', function($query) use ($dayOfWeek) {
-                $query->where('day_of_week', $dayOfWeek);
+                $query->where('day_of_week', $dayOfWeek)
+                      ->where('is_active', true);
             })
             ->when($doctorId, function($query) use ($doctorId) {
                 return $query->where('id', $doctorId);
             })
             ->with(['schedules' => function($query) use ($dayOfWeek) {
-                $query->where('day_of_week', $dayOfWeek);
+                $query->where('day_of_week', $dayOfWeek)
+                      ->where('is_active', true);
             }])
             ->get();
 
         $allSlots = [];
+        $slotDetails = [];
 
         foreach ($doctors as $doctor) {
             foreach ($doctor->schedules as $schedule) {
@@ -52,15 +55,24 @@ class BookingService
                 );
 
                 foreach ($slots as $slot) {
-                    if ($slot['available'] && !in_array($slot['time'], $allSlots)) {
-                        $allSlots[] = $slot['time'];
+                    $timeKey = $slot['time'];
+                    if (!isset($slotDetails[$timeKey])) {
+                        $slotDetails[$timeKey] = $slot;
+                    } else {
+                        // If slot already exists and this one is available, mark as available
+                        if ($slot['available'] && !$slot['isPast']) {
+                            $slotDetails[$timeKey]['available'] = true;
+                        }
                     }
                 }
             }
         }
 
-        sort($allSlots);
-        return $allSlots;
+        // Sort by time
+        ksort($slotDetails);
+        
+        // Return array of slot objects
+        return array_values($slotDetails);
     }
 
     /**
@@ -69,35 +81,50 @@ class BookingService
     protected function generateTimeSlots($startTime, $endTime, $duration, $doctor, $date)
     {
         $slots = [];
-        $currentTime = Carbon::parse($startTime);
-        $endTime = Carbon::parse($endTime);
         
-        // Get max booking time from settings (default 18:00)
-        $maxBookingTime = \App\Models\Setting::get('max_booking_time', '18:00');
-        $maxTime = Carbon::parse($maxBookingTime);
+        // Extract time from datetime if necessary
+        $startTimeStr = is_string($startTime) ? $startTime : $startTime->format('H:i:s');
+        $endTimeStr = is_string($endTime) ? $endTime : $endTime->format('H:i:s');
+        
+        $currentTime = Carbon::createFromTimeString($startTimeStr);
+        $endTime = Carbon::createFromTimeString($endTimeStr);
+        $bookingDate = Carbon::parse($date);
+        $now = Carbon::now();
+        
+        // Get max booking time from settings (default 20:00 / 8 PM)
+        $maxBookingTime = \App\Models\Setting::get('max_booking_time', '20:00');
+        $maxTime = Carbon::createFromTimeString($maxBookingTime);
 
         while ($currentTime->copy()->addMinutes($duration)->lte($endTime)) {
             $slotStart = $currentTime->format('H:i');
             $slotEnd = $currentTime->copy()->addMinutes($duration)->format('H:i');
             
             // Check if slot exceeds max booking time (slot bisa dimulai sampai max booking time)
-            $slotStartTime = Carbon::parse($slotStart);
+            $slotStartTime = Carbon::createFromTimeString($slotStart);
             if ($slotStartTime->gt($maxTime)) {
-                // Skip slots that start AFTER max booking time
+                // Skip slots that start AFTER max booking time (20:00)
                 $currentTime->addMinutes(30);
                 continue;
             }
 
+            // Disable slot if it's today and the time has already passed
+            $slotDateTime = $bookingDate->copy()->setTimeFromTimeString($slotStart);
+            $isPast = false;
+            if ($bookingDate->isToday() && $slotDateTime->lte($now)) {
+                $isPast = true;
+            }
+
             // Check if slot is available
-            $isAvailable = $doctor->isAvailable($date, $slotStart, $slotEnd);
+            $isAvailable = $doctor->isAvailable($date, $slotStart, $slotEnd) && !$isPast;
 
             $slots[] = [
                 'time' => $slotStart,
                 'end_time' => $slotEnd,
                 'available' => $isAvailable,
+                'isPast' => $isPast,
             ];
 
-            // Move to next slot (bisa dikonfigurasi, misal setiap 30 menit)
+            // Move to next slot (setiap 30 menit)
             $currentTime->addMinutes(30);
         }
 

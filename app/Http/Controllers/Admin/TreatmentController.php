@@ -60,15 +60,26 @@ class TreatmentController extends Controller
 
     public function destroy(Treatment $treatment)
     {
-        if ($treatment->bookings()->exists()) {
-            return back()->withErrors(['error' => 'Treatment tidak bisa dihapus karena ada booking terkait.']);
+        try {
+            // Cek apakah ada booking terkait
+            $bookingCount = $treatment->bookings()->count();
+            
+            if ($bookingCount > 0) {
+                return redirect()
+                    ->route('admin.treatments.index')
+                    ->withErrors(['error' => "Treatment tidak bisa dihapus karena ada {$bookingCount} booking terkait. Nonaktifkan treatment sebagai gantinya."]);
+            }
+
+            $treatment->delete();
+
+            return redirect()
+                ->route('admin.treatments.index')
+                ->with('success', 'Treatment berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.treatments.index')
+                ->withErrors(['error' => 'Gagal menghapus treatment: ' . $e->getMessage()]);
         }
-
-        $treatment->delete();
-
-        return redirect()
-            ->route('admin.treatments.index')
-            ->with('success', 'Treatment berhasil dihapus.');
     }
 
     public function toggleStatus(Treatment $treatment)

@@ -28,6 +28,29 @@
     </div>
     @endif
 
+    <!-- Shop Open/Close Toggle -->
+    <div class="mb-6 bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">
+                        Status Toko
+                    </h3>
+                    <p class="mt-1 text-sm {{ \App\Models\Setting::get('is_shop_open', true) ? 'text-green-600' : 'text-red-600' }} font-semibold" id="shopStatusText">
+                        Toko saat ini: {{ \App\Models\Setting::get('is_shop_open', true) ? 'BUKA' : 'TUTUP' }}
+                    </p>
+                    <p class="mt-1 text-xs text-gray-400">
+                        Jika toko ditutup, customer tidak bisa membuat booking baru
+                    </p>
+                </div>
+                <button type="button" id="toggleShopBtn" data-is-open="{{ \App\Models\Setting::get('is_shop_open', true) ? '1' : '0' }}" class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'bg-green-600' : 'bg-gray-200' }} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <span class="sr-only">Toggle shop status</span>
+                    <span class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'translate-x-5' : 'translate-x-0' }} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="md:grid md:grid-cols-3 md:gap-6">
         <div class="md:col-span-1">
             <div class="px-4 sm:px-0">
@@ -106,6 +129,51 @@
                             <div class="ml-3 text-sm">
                                 <label for="whatsapp_enabled" class="font-medium text-gray-700">Aktifkan Notifikasi WhatsApp</label>
                                 <p class="text-gray-500">Kirim notifikasi otomatis ke customer via WhatsApp</p>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="pt-4 border-t border-gray-200"></div>
+
+                        <!-- Clinic Information Section -->
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-900 mb-4">Informasi Klinik</h4>
+                            
+                            <!-- Address -->
+                            <div class="mb-4">
+                                <label for="address" class="block text-sm font-medium text-gray-700">
+                                    Alamat Klinik
+                                </label>
+                                <textarea id="address" 
+                                       name="address" 
+                                       rows="3"
+                                       placeholder="Jl. Example No. 123, Jakarta"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('address') border-red-300 @enderror">{{ old('address', $settings['address'] ?? '') }}</textarea>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Alamat lengkap klinik yang akan ditampilkan di landing page
+                                </p>
+                                @error('address')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Google Maps URL -->
+                            <div>
+                                <label for="google_maps_url" class="block text-sm font-medium text-gray-700">
+                                    Link Google Maps
+                                </label>
+                                <input type="url" 
+                                       id="google_maps_url" 
+                                       name="google_maps_url" 
+                                       value="{{ old('google_maps_url', $settings['google_maps_url'] ?? '') }}"
+                                       placeholder="https://maps.google.com/..."
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('google_maps_url') border-red-300 @enderror">
+                                <p class="mt-2 text-sm text-gray-500">
+                                    URL Google Maps untuk navigasi ke lokasi klinik
+                                </p>
+                                @error('google_maps_url')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -256,7 +324,61 @@
 
 <!-- Test Connection Script -->
 <script>
-document.getElementById('testConnectionBtn').addEventListener('click', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle Shop Status
+    const toggleShopBtn = document.getElementById('toggleShopBtn');
+    if (toggleShopBtn) {
+        toggleShopBtn.addEventListener('click', function() {
+            const button = this;
+            const isOpen = button.getAttribute('data-is-open') === '1';
+            const statusText = document.getElementById('shopStatusText');
+
+            fetch('{{ route("admin.settings.toggle-shop") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const newIsOpen = data.is_open;
+                    button.setAttribute('data-is-open', newIsOpen ? '1' : '0');
+                    
+                    // Update button appearance
+                    if (newIsOpen) {
+                        button.classList.remove('bg-gray-200');
+                        button.classList.add('bg-green-600');
+                        button.querySelector('span:last-child').classList.remove('translate-x-0');
+                        button.querySelector('span:last-child').classList.add('translate-x-5');
+                        statusText.textContent = 'Toko saat ini: BUKA';
+                        statusText.classList.remove('text-red-600');
+                        statusText.classList.add('text-green-600');
+                    } else {
+                        button.classList.remove('bg-green-600');
+                        button.classList.add('bg-gray-200');
+                        button.querySelector('span:last-child').classList.remove('translate-x-5');
+                        button.querySelector('span:last-child').classList.add('translate-x-0');
+                        statusText.textContent = 'Toko saat ini: TUTUP';
+                        statusText.classList.remove('text-green-600');
+                        statusText.classList.add('text-red-600');
+                    }
+                    
+                    // Show notification
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    }
+
+// Test Connection
+const testConnectionBtn = document.getElementById('testConnectionBtn');
+if (testConnectionBtn) {
+    testConnectionBtn.addEventListener('click', function() {
     const apiKey = document.getElementById('fonnte_api_key').value;
     const button = this;
     const resultDiv = document.getElementById('testResult');
@@ -351,6 +473,8 @@ document.getElementById('testConnectionBtn').addEventListener('click', function(
             Test Koneksi
         `;
     });
+    });
+}
 });
 </script>
 @endsection

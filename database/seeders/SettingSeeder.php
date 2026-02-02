@@ -104,6 +104,24 @@ class SettingSeeder extends Seeder
                 'type' => 'boolean',
                 'description' => 'Aktifkan notifikasi WhatsApp',
             ],
+            [
+                'key' => 'address',
+                'value' => 'Jl. Raya Kecantikan No. 123, Jakarta Selatan, DKI Jakarta 12345',
+                'type' => 'string',
+                'description' => 'Alamat lengkap klinik',
+            ],
+            [
+                'key' => 'google_maps_url',
+                'value' => 'https://maps.google.com/maps/place//data=!4m2!3m1!1s0x2e69ef001aaf6ca9:0xb5afe54a38f8eb26',
+                'type' => 'string',
+                'description' => 'Link Google Maps klinik',
+            ],
+            [
+                'key' => 'is_shop_open',
+                'value' => '1',
+                'type' => 'boolean',
+                'description' => 'Status toko (buka/tutup)',
+            ],
         ];
 
         foreach ($settings as $setting) {

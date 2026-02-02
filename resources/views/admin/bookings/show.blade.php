@@ -10,6 +10,38 @@
         </a>
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 rounded-md bg-green-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-6 rounded-md bg-red-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    @foreach($errors->all() as $error)
+                        <p class="text-sm font-medium text-red-800">{{ $error }}</p>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="mb-6">
         <div class="md:flex md:items-center md:justify-between">
@@ -52,11 +84,7 @@
                 </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4">
-<<<<<<< HEAD
-                @if($booking->status === 'confirmed')
-=======
                 @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
->>>>>>> 37f6b61 (upload project)
                     <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
@@ -65,19 +93,8 @@
                             ✓ Selesai
                         </button>
                     </form>
-<<<<<<< HEAD
-                @endif
-                @if(in_array($booking->status, ['pending', 'waiting_dp', 'deposit_confirmed', 'confirmed']))
-=======
-                    <!-- Testing: Mark as No-Show -->
-                    <button type="button" 
-                            onclick="showNoShowModal()"
-                            class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700">
-                        🚫 No-Show (Test)
-                    </button>
                 @endif
                 @if(in_array($booking->status, ['pending', 'waiting_deposit', 'deposit_confirmed', 'confirmed', 'auto_approved']))
->>>>>>> 37f6b61 (upload project)
                     <form action="{{ route('admin.bookings.cancel', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
@@ -281,29 +298,43 @@
             @endif
 
             <!-- Before-After Photos -->
-            @if($booking->beforeAfterPhotos)
+            @if($booking->beforeAfterPhotos && ($booking->beforeAfterPhotos->before_photo || $booking->beforeAfterPhotos->after_photo))
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
                         Foto Before-After
                     </h3>
+                    <form action="{{ route('admin.before-after.destroy', $booking) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus foto?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-medium">
+                            🗑️ Hapus
+                        </button>
+                    </form>
                 </div>
                 <div class="px-4 py-5 sm:p-6">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid {{ ($booking->beforeAfterPhotos->before_photo && $booking->beforeAfterPhotos->after_photo) ? 'grid-cols-2' : 'grid-cols-1' }} gap-4">
+                        @if($booking->beforeAfterPhotos->before_photo)
                         <div>
                             <p class="text-xs font-medium text-gray-500 mb-2">Before</p>
-                            <img src="{{ Storage::url($booking->beforeAfterPhotos->before_photo) }}" 
+                            <img src="{{ asset('storage/' . $booking->beforeAfterPhotos->before_photo) }}" 
                                  alt="Before" 
-                                 class="w-full rounded-lg border border-gray-200">
+                                 class="w-full rounded-lg border border-gray-200"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
                         </div>
+                        @endif
+                        @if($booking->beforeAfterPhotos->after_photo)
                         <div>
                             <p class="text-xs font-medium text-gray-500 mb-2">After</p>
-                            <img src="{{ Storage::url($booking->beforeAfterPhotos->after_photo) }}" 
+                            <img src="{{ asset('storage/' . $booking->beforeAfterPhotos->after_photo) }}" 
                                  alt="After" 
-                                 class="w-full rounded-lg border border-gray-200">
+                                 class="w-full rounded-lg border border-gray-200"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
                         </div>
+                        @endif
                         @if($booking->beforeAfterPhotos->notes)
-                        <div class="col-span-2">
+                        <div class="{{ ($booking->beforeAfterPhotos->before_photo && $booking->beforeAfterPhotos->after_photo) ? 'col-span-2' : '' }}">
+                            <p class="text-sm font-medium text-gray-700 mb-1">Catatan:</p>
                             <p class="text-sm text-gray-600">{{ $booking->beforeAfterPhotos->notes }}</p>
                         </div>
                         @endif
@@ -374,11 +405,19 @@
                 </div>
                 <div class="px-4 py-5 sm:p-6">
                     <div class="space-y-3">
-                        @if($booking->status === 'completed' && !$booking->beforeAfterPhotos)
+                        @if(in_array($booking->status, ['completed', 'confirmed', 'deposit_confirmed', 'auto_approved']) && !$booking->beforeAfterPhotos)
                         <button type="button"
                                 onclick="document.getElementById('uploadPhotoModal').classList.remove('hidden')"
                                 class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
                             📸 Upload Foto Before-After
+                        </button>
+                        @endif
+
+                        @if($booking->beforeAfterPhotos)
+                        <button type="button"
+                                onclick="document.getElementById('uploadPhotoModal').classList.remove('hidden')"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+                            📸 Update Foto Before-After
                         </button>
                         @endif
 
@@ -426,7 +465,7 @@
                                 <!-- Before Photo -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Foto Before</label>
-                                    <input type="file" name="before_photo" accept="image/*" required
+                                    <input type="file" name="before_photo" accept="image/*"
                                            class="mt-1 block w-full text-sm text-gray-500
                                                   file:mr-4 file:py-2 file:px-4
                                                   file:rounded-md file:border-0
@@ -438,7 +477,7 @@
                                 <!-- After Photo -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Foto After</label>
-                                    <input type="file" name="after_photo" accept="image/*" required
+                                    <input type="file" name="after_photo" accept="image/*"
                                            class="mt-1 block w-full text-sm text-gray-500
                                                   file:mr-4 file:py-2 file:px-4
                                                   file:rounded-md file:border-0

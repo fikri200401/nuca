@@ -111,6 +111,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
         Route::get('bookings/create', [AdminBookingController::class, 'create'])->name('bookings.create');
         Route::post('bookings', [AdminBookingController::class, 'store'])->name('bookings.store');
         Route::get('bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
+        Route::post('bookings/available-slots', [AdminBookingController::class, 'getAvailableSlots'])->name('bookings.available-slots');
         Route::post('bookings/{booking}/reschedule', [AdminBookingController::class, 'reschedule'])->name('bookings.reschedule');
         Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel');
         Route::post('bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete');
@@ -154,6 +155,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner'])
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
         Route::post('settings/test-connection', [SettingController::class, 'testConnection'])->name('settings.test-connection');
+        Route::post('settings/toggle-shop', [SettingController::class, 'toggleShopStatus'])->name('settings.toggle-shop');
+
+        // Articles
+        Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+        Route::post('articles/{article}/toggle-status', [\App\Http\Controllers\Admin\ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
     });
 });
+
+// Landing - Articles
+Route::get('/articles', [LandingController::class, 'articles'])->name('articles');
+Route::get('/articles/{slug}', [LandingController::class, 'articleDetail'])->name('article.detail');
 

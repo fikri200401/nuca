@@ -14,6 +14,13 @@ class Setting extends Model
         'value',
         'type',
         'description',
+        'address',
+        'google_maps_url',
+        'is_shop_open',
+    ];
+
+    protected $casts = [
+        'is_shop_open' => 'boolean',
     ];
 
     /**

@@ -200,4 +200,38 @@ class BookingController extends Controller
 
         return back()->with('success', 'Catatan berhasil diupdate.');
     }
+
+    /**
+     * Get available time slots (AJAX for admin booking form)
+     */
+    public function getAvailableSlots(Request $request)
+    {
+        $request->validate([
+            'treatment_id' => 'required|exists:treatments,id',
+            'booking_date' => 'required|date',
+            'doctor_id' => 'nullable|exists:doctors,id',
+        ]);
+
+        try {
+            $slots = $this->bookingService->getAvailableSlots(
+                $request->treatment_id,
+                $request->booking_date,
+                $request->doctor_id
+            );
+            \Log::info('Admin getAvailableSlots', [
+                'input' => $request->only(['treatment_id', 'booking_date', 'doctor_id']),
+                'slots_count' => is_array($slots) ? count($slots) : null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'slots' => $slots,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

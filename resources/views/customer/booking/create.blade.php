@@ -284,8 +284,12 @@ const app = createApp({
                 console.log('Slots response:', data);
                 
                 if (data.success) {
-                    this.availableSlots = data.slots;
-                    console.log('Available slots:', this.availableSlots);
+                    const rawSlots = Array.isArray(data.slots) ? data.slots : [];
+                    // Hanya ambil slot yang masih tersedia dan belum lewat, sama seperti di booking manual
+                    const available = rawSlots.filter(slot => slot.available && !slot.isPast);
+                    this.availableSlots = available.map(slot => slot.time);
+
+                    console.log('Available slots (filtered):', this.availableSlots);
                     if (this.availableSlots.length === 0) {
                         this.errorMessage = 'Tidak ada slot waktu tersedia untuk tanggal ini';
                     }

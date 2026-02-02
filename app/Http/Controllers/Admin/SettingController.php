@@ -21,6 +21,8 @@ class SettingController extends Controller
             'fonnte_api_key' => 'nullable|string',
             'fonnte_device' => 'nullable|string',
             'whatsapp_enabled' => 'boolean',
+            'address' => 'nullable|string',
+            'google_maps_url' => 'nullable|url',
         ]);
 
         // Update or create settings
@@ -39,6 +41,16 @@ class SettingController extends Controller
             ['value' => $request->input('whatsapp_enabled', 0)]
         );
 
+        Setting::updateOrCreate(
+            ['key' => 'address'],
+            ['value' => $request->input('address')]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'google_maps_url'],
+            ['value' => $request->input('google_maps_url')]
+        );
+
         // Update .env file (optional)
         $this->updateEnvFile([
             'FONNTE_API_KEY' => $request->input('fonnte_api_key'),
@@ -47,7 +59,27 @@ class SettingController extends Controller
 
         return redirect()
             ->route('admin.settings.index')
-            ->with('success', 'Konfigurasi WhatsApp berhasil disimpan.');
+            ->with('success', 'Konfigurasi berhasil disimpan.');
+    }
+
+    /**
+     * Toggle shop open/close status
+     */
+    public function toggleShopStatus(Request $request)
+    {
+        $currentStatus = Setting::get('is_shop_open', true);
+        $newStatus = !$currentStatus;
+
+        Setting::updateOrCreate(
+            ['key' => 'is_shop_open'],
+            ['value' => $newStatus ? '1' : '0', 'type' => 'boolean']
+        );
+
+        return response()->json([
+            'success' => true,
+            'is_open' => $newStatus,
+            'message' => $newStatus ? 'Toko dibuka' : 'Toko ditutup'
+        ]);
     }
 
     /**

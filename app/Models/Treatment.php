@@ -66,4 +66,12 @@ class Treatment extends Model
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');
     }
+
+    /**
+     * Accessor for duration (alias for duration_minutes)
+     */
+    public function getDurationAttribute()
+    {
+        return $this->duration_minutes;
+    }
 }

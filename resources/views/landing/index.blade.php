@@ -46,6 +46,7 @@
             <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
                 <a href="#home" class="hover:text-brand transition">Home</a>
                 <a href="#treatments" class="hover:text-brand transition">Perawatan</a>
+                <a href="{{ route('articles') }}" class="hover:text-brand transition">Artikel</a>
                 <a href="#promo" class="hover:text-brand transition">Promo</a>
                 <a href="#advantages" class="hover:text-brand transition">Klinik</a>
                 <a href="#faq" class="hover:text-brand transition">Info</a>
@@ -60,7 +61,30 @@
                 <a href="{{ route('customer.bookings.create') }}" class="px-5 py-2 bg-brand text-white rounded-full text-sm font-medium hover:bg-brand-dark transition shadow-lg shadow-pink-200">Reservasi Sekarang</a>
             </div>
             
-            <button class="md:hidden text-gray-600 text-2xl"><i class="fas fa-bars"></i></button>
+            <button id="mobileMenuBtn" class="md:hidden text-gray-600 text-2xl focus:outline-none">
+                <i id="hamburgerIcon" class="fas fa-bars"></i>
+                <i id="closeIcon" class="fas fa-times hidden"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t mt-4">
+            <div class="px-6 py-4 space-y-3">
+                <a href="#home" class="block text-gray-600 hover:text-brand transition">Home</a>
+                <a href="#treatments" class="block text-gray-600 hover:text-brand transition">Perawatan</a>
+                <a href="{{ route('articles') }}" class="block text-gray-600 hover:text-brand transition">Artikel</a>
+                <a href="#promo" class="block text-gray-600 hover:text-brand transition">Promo</a>
+                <a href="#advantages" class="block text-gray-600 hover:text-brand transition">Klinik</a>
+                <a href="#faq" class="block text-gray-600 hover:text-brand transition">Info</a>
+                <div class="pt-4 border-t space-y-3">
+                    @auth
+                        <a href="{{ route('customer.dashboard') }}" class="block px-5 py-2 border border-brand text-brand rounded-full text-sm font-medium text-center hover:bg-pink-50 transition">Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="block px-5 py-2 border border-brand text-brand rounded-full text-sm font-medium text-center hover:bg-pink-50 transition">Masuk Akun</a>
+                    @endauth
+                    <a href="{{ route('customer.bookings.create') }}" class="block px-5 py-2 bg-brand text-white rounded-full text-sm font-medium text-center hover:bg-brand-dark transition">Reservasi Sekarang</a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -398,6 +422,23 @@
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-serif font-bold text-gray-900 text-center mb-12">Artikel Kecantikan</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @php
+                    $latestArticles = \App\Models\Article::active()->orderBy('created_at', 'desc')->limit(3)->get();
+                @endphp
+                @forelse($latestArticles as $article)
+                <a href="{{ route('article.detail', $article->slug) }}" class="group cursor-pointer block">
+                    <div class="rounded-xl overflow-hidden mb-4 relative">
+                        @if($article->image)
+                            <img src="{{ asset('storage/' . $article->image) }}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" alt="{{ $article->title }}">
+                        @else
+                            <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" alt="{{ $article->title }}">
+                        @endif
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Tips</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">{{ $article->title }}</h3>
+                    <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
+                </a>
+                @empty
                 <div class="group cursor-pointer">
                     <div class="rounded-xl overflow-hidden mb-4 relative">
                         <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
@@ -422,9 +463,10 @@
                     <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Pola Makan Sehat untuk Kulit Awet Muda</h3>
                     <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
                 </div>
+                @endforelse
             </div>
              <div class="text-center mt-12">
-                <button class="px-6 py-2 border border-brand text-brand rounded-full text-sm font-medium hover:bg-pink-50">LIHAT SEMUA ARTIKEL</button>
+                <a href="{{ route('articles') }}" class="inline-block px-6 py-2 border border-brand text-brand rounded-full text-sm font-medium hover:bg-pink-50">LIHAT SEMUA ARTIKEL</a>
             </div>
         </div>
     </section>
@@ -519,6 +561,22 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const closeIcon = document.getElementById('closeIcon');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+        }
+    </script>
 
 </body>
 </html>

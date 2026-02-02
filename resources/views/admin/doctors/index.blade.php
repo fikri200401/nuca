@@ -54,9 +54,14 @@
                                     <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                                     <form action="{{ route('admin.doctors.toggle-status', $doctor->id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-yellow-600 hover:text-yellow-900">
+                                        <button type="submit" class="text-yellow-600 hover:text-yellow-900 mr-3">
                                             {{ $doctor->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
+                                    </form>
+                                    <form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokter ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
                                     </form>
                                 </td>
                             </tr>

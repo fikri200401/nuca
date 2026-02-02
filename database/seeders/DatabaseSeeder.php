@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             VoucherSeeder::class,
             BookingSeeder::class,
             FeedbackSeeder::class,
+            ArticleSeeder::class,
         ]);
     }
 }

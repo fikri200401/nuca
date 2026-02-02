@@ -113,11 +113,12 @@
                             <label for="booking_time" class="block text-sm font-medium text-gray-700">
                                 Jam Booking <span class="text-red-500">*</span>
                             </label>
-                            <input type="time" id="booking_time" name="booking_time" required 
-                                   value="{{ old('booking_time') }}"
+                            <select id="booking_time" name="booking_time" required 
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('booking_time') border-red-300 @enderror">
-                            <p class="mt-2 text-sm text-gray-500">
-                                Pastikan waktu sesuai dengan jam operasional klinik ({{ config('CLINIC_OPERATING_HOURS', '09:00-17:00') }})
+                                <option value="">Pilih jam terlebih dahulu tanggal dan treatment</option>
+                            </select>
+                            <p class="mt-2 text-sm text-gray-500" id="timeSlotInfo">
+                                Pilih tanggal dan treatment terlebih dahulu untuk melihat jam yang tersedia
                             </p>
                             @error('booking_time')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -212,6 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const btnText = document.getElementById('btnText');
     const btnLoading = document.getElementById('btnLoading');
+    const bookingDateInput = document.getElementById('booking_date');
+    const bookingTimeSelect = document.getElementById('booking_time');
+    const treatmentSelect = document.getElementById('treatment_id');
+    const doctorSelect = document.getElementById('doctor_id');
+    const timeSlotInfo = document.getElementById('timeSlotInfo');
     
     form.addEventListener('submit', function(e) {
         // Show loading state
@@ -219,6 +225,74 @@ document.addEventListener('DOMContentLoaded', function() {
         btnText.textContent = 'Memproses...';
         btnLoading.classList.remove('hidden');
     });
+
+    // Load time slots when date or treatment changes
+    function loadTimeSlots() {
+        const date = bookingDateInput.value;
+        const treatmentId = treatmentSelect.value;
+        const doctorId = doctorSelect.value;
+
+        if (!date || !treatmentId) {
+            bookingTimeSelect.innerHTML = '<option value="">Pilih tanggal dan treatment terlebih dahulu</option>';
+            bookingTimeSelect.disabled = true;
+            return;
+        }
+
+        bookingTimeSelect.disabled = true;
+        timeSlotInfo.textContent = 'Memuat jam yang tersedia...';
+        
+        fetch('{{ route("admin.bookings.available-slots") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                booking_date: date,
+                treatment_id: treatmentId,
+                doctor_id: doctorId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            bookingTimeSelect.innerHTML = '';
+            
+            if (data.slots && data.slots.length > 0) {
+                let hasAvailable = false;
+                data.slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.time;
+                    option.textContent = slot.time + (slot.isPast ? ' (Sudah Lewat)' : (slot.available ? '' : ' (Penuh)'));
+                    option.disabled = !slot.available || slot.isPast;
+                    bookingTimeSelect.appendChild(option);
+                    if (slot.available && !slot.isPast) hasAvailable = true;
+                });
+                
+                if (hasAvailable) {
+                    timeSlotInfo.textContent = 'Pilih jam yang tersedia';
+                    timeSlotInfo.className = 'mt-2 text-sm text-gray-500';
+                } else {
+                    timeSlotInfo.textContent = 'Tidak ada slot tersedia untuk tanggal ini';
+                    timeSlotInfo.className = 'mt-2 text-sm text-red-600';
+                }
+                bookingTimeSelect.disabled = false;
+            } else {
+                bookingTimeSelect.innerHTML = '<option value="">Tidak ada slot tersedia</option>';
+                timeSlotInfo.textContent = 'Tidak ada slot tersedia untuk tanggal ini';
+                timeSlotInfo.className = 'mt-2 text-sm text-red-600';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading slots:', error);
+            bookingTimeSelect.innerHTML = '<option value="">Gagal memuat slot</option>';
+            timeSlotInfo.textContent = 'Gagal memuat slot, coba lagi';
+            timeSlotInfo.className = 'mt-2 text-sm text-red-600';
+        });
+    }
+
+    bookingDateInput.addEventListener('change', loadTimeSlots);
+    treatmentSelect.addEventListener('change', loadTimeSlots);
+    doctorSelect.addEventListener('change', loadTimeSlots);
 });
 </script>
 @endsection

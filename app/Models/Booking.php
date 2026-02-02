@@ -161,4 +161,12 @@ class Booking extends Model
     {
         return in_array($this->status, ['auto_approved', 'deposit_confirmed']);
     }
+
+    /**
+     * Accessor for booking_number (alias for booking_code)
+     */
+    public function getBookingNumberAttribute()
+    {
+        return $this->booking_code;
+    }
 }

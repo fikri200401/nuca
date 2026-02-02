@@ -40,6 +40,9 @@ class BookingController extends Controller
         ]);
 
         try {
+            // Check if shop is open
+            $isShopOpen = \App\Models\Setting::get('is_shop_open', true);
+            
             $slots = $this->bookingService->getAvailableSlots(
                 $request->treatment_id,
                 $request->date,
@@ -49,6 +52,7 @@ class BookingController extends Controller
             return response()->json([
                 'success' => true,
                 'slots' => $slots,
+                'is_shop_open' => $isShopOpen,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -94,6 +98,15 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         try {
+            // Check if shop is open
+            $isShopOpen = \App\Models\Setting::get('is_shop_open', true);
+            if (!$isShopOpen) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maaf, toko sedang tutup. Silakan coba lagi nanti.',
+                ], 422);
+            }
+
             $request->validate([
                 'treatment_id' => 'required|exists:treatments,id',
                 'doctor_id' => 'required|exists:doctors,id',
