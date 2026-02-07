@@ -46,7 +46,7 @@
             <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
                 <a href="#home" class="hover:text-brand transition">Home</a>
                 <a href="#treatments" class="hover:text-brand transition">Perawatan</a>
-                <a href="{{ route('articles') }}" class="hover:text-brand transition">Artikel</a>
+                <a href="#articles" class="hover:text-brand transition">Artikel</a>
                 <a href="#promo" class="hover:text-brand transition">Promo</a>
                 <a href="#advantages" class="hover:text-brand transition">Klinik</a>
                 <a href="#faq" class="hover:text-brand transition">Info</a>
@@ -72,7 +72,7 @@
             <div class="px-6 py-4 space-y-3">
                 <a href="#home" class="block text-gray-600 hover:text-brand transition">Home</a>
                 <a href="#treatments" class="block text-gray-600 hover:text-brand transition">Perawatan</a>
-                <a href="{{ route('articles') }}" class="block text-gray-600 hover:text-brand transition">Artikel</a>
+                <a href="#articles" class="block text-gray-600 hover:text-brand transition">Artikel</a>
                 <a href="#promo" class="block text-gray-600 hover:text-brand transition">Promo</a>
                 <a href="#advantages" class="block text-gray-600 hover:text-brand transition">Klinik</a>
                 <a href="#faq" class="block text-gray-600 hover:text-brand transition">Info</a>
@@ -115,7 +115,11 @@
                 @forelse($popularTreatments as $treatment)
                 <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100">
                     <div class="h-48 overflow-hidden relative">
-                        <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $treatment->name }}">
+                        @if($treatment->image)
+                            <img src="{{ asset('storage/' . $treatment->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $treatment->name }}">
+                        @else
+                            <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $treatment->name }}">
+                        @endif
                         @if($treatment->is_popular)
                         <span class="absolute top-4 left-4 bg-pink-100 text-brand text-xs font-bold px-3 py-1 rounded-full">Populer</span>
                         @endif
@@ -418,27 +422,11 @@
         </div>
     </section>
 
-    <section class="py-16 bg-white">
+    <section id="articles" class="py-16 bg-white">
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-serif font-bold text-gray-900 text-center mb-12">Artikel Kecantikan</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @php
-                    $latestArticles = \App\Models\Article::active()->orderBy('created_at', 'desc')->limit(3)->get();
-                @endphp
-                @forelse($latestArticles as $article)
-                <a href="{{ route('article.detail', $article->slug) }}" class="group cursor-pointer block">
-                    <div class="rounded-xl overflow-hidden mb-4 relative">
-                        @if($article->image)
-                            <img src="{{ asset('storage/' . $article->image) }}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" alt="{{ $article->title }}">
-                        @else
-                            <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" alt="{{ $article->title }}">
-                        @endif
-                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Tips</span>
-                    </div>
-                    <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">{{ $article->title }}</h3>
-                    <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
-                </a>
-                @empty
+                {{-- Artikel dummy - Model Article belum ada --}}
                 <div class="group cursor-pointer">
                     <div class="rounded-xl overflow-hidden mb-4 relative">
                         <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
@@ -463,10 +451,6 @@
                     <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Pola Makan Sehat untuk Kulit Awet Muda</h3>
                     <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
                 </div>
-                @endforelse
-            </div>
-             <div class="text-center mt-12">
-                <a href="{{ route('articles') }}" class="inline-block px-6 py-2 border border-brand text-brand rounded-full text-sm font-medium hover:bg-pink-50">LIHAT SEMUA ARTIKEL</a>
             </div>
         </div>
     </section>

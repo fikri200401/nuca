@@ -21,7 +21,7 @@
         </div>
 
         <div class="mt-5 md:mt-0 md:col-span-2">
-            <form action="{{ route('admin.treatments.update', $treatment) }}" method="POST">
+            <form action="{{ route('admin.treatments.update', $treatment) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="shadow sm:rounded-md sm:overflow-hidden">
@@ -50,6 +50,33 @@
                                       placeholder="Jelaskan manfaat dan proses treatment..."
                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('description') border-red-300 @enderror">{{ old('description', $treatment->description) }}</textarea>
                             @error('description')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">
+                                Gambar Treatment
+                            </label>
+                            <div class="mt-1 flex items-center space-x-4">
+                                <div id="imagePreview" class="h-32 w-32 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden">
+                                    @if($treatment->image)
+                                        <img src="{{ asset('storage/' . $treatment->image) }}" alt="{{ $treatment->name }}" class="h-32 w-32 object-cover rounded-lg">
+                                    @else
+                                        <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" id="image" name="image" accept="image/*" 
+                                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                           onchange="previewImage(event)">
+                                    <p class="mt-2 text-xs text-gray-500">PNG, JPG, GIF hingga 2MB. Biarkan kosong jika tidak ingin mengubah gambar.</p>
+                                </div>
+                            </div>
+                            @error('image')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -141,4 +168,21 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" class="h-32 w-32 object-cover rounded-lg">`;
+        }
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+@endpush
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Treatment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TreatmentController extends Controller
 {
@@ -24,12 +25,20 @@ class TreatmentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'duration_minutes' => 'required|integer|min:15',
             'price' => 'required|numeric|min:0',
             'is_popular' => 'boolean',
         ]);
 
-        Treatment::create($request->all());
+        $data = $request->all();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('treatments', 'public');
+        }
+
+        Treatment::create($data);
 
         return redirect()
             ->route('admin.treatments.index')
@@ -46,12 +55,25 @@ class TreatmentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'duration_minutes' => 'required|integer|min:15',
             'price' => 'required|numeric|min:0',
             'is_popular' => 'boolean',
         ]);
 
-        $treatment->update($request->all());
+        $data = $request->all();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($treatment->image && Storage::disk('public')->exists($treatment->image)) {
+                Storage::disk('public')->delete($treatment->image);
+            }
+            
+            $data['image'] = $request->file('image')->store('treatments', 'public');
+        }
+
+        $treatment->update($data);
 
         return redirect()
             ->route('admin.treatments.index')

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Treatment;
 use App\Models\Voucher;
 use App\Models\Setting;
-use App\Models\Article;
 use Illuminate\Http\Request;
 
 class LandingController extends Controller
@@ -90,29 +89,5 @@ class LandingController extends Controller
         }
 
         return redirect('/#booking-check')->with('booking_info', $booking);
-    }
-
-    /**
-     * Show all articles
-     */
-    public function articles()
-    {
-        $articles = Article::active()
-            ->orderBy('created_at', 'desc')
-            ->paginate(9);
-
-        return view('landing.articles', compact('articles'));
-    }
-
-    /**
-     * Show article detail
-     */
-    public function articleDetail($slug)
-    {
-        $article = Article::active()
-            ->where('slug', $slug)
-            ->firstOrFail();
-
-        return view('landing.article-detail', compact('article'));
     }
 }
