@@ -48,6 +48,7 @@
                     <span class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'translate-x-5' : 'translate-x-0' }} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                 </button>
             </div>
+            <div id="shopStatusAlert" class="mt-4 hidden"></div>
         </div>
     </div>
 
@@ -327,10 +328,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle Shop Status
     const toggleShopBtn = document.getElementById('toggleShopBtn');
+    const shopStatusAlert = document.getElementById('shopStatusAlert');
+
     if (toggleShopBtn) {
         toggleShopBtn.addEventListener('click', function() {
             const button = this;
-            const isOpen = button.getAttribute('data-is-open') === '1';
             const statusText = document.getElementById('shopStatusText');
 
             fetch('{{ route("admin.settings.toggle-shop") }}', {
@@ -340,38 +342,105 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const newIsOpen = data.is_open;
-                    button.setAttribute('data-is-open', newIsOpen ? '1' : '0');
-                    
-                    // Update button appearance
-                    if (newIsOpen) {
-                        button.classList.remove('bg-gray-200');
-                        button.classList.add('bg-green-600');
-                        button.querySelector('span:last-child').classList.remove('translate-x-0');
-                        button.querySelector('span:last-child').classList.add('translate-x-5');
-                        statusText.textContent = 'Toko saat ini: BUKA';
-                        statusText.classList.remove('text-red-600');
-                        statusText.classList.add('text-green-600');
+                .then(response => response.json())
+                .then(data => {
+                    if (!shopStatusAlert) return;
+
+                    if (data.success) {
+                        const newIsOpen = data.is_open;
+                        button.setAttribute('data-is-open', newIsOpen ? '1' : '0');
+
+                        const knob = button.querySelector('span:last-child');
+
+                        if (newIsOpen) {
+                            button.classList.remove('bg-gray-200');
+                            button.classList.add('bg-green-600');
+                            if (knob) {
+                                knob.classList.remove('translate-x-0');
+                                knob.classList.add('translate-x-5');
+                            }
+                            if (statusText) {
+                                statusText.textContent = 'Toko saat ini: BUKA';
+                                statusText.classList.remove('text-red-600');
+                                statusText.classList.add('text-green-600');
+                            }
+
+                            shopStatusAlert.className = 'mt-4 rounded-md bg-green-50 border border-green-200 p-4';
+                            shopStatusAlert.innerHTML = `
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-green-800">${data.message}</p>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            button.classList.remove('bg-green-600');
+                            button.classList.add('bg-gray-200');
+                            if (knob) {
+                                knob.classList.remove('translate-x-5');
+                                knob.classList.add('translate-x-0');
+                            }
+                            if (statusText) {
+                                statusText.textContent = 'Toko saat ini: TUTUP';
+                                statusText.classList.remove('text-green-600');
+                                statusText.classList.add('text-red-600');
+                            }
+
+                            shopStatusAlert.className = 'mt-4 rounded-md bg-red-50 border border-red-200 p-4';
+                            shopStatusAlert.innerHTML = `
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-red-800">${data.message}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        shopStatusAlert.classList.remove('hidden');
                     } else {
-                        button.classList.remove('bg-green-600');
-                        button.classList.add('bg-gray-200');
-                        button.querySelector('span:last-child').classList.remove('translate-x-5');
-                        button.querySelector('span:last-child').classList.add('translate-x-0');
-                        statusText.textContent = 'Toko saat ini: TUTUP';
-                        statusText.classList.remove('text-green-600');
-                        statusText.classList.add('text-red-600');
+                        shopStatusAlert.className = 'mt-4 rounded-md bg-red-50 border border-red-200 p-4';
+                        shopStatusAlert.innerHTML = `
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-red-800">${data.message || 'Gagal mengubah status toko.'}</p>
+                                </div>
+                            </div>
+                        `;
+                        shopStatusAlert.classList.remove('hidden');
                     }
-                    
-                    // Show notification
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('Error: ' + error.message);
-            });
+                })
+                .catch(error => {
+                    if (!shopStatusAlert) return;
+                    shopStatusAlert.className = 'mt-4 rounded-md bg-red-50 border border-red-200 p-4';
+                    shopStatusAlert.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">Error: ${error.message}</p>
+                            </div>
+                        </div>
+                    `;
+                    shopStatusAlert.classList.remove('hidden');
+                });
         });
     }
 

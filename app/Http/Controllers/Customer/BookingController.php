@@ -25,7 +25,9 @@ class BookingController extends Controller
     public function create()
     {
         $treatments = Treatment::active()->get();
-        return view('customer.booking.create', compact('treatments'));
+        $isShopOpen = \App\Models\Setting::get('is_shop_open', true);
+
+        return view('customer.booking.create', compact('treatments', 'isShopOpen'));
     }
 
     /**
@@ -103,7 +105,7 @@ class BookingController extends Controller
             if (!$isShopOpen) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Maaf, toko sedang tutup. Silakan coba lagi nanti.',
+                    'message' => 'Maaf, klinik sedang tutup. Reservasi online sementara tidak tersedia.',
                 ], 422);
             }
 

@@ -28,6 +28,19 @@
         </div>
 
         <div id="bookingApp" class="bg-white rounded-2xl shadow-xl p-8 border border-pink-100">
+            <!-- Klinik Tutup Modal (non-Vue, dikontrol JS biasa) -->
+            <div id="clinicClosedModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 {{ isset($isShopOpen) && !$isShopOpen ? '' : 'hidden' }}">
+                <div class="bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Klinik Sedang Tutup</h2>
+                    <p id="clinicClosedModalMessage" class="text-sm text-gray-600 mb-4">
+                        {{ isset($isShopOpen) && !$isShopOpen ? 'Maaf, klinik sedang tutup. Reservasi online sementara tidak tersedia.' : '' }}
+                    </p>
+                    <button type="button" id="clinicClosedModalClose" class="inline-flex justify-center px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        Mengerti
+                    </button>
+                </div>
+            </div>
+
             <!-- Alert Messages -->
             <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2" role="alert">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -284,6 +297,16 @@ const app = createApp({
                 console.log('Slots response:', data);
                 
                 if (data.success) {
+                    if (data.is_shop_open === false) {
+                        this.availableSlots = [];
+                        this.availableDoctors = [];
+                        if (typeof showClinicClosedModal === 'function') {
+                            showClinicClosedModal('Maaf, klinik sedang tutup. Reservasi online sementara tidak tersedia.');
+                        }
+                        this.loading = false;
+                        return;
+                    }
+
                     const rawSlots = Array.isArray(data.slots) ? data.slots : [];
                     // Hanya ambil slot yang masih tersedia dan belum lewat, sama seperti di booking manual
                     const available = rawSlots.filter(slot => slot.available && !slot.isPast);
@@ -402,7 +425,12 @@ const app = createApp({
                         window.location.href = '{{ route("customer.dashboard") }}';
                     }, 1000);
                 } else {
-                    this.errorMessage = data.message || 'Gagal membuat booking';
+                    const msg = data.message || 'Gagal membuat booking';
+                    if (msg.includes('klinik sedang tutup') && typeof showClinicClosedModal === 'function') {
+                        showClinicClosedModal(msg);
+                    } else {
+                        this.errorMessage = msg;
+                    }
                 }
             } catch (error) {
                 this.errorMessage = 'Terjadi kesalahan: ' + error.message;
@@ -417,5 +445,24 @@ const app = createApp({
 console.log('Attempting to mount Vue app...');
 app.mount('#bookingApp');
 console.log('Vue app mounted!');
+
+// Modal klinik tutup - JS biasa (di luar Vue)
+const clinicClosedModal = document.getElementById('clinicClosedModal');
+const clinicClosedModalMessage = document.getElementById('clinicClosedModalMessage');
+const clinicClosedModalClose = document.getElementById('clinicClosedModalClose');
+
+function showClinicClosedModal(message) {
+    if (!clinicClosedModal) return;
+    if (clinicClosedModalMessage && message) {
+        clinicClosedModalMessage.textContent = message;
+    }
+    clinicClosedModal.classList.remove('hidden');
+}
+
+if (clinicClosedModalClose && clinicClosedModal) {
+    clinicClosedModalClose.addEventListener('click', function () {
+        clinicClosedModal.classList.add('hidden');
+    });
+}
 </script>
 @endsection
