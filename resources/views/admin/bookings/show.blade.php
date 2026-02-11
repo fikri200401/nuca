@@ -4,14 +4,22 @@
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-8">
-    <div class="mb-6">
+    
+    <!-- Print Header (Only visible when printing) -->
+    <div class="hidden print:block mb-8 text-center border-b-2 border-gray-800 pb-4">
+        <h1 class="text-3xl font-bold text-gray-900">DETAIL BOOKING</h1>
+        <p class="text-lg font-semibold text-gray-900 mt-2">{{ $booking->booking_number }}</p>
+        <p class="text-sm text-gray-600 mt-1">Tanggal Cetak: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
+    </div>
+
+    <div class="mb-6 print:hidden">
         <a href="{{ route('admin.bookings.index') }}" class="text-sm text-indigo-600 hover:text-indigo-900">
             ← Kembali ke Daftar Booking
         </a>
     </div>
 
     @if(session('success'))
-        <div class="mb-6 rounded-md bg-green-50 p-4">
+        <div class="mb-6 rounded-md bg-green-50 p-4 print:hidden">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -26,7 +34,7 @@
     @endif
 
     @if($errors->any())
-        <div class="mb-6 rounded-md bg-red-50 p-4">
+        <div class="mb-6 rounded-md bg-red-50 p-4 print:hidden">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -83,7 +91,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4">
+            <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4 print:hidden">
                 @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
                     <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf
@@ -107,7 +115,7 @@
             </div>
         </div>
     </div>
-
+  
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
@@ -259,7 +267,7 @@
 
             <!-- Feedback -->
             @if($booking->feedback)
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg print:hidden">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
                         Feedback Customer
@@ -299,7 +307,7 @@
 
             <!-- Before-After Photos -->
             @if($booking->beforeAfterPhotos && ($booking->beforeAfterPhotos->before_photo || $booking->beforeAfterPhotos->after_photo))
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg print:hidden">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
                         Foto Before-After
@@ -397,43 +405,68 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg overflow-hidden rounded-2xl border-2 border-purple-200 print:hidden">
+                <div class="px-6 py-4 border-b-2 border-purple-200 bg-white">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900 flex items-center">
+                        <svg class="w-6 h-6 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
                         Quick Actions
                     </h3>
                 </div>
-                <div class="px-4 py-5 sm:p-6">
+                <div class="px-6 py-5 bg-white">
                     <div class="space-y-3">
                         @if(in_array($booking->status, ['completed', 'confirmed', 'deposit_confirmed', 'auto_approved']) && !$booking->beforeAfterPhotos)
                         <button type="button"
                                 onclick="document.getElementById('uploadPhotoModal').classList.remove('hidden')"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
-                            📸 Upload Foto Before-After
+                                class="w-full group inline-flex justify-center items-center px-5 py-3 border-2 border-purple-300 shadow-md text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Upload Foto Before-After
                         </button>
                         @endif
 
                         @if($booking->beforeAfterPhotos)
                         <button type="button"
                                 onclick="document.getElementById('uploadPhotoModal').classList.remove('hidden')"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
-                            📸 Update Foto Before-After
+                                class="w-full group inline-flex justify-center items-center px-5 py-3 border-2 border-purple-300 shadow-md text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Update Foto Before-After
                         </button>
                         @endif
 
                         @if(in_array($booking->status, ['pending', 'waiting_deposit', 'deposit_confirmed']))
                         <button type="button"
-                                onclick="alert('Fitur reschedule akan segera ditambahkan')"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            📅 Reschedule
+                                onclick="showRescheduleNotification()"
+                                class="w-full group inline-flex justify-center items-center px-5 py-3 border-2 border-blue-300 shadow-md text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-blue-50 hover:border-blue-400 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5 mr-2 text-blue-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Reschedule
                         </button>
                         @endif
 
                         <button type="button"
                                 onclick="window.print()"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            🖨️ Print
+                                class="w-full group inline-flex justify-center items-center px-5 py-3 border-2 border-gray-300 shadow-md text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5 mr-2 text-gray-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                            Print Booking
                         </button>
+
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $booking->user->whatsapp_number) }}?text=Halo {{ $booking->user->name }}, terkait booking {{ $booking->booking_code }}" 
+                           target="_blank"
+                           class="w-full group inline-flex justify-center items-center px-5 py-3 border-2 border-green-300 shadow-md text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-green-50 hover:border-green-400 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5 mr-2 text-green-600 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                            WhatsApp Customer
+                        </a>
                     </div>
                 </div>
             </div>
@@ -583,5 +616,279 @@ function hideNoShowModal() {
         modal.classList.add('hidden');
     }
 }
+
+function showRescheduleNotification() {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-50 max-w-md bg-white border-2 border-blue-300 rounded-2xl shadow-2xl p-6 transform transition-all duration-300 animate-slide-in';
+    notification.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="ml-4 flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Fitur Reschedule</h3>
+                <p class="text-sm text-gray-600 mb-3">Fitur untuk mengubah jadwal booking sedang dalam pengembangan dan akan segera tersedia.</p>
+                <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="font-semibold">Coming Soon - Q1 2026</span>
+                </div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+    }
+    
+    /* Print Styles - Clean Text Only */
+    @media print {
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+        
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        body {
+            background: white !important;
+            color: black !important;
+            font-family: 'Arial', sans-serif !important;
+            font-size: 11pt !important;
+            line-height: 1.4 !important;
+            overflow: visible !important;
+        }
+        
+        /* Hide scrollbars */
+        html, body {
+            overflow: visible !important;
+            height: auto !important;
+        }
+        
+        ::-webkit-scrollbar {
+            display: none !important;
+        }
+        
+        * {
+            overflow: visible !important;
+            -webkit-overflow-scrolling: auto !important;
+        }
+        
+        /* Hide admin sidebar and navigation */
+        aside,
+        nav,
+        header,
+        footer,
+        [class*="sidebar"],
+        [class*="navigation"],
+        [class*="nav-"],
+        .bg-indigo-900,
+        .bg-indigo-800,
+        .bg-indigo-700,
+        .bg-purple-900,
+        .bg-purple-800 {
+            display: none !important;
+        }
+        
+        /* Full width content */
+        main,
+        .main-content,
+        [role="main"] {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        /* Hide all UI elements */
+        .print\\:hidden,
+        button,
+        form,
+        a[href*="admin"],
+        .bg-gradient-to-r,
+        .bg-gradient-to-br,
+        svg,
+        #uploadPhotoModal,
+        #noShowModal {
+            display: none !important;
+        }
+        
+        /* Hide header with buttons */
+        .mb-6:has(button),
+        .mb-6:has(form) {
+            display: none !important;
+        }
+        
+        /* Hide Quick Actions sections completely */
+        .bg-gradient-to-br.from-purple-50 {
+            display: none !important;
+        }
+        
+        /* Single column text layout */
+        .px-4, .sm\\:px-6, .lg\\:px-8,
+        .px-6, .py-5, .sm\\:p-6 {
+            padding: 0 !important;
+        }
+        
+        .grid {
+            display: block !important;
+        }
+        
+        .lg\\:col-span-2,
+        .lg\\:col-span-1,
+        .space-y-6 {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        /* Clean card appearance - just text */
+        .bg-white {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            margin-bottom: 24px !important;
+            padding: 0 !important;
+        }
+        
+        /* Section headers */
+        .border-b {
+            border-bottom: 2px solid #000 !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 12px !important;
+        }
+        
+        h3 {
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            color: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Grid content to simple list */
+        .grid.grid-cols-1,
+        .sm\\:grid-cols-2 {
+            display: block !important;
+            gap: 0 !important;
+        }
+        
+        dl {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        dt {
+            font-weight: bold !important;
+            color: #000 !important;
+            font-size: 10pt !important;
+            margin-top: 8px !important;
+            margin-bottom: 2px !important;
+        }
+        
+        dd {
+            color: #333 !important;
+            font-size: 11pt !important;
+            margin-left: 0 !important;
+            margin-bottom: 4px !important;
+        }
+        
+        /* Status badges as text */
+        .rounded-full {
+            background: transparent !important;
+            border: 1px solid #000 !important;
+            border-radius: 0 !important;
+            padding: 2px 6px !important;
+            font-weight: bold !important;
+            color: #000 !important;
+            display: inline-block !important;
+        }
+        
+        /* Clean spacing */
+        .space-y-4 > div,
+        .space-y-6 > div {
+            margin-bottom: 6px !important;
+        }
+        
+        /* Page breaks */
+        .bg-white {
+            page-break-inside: avoid;
+        }
+        
+        h2, h3 {
+            page-break-after: avoid;
+        }
+        
+        /* Print header styling */
+        .hidden.print\\:block {
+            display: block !important;
+            border-bottom: 3px solid #000 !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 24px !important;
+            text-align: center !important;
+        }
+        
+        .hidden.print\\:block h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            margin: 0 0 8px 0 !important;
+        }
+        
+        .hidden.print\\:block p {
+            font-size: 9pt !important;
+            color: #666 !important;
+            margin: 0 !important;
+        }
+        
+        /* Hide booking number styled header */
+        .mb-6:has(.text-2xl) {
+            display: none !important;
+        }
+        
+        /* Links as plain text */
+        a {
+            color: #000 !important;
+            text-decoration: none !important;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 @endpush

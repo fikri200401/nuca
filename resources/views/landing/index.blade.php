@@ -88,12 +88,15 @@
         </div>
     </nav>
 
-    <header id="home" class="relative h-[500px] flex items-center justify-center bg-gray-100 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2070&auto=format&fit=crop" alt="Beauty Clinic" class="absolute w-full h-full object-cover opacity-90" onerror="this.onerror=null;this.src='https://via.placeholder.com/1600x500?text=Klinik+Kecantikan';">
+    <header id="home" class="relative h-[500px] flex items-center justify-center bg-gradient-to-br from-pink-100 to-purple-100 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2070&auto=format&fit=crop" alt="Beauty Clinic" class="absolute w-full h-full object-cover opacity-90" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwMCIgaGVpZ2h0PSI1MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZmZiZGNhO3N0b3Atb3BhY2l0eToxIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZTljYWZmO3N0b3Atb3BhY2l0eToxIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmFkKSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiNmZjRkODgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn4+peKAgS2xpbmlrIEtlY2FudGlrYW48L3RleHQ+PC9zdmc+';this.onerror=null;">
         
         <div class="absolute inset-0 bg-white/30"></div>
 
         <div class="relative z-10 text-center px-4 max-w-3xl">
+            <div class="text-8xl md:text-9xl font-bold text-brand mb-6 tracking-wider">
+                
+            </div>
             <h1 class="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-4 leading-tight">
                 Klinik Kecantikan Terbaik untukmu
             </h1>
@@ -248,22 +251,26 @@
                 </div>
 
                 <div>
-                    @if(!empty($clinicInfo['google_maps_url']))
-                        <div class="rounded-2xl overflow-hidden shadow-lg border border-gray-200 h-80">
-                            <iframe
-                                src="{{ $clinicInfo['google_maps_url'] }}"
-                                width="100%"
-                                height="100%"
-                                style="border:0;"
-                                allowfullscreen=""
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade"></iframe>
-                        </div>
-                    @else
-                        <div class="h-80 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-sm">
-                            Link Google Maps belum diatur. Silakan isi di menu Konfigurasi Klinik.
-                        </div>
-                    @endif
+                    <div class="rounded-2xl overflow-hidden shadow-lg border border-gray-200 h-80 bg-gray-100">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.556006470851!2d106.7454064!3d-6.321898300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ef001aaf6ca9%3A0xb5afe54a38f8eb26!2sNUCA%20BEAUTY%20SKIN!5e0!3m2!1sen!2sid!4v1770798293485!5m2!1sen!2sid"
+                            width="100%"
+                            height="100%"
+                            style="border:0; display:block;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Lokasi NUCA BEAUTY SKIN">
+                        </iframe>
+                    </div>
+                    <div class="mt-4 flex gap-3">
+                        <a href="https://maps.app.goo.gl/uPk26KwhGUxy2CXY7" target="_blank" class="flex-1 text-center px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-all shadow-md">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Buka di Google Maps
+                        </a>
+                        <a href="https://maps.app.goo.gl/uPk26KwhGUxy2CXY7" target="_blank" class="px-4 py-3 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-all shadow-md">
+                            <i class="fas fa-directions mr-2"></i>Petunjuk Arah
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -452,7 +459,7 @@
              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white p-6 rounded-xl shadow-sm">
                     <div class="flex items-center gap-4 mb-4">
-                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.onerror=null;this.src='https://via.placeholder.com/96x96?text=User';">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iNDgiIGZpbGw9IiNmZmRkZTciLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjM4IiByPSIxNSIgZmlsbD0iI2ZmNGQ4OCIvPjxwYXRoIGQ9Ik0yMCA3NWMwLTE1LjUtMTItMjgtMjguMSAyMEg3NmMtMTYuMS02LTI4LjEtNS41LTI4LTIweiIgZmlsbD0iI2ZmNGQ4OCIvPjwvc3ZnPg==';this.onerror=null;">
                         <div>
                             <h5 class="font-bold text-sm">Sarah P.</h5>
                             <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
@@ -462,7 +469,7 @@
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm">
                     <div class="flex items-center gap-4 mb-4">
-                        <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.onerror=null;this.src='https://via.placeholder.com/96x96?text=User';">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iNDgiIGZpbGw9IiNlMGU3ZmYiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjM4IiByPSIxNSIgZmlsbD0iI2ZmNGQ4OCIvPjxwYXRoIGQ9Ik0yMCA3NWMwLTE1LjUtMTItMjgtMjguMSAyMEg3NmMtMTYuMS02LTI4LjEtNS41LTI4LTIweiIgZmlsbD0iI2ZmNGQ4OCIvPjwvc3ZnPg==';this.onerror=null;">
                         <div>
                             <h5 class="font-bold text-sm">Rina M.</h5>
                             <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
@@ -472,7 +479,7 @@
                 </div>
                  <div class="bg-white p-6 rounded-xl shadow-sm">
                     <div class="flex items-center gap-4 mb-4">
-                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.onerror=null;this.src='https://via.placeholder.com/96x96?text=User';">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-12 h-12 rounded-full object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iNDgiIGZpbGw9IiNmZmU3ZGYiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjM4IiByPSIxNSIgZmlsbD0iI2ZmNGQ4OCIvPjxwYXRoIGQ9Ik0yMCA3NWMwLTE1LjUtMTItMjgtMjguMSAyMEg3NmMtMTYuMS02LTI4LjEtNS41LTI4LTIweiIgZmlsbD0iI2ZmNGQ4OCIvPjwvc3ZnPg==';this.onerror=null;">
                         <div>
                             <h5 class="font-bold text-sm">Tania K.</h5>
                             <div class="text-yellow-400 text-xs"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
@@ -490,25 +497,37 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {{-- Artikel dummy - Model Article belum ada --}}
                 <button type="button" class="group cursor-pointer text-left" data-article-title="Tips Wajah Glowing Alami Tanpa Makeup" data-article-content="Ingin wajah glowing tanpa perlu makeup tebal? Kuncinya adalah konsistensi merawat kulit dari dalam dan luar. Mulai dari membersihkan wajah dengan lembut, menggunakan sunscreen setiap hari, hingga rutin melakukan treatment sesuai kebutuhan kulit. Hindari begadang, perbanyak minum air putih, dan konsumsi makanan bergizi agar kulit tampak sehat dan bercahaya alami.">
-                    <div class="rounded-xl overflow-hidden mb-4 relative">
-                        <img src="https://images.unsplash.com/photo-1596704017254-9b1b1848fb11?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200?text=Artikel';">
-                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Kulit</span>
+                    <div class="rounded-xl overflow-hidden mb-4 relative bg-gradient-to-br from-pink-200 to-purple-200 h-48 flex items-center justify-center">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-pink-500 z-0">
+                            <i class="fas fa-spa text-6xl mb-2 opacity-30"></i>
+                            <p class="text-xs font-medium opacity-50">Artikel Kecantikan</p>
+                        </div>
+                        <img src="https://i.ibb.co.com/6czhMMLX/awajaswsw.webp" alt="awajaswsw"  class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500 z-10" onerror="this.style.display='none';">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded z-20">Kulit</span>
                     </div>
                     <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Tips Wajah Glowing Alami Tanpa Makeup</h3>
                     <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
                 </button>
                  <button type="button" class="group cursor-pointer text-left" data-article-title="Rambut Rontok? Ini Solusi Ampuhnya!" data-article-content="Rambut rontok bisa disebabkan banyak faktor, mulai dari stres, gaya hidup, hingga ketidakseimbangan hormon. Langkah pertama adalah memilih shampoo dan perawatan rambut yang sesuai jenis kulit kepala. Lakukan pijat kulit kepala secara rutin untuk melancarkan sirkulasi darah, hindari alat styling bersuhu tinggi berlebihan, dan jangan lupa cek asupan nutrisi seperti protein, zat besi, dan vitamin. Jika rontok berlebihan, konsultasikan dengan dokter agar mendapatkan perawatan yang tepat.">
-                    <div class="rounded-xl overflow-hidden mb-4 relative">
-                        <img src="https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200?text=Artikel';">
-                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Rambut</span>
+                    <div class="rounded-xl overflow-hidden mb-4 relative bg-gradient-to-br from-pink-200 to-purple-200 h-48 flex items-center justify-center">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-pink-500 z-0">
+                            <i class="fas fa-cut text-6xl mb-2 opacity-30"></i>
+                            <p class="text-xs font-medium opacity-50">Artikel Kecantikan</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500 z-10" onerror="this.style.display='none';">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded z-20">Rambut</span>
                     </div>
                     <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Rambut Rontok? Ini Solusi Ampuhnya!</h3>
                     <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>
                 </button>
                  <button type="button" class="group cursor-pointer text-left" data-article-title="Pola Makan Sehat untuk Kulit Awet Muda" data-article-content="Kulit yang sehat dan tampak awet muda sangat dipengaruhi oleh apa yang kita konsumsi setiap hari. Perbanyak buah dan sayur yang kaya antioksidan, kurangi gula berlebih, dan pilih lemak sehat seperti dari ikan, alpukat, dan kacang-kacangan. Kombinasikan dengan kebiasaan minum air putih yang cukup dan tidur berkualitas, maka perawatan kulit dari luar akan bekerja lebih optimal dan hasilnya lebih tahan lama.">
-                    <div class="rounded-xl overflow-hidden mb-4 relative">
-                        <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200?text=Artikel';">
-                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded">Tips</span>
+                    <div class="rounded-xl overflow-hidden mb-4 relative bg-gradient-to-br from-pink-200 to-purple-200 h-48 flex items-center justify-center">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-pink-500 z-0">
+                            <i class="fas fa-apple-alt text-6xl mb-2 opacity-30"></i>
+                            <p class="text-xs font-medium opacity-50">Artikel Kecantikan</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&q=80&w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500 z-10" onerror="this.style.display='none';">
+                        <span class="absolute top-3 left-3 bg-brand text-white text-[10px] px-2 py-1 rounded z-20">Tips</span>
                     </div>
                     <h3 class="font-bold text-gray-800 mb-2 group-hover:text-brand transition">Pola Makan Sehat untuk Kulit Awet Muda</h3>
                     <p class="text-xs text-brand font-bold">BACA SELENGKAPNYA <i class="fas fa-arrow-right ml-1"></i></p>

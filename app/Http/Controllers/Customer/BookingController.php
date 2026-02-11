@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -145,7 +146,7 @@ class BookingController extends Controller
                 'message' => 'Validasi gagal: ' . implode(', ', $e->validator->errors()->all()),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Booking creation error: ' . $e->getMessage(), [
+            Log::error('Booking creation error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
             
@@ -190,7 +191,7 @@ class BookingController extends Controller
         $booking = Booking::where('user_id', Auth::id())
             ->findOrFail($id);
 
-        if (!$booking->deposit || $booking->deposit->status !== 'pending') {
+        if (!$booking->deposit || !in_array($booking->deposit->status, ['pending', 'rejected'])) {
             return back()->withErrors(['error' => 'Deposit tidak dapat diupload.']);
         }
 
@@ -201,8 +202,11 @@ class BookingController extends Controller
         // Upload file
         $path = $request->file('proof_of_payment')->store('deposits', 'public');
 
+        // Update deposit with proof and change status to submitted
         $booking->deposit->update([
             'proof_of_payment' => $path,
+            'status' => 'submitted',
+            'rejection_reason' => null, // Clear rejection reason if re-uploading
         ]);
 
         return back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');

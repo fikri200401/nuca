@@ -49,19 +49,22 @@
                 </p>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-                @if($deposit->status === 'pending')
-                    <form action="{{ route('admin.deposits.approve', $deposit) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" 
-                                onclick="return confirm('Yakin approve deposit ini?')"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            ✓ Approve Deposit
-                        </button>
-                    </form>
+                @if(in_array($deposit->status, ['pending', 'submitted']))
+                    <button type="button" 
+                            onclick="showApproveModal()"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all hover:shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Approve Deposit
+                    </button>
                     <button type="button" 
                             onclick="showRejectModal()"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        ✗ Reject Deposit
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all hover:shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Reject Deposit
                     </button>
                 @endif
             </div>
@@ -86,19 +89,27 @@
                             <dd class="mt-1">
                                 @if($deposit->status === 'pending')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Pending
+                                        Pending - Menunggu Upload
+                                    </span>
+                                @elseif($deposit->status === 'submitted')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Submitted - Menunggu Verifikasi
                                     </span>
                                 @elseif($deposit->status === 'approved')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Approved
+                                        Approved - Disetujui
                                     </span>
                                 @elseif($deposit->status === 'rejected')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Rejected
+                                        Rejected - Ditolak
+                                    </span>
+                                @elseif($deposit->status === 'expired')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Expired - Kedaluwarsa
                                     </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        {{ ucfirst($deposit->status) }}
+                                        {{ ucfirst(str_replace('_', ' ', $deposit->status)) }}
                                     </span>
                                 @endif
                             </dd>
@@ -359,7 +370,64 @@
     </div>
 </div>
 
+<!-- Approve Confirmation Modal -->
+<div id="approveModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+        <div class="p-6">
+            <!-- Icon -->
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Approve Deposit</h3>
+                <p class="text-sm text-gray-600 mb-1">Apakah Anda yakin ingin menyetujui deposit ini?</p>
+                <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p class="text-sm text-green-800 font-semibold">Nominal: Rp {{ number_format($deposit->amount, 0, ',', '.') }}</p>
+                    <p class="text-xs text-green-700 mt-1">Booking: {{ $deposit->booking->booking_number }}</p>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Customer akan mendapat notifikasi WhatsApp
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <form action="{{ route('admin.deposits.approve', $deposit) }}" method="POST">
+                @csrf
+                <div class="flex gap-3">
+                    <button type="button" 
+                            onclick="closeApproveModal()" 
+                            class="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-5 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Ya, Approve
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+function showApproveModal() {
+    document.getElementById('approveModal').classList.remove('hidden');
+}
+
+function closeApproveModal() {
+    document.getElementById('approveModal').classList.add('hidden');
+}
+
 function showRejectModal() {
     document.getElementById('rejectModal').classList.remove('hidden');
 }
@@ -368,9 +436,23 @@ function closeRejectModal() {
     document.getElementById('rejectModal').classList.add('hidden');
 }
 
-// Close modal when clicking outside
+// Close modals when clicking outside
+document.getElementById('approveModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeApproveModal();
+    }
+});
+
 document.getElementById('rejectModal')?.addEventListener('click', function(e) {
     if (e.target === this) {
+        closeRejectModal();
+    }
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeApproveModal();
         closeRejectModal();
     }
 });

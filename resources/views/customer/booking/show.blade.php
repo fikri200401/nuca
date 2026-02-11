@@ -319,7 +319,8 @@
 </div>
 
 {{-- Upload Deposit Modal --}}
-<div id="uploadDepositModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+<div id="uploadDepositModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 p-4 backdrop-blur-sm">
+    <div class="flex items-center justify-center min-h-full">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all border border-pink-100">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Upload Bukti Deposit</h3>
@@ -360,16 +361,21 @@
             </div>
         </form>
     </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 function showUploadModal() {
-    document.getElementById('uploadDepositModal').classList.remove('hidden');
+    const modal = document.getElementById('uploadDepositModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'block';
 }
 
 function closeUploadModal() {
-    document.getElementById('uploadDepositModal').classList.add('hidden');
+    const modal = document.getElementById('uploadDepositModal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
     document.getElementById('uploadPlaceholder').classList.remove('hidden');
     document.getElementById('imagePreview').classList.add('hidden');
 }
