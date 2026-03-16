@@ -96,12 +96,15 @@
                 </div>
 
                 <div class="mt-4 flex justify-end space-x-3">
+                    @canDo('feedbacks', 'edit')
                     <form action="{{ route('admin.feedbacks.toggle-visibility', $feedback->id) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="text-sm text-yellow-600 hover:text-yellow-900">
                             {{ $feedback->is_visible ? 'Hide' : 'Show' }}
                         </button>
                     </form>
+                    @endCanDo
+                    @canDo('feedbacks', 'delete')
                     <form action="{{ route('admin.feedbacks.destroy', $feedback->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus feedback ini?')">
                         @csrf
                         @method('DELETE')
@@ -109,6 +112,7 @@
                             Delete
                         </button>
                     </form>
+                    @endCanDo
                 </div>
             </div>
         </div>

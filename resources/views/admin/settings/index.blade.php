@@ -43,7 +43,9 @@
                         Jika toko ditutup, customer tidak bisa membuat booking baru
                     </p>
                 </div>
-                <button type="button" id="toggleShopBtn" data-is-open="{{ \App\Models\Setting::get('is_shop_open', true) ? '1' : '0' }}" class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'bg-green-600' : 'bg-gray-200' }} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <button type="button" id="toggleShopBtn" 
+                        @cannotDo('settings', 'edit') disabled @endCannotDo
+                        data-is-open="{{ \App\Models\Setting::get('is_shop_open', true) ? '1' : '0' }}" class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'bg-green-600' : 'bg-gray-200' }} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2{{ auth()->user()->canDo('settings','edit') ? '' : ' opacity-50 cursor-not-allowed' }}">
                     <span class="sr-only">Toggle shop status</span>
                     <span class="{{ \App\Models\Setting::get('is_shop_open', true) ? 'translate-x-5' : 'translate-x-0' }} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                 </button>
@@ -216,10 +218,12 @@
                     </div>
 
                     <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        @canDo('settings', 'edit')
                         <button type="submit" 
                                 class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Simpan Konfigurasi
                         </button>
+                        @endCanDo
                     </div>
                 </div>
             </form>

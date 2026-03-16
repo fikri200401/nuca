@@ -72,6 +72,7 @@
                     <a href="{{ route('admin.bookings.show', $photo->booking_id) }}" class="text-sm text-indigo-600 hover:text-indigo-900">
                         Detail Booking
                     </a>
+                    @canDo('bookings', 'delete')
                     <form action="{{ route('admin.before-after.destroy', $photo->booking_id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus foto ini?')">
                         @csrf
                         @method('DELETE')
@@ -79,6 +80,7 @@
                             Delete
                         </button>
                     </form>
+                    @endCanDo
                 </div>
             </div>
         </div>

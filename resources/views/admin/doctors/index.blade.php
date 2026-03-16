@@ -9,11 +9,13 @@
             <h1 class="text-2xl font-semibold text-gray-900">Doctors Management</h1>
             <p class="mt-2 text-sm text-gray-700">Kelola data dokter dan jadwal praktik</p>
         </div>
+        @canDo('doctors', 'add')
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <a href="{{ route('admin.doctors.create') }}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
                 + Tambah Dokter
             </a>
         </div>
+        @endCanDo
     </div>
 
     <div class="mt-8 flex flex-col">
@@ -50,7 +52,10 @@
                                     @endif
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    @canDo('doctors', 'view')
                                     <a href="{{ route('admin.doctors.schedules', $doctor->id) }}" class="text-green-600 hover:text-green-900 mr-3">Jadwal</a>
+                                    @endCanDo
+                                    @canDo('doctors', 'edit')
                                     <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                                     <form action="{{ route('admin.doctors.toggle-status', $doctor->id) }}" method="POST" class="inline">
                                         @csrf
@@ -58,17 +63,23 @@
                                             {{ $doctor->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
                                     </form>
+                                    @endCanDo
+                                    @canDo('doctors', 'delete')
                                     <form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokter ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
                                     </form>
+                                    @endCanDo
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="6" class="px-3 py-8 text-center text-sm text-gray-500">
-                                    Belum ada dokter. <a href="{{ route('admin.doctors.create') }}" class="text-indigo-600">Tambah dokter pertama</a>
+                                    Belum ada dokter.
+                                    @canDo('doctors', 'add')
+                                    <a href="{{ route('admin.doctors.create') }}" class="text-indigo-600">Tambah dokter pertama</a>
+                                    @endCanDo
                                 </td>
                             </tr>
                             @endforelse

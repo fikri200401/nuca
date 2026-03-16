@@ -30,6 +30,9 @@ class User extends Authenticatable
         'is_member',
         'member_discount',
         'role',
+        'role_id',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -54,13 +57,20 @@ class User extends Authenticatable
             'password' => 'hashed',
             'birth_date' => 'date',
             'is_member' => 'boolean',
+            'is_active' => 'boolean',
             'member_discount' => 'decimal:2',
+            'last_login_at' => 'datetime',
         ];
     }
 
     /**
      * Relationships
      */
+    public function roleModel()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);
@@ -99,6 +109,16 @@ class User extends Authenticatable
         return $query->where('role', 'admin');
     }
 
+    public function scopeStaff($query)
+    {
+        return $query->whereIn('role', ['admin', 'owner', 'doctor', 'frontdesk']);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     /**
      * Helper methods
      */
@@ -115,5 +135,23 @@ class User extends Authenticatable
     public function isCustomer()
     {
         return $this->role === 'customer';
+    }
+
+    /**
+     * Check if user has a specific permission via their role's permission matrix.
+     * If the user has a role_id assigned, the permission matrix always takes precedence.
+     * Only users without a role_id (e.g. legacy super-admin) fall back to full access.
+     */
+    public function canDo(string $module, string $action = 'view'): bool
+    {
+        // If a role is assigned via role_id, ALWAYS use its permission matrix.
+        // This applies to everyone — owner, admin, frontdesk, doctor, etc.
+        if ($this->role_id && $this->roleModel) {
+            return $this->roleModel->hasPermission($module, $action);
+        }
+
+        // Fallback for users with no role_id (e.g. legacy super-admin account):
+        // owner/admin enum get full access, everyone else is denied.
+        return in_array($this->role, ['owner', 'admin']);
     }
 }

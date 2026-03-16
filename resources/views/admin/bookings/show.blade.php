@@ -92,6 +92,7 @@
                 </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4 print:hidden">
+                @canDo('bookings', 'edit')
                 @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
                     <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf
@@ -112,6 +113,7 @@
                         </button>
                     </form>
                 @endif
+                @endCanDo
             </div>
         </div>
     </div>

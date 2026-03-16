@@ -33,11 +33,12 @@ class LoginController extends Controller
         $identifier = $request->identifier;
         $password = $request->password;
 
-        // Cari user berdasarkan identifier (bisa WA number, username, atau member number)
+        // Cari user berdasarkan identifier (bisa WA number, username, member number, atau email)
         $user = User::where(function($query) use ($identifier) {
             $query->where('whatsapp_number', $identifier)
                   ->orWhere('username', $identifier)
-                  ->orWhere('member_number', $identifier);
+                  ->orWhere('member_number', $identifier)
+                  ->orWhere('email', $identifier);
         })->first();
 
         if (!$user || !Hash::check($password, $user->password)) {
@@ -51,12 +52,15 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect based on role
-        if ($user->isAdmin() || $user->isOwner()) {
-            return redirect()->intended(route('admin.dashboard'));
+        // Track last login time
+        $user->update(['last_login_at' => now()]);
+
+        // Redirect based on role — use direct redirect to prevent cross-role intended URL issues
+        if (in_array($user->role, ['admin', 'owner', 'doctor', 'frontdesk'])) {
+            return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->intended(route('customer.dashboard'));
+        return redirect()->route('customer.dashboard');
     }
 
     /**

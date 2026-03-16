@@ -49,6 +49,7 @@
                 </p>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+                @canDo('deposits', 'edit')
                 @if(in_array($deposit->status, ['pending', 'submitted']))
                     <button type="button" 
                             onclick="showApproveModal()"
@@ -67,6 +68,7 @@
                         Reject Deposit
                     </button>
                 @endif
+                @endCanDo
             </div>
         </div>
     </div>

@@ -80,6 +80,7 @@
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <a href="{{ route('admin.members.show', $member->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Detail</a>
+                                    @canDo('members', 'edit')
                                     @if($member->is_member)
                                         <form action="{{ route('admin.members.deactivate', $member->id) }}" method="POST" class="inline">
                                             @csrf
@@ -91,6 +92,7 @@
                                             <button type="submit" class="text-green-600 hover:text-green-900">Aktifkan Member</button>
                                         </form>
                                     @endif
+                                    @endCanDo
                                 </td>
                             </tr>
                             @empty
