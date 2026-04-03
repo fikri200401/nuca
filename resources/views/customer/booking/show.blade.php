@@ -230,6 +230,8 @@
 
         {{-- Before After Photos --}}
         @if($booking->beforeAfterPhotos && $booking->beforeAfterPhotos->count() > 0)
+        @php $photosWithContent = $booking->beforeAfterPhotos->filter(fn($p) => $p->before_photo || $p->after_photo); @endphp
+        @if($photosWithContent->count() > 0)
         <div class="bg-white rounded-2xl shadow-lg border border-pink-100 p-6 mt-6">
             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mr-3 shadow-lg">
@@ -241,22 +243,38 @@
             </h2>
             
             <div class="grid grid-cols-1 gap-6">
-                @foreach($booking->beforeAfterPhotos as $photo)
+                @foreach($photosWithContent as $photo)
                 <div class="border-2 border-pink-200 rounded-2xl p-5 hover:border-pink-300 transition shadow-md">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Before</p>
-                            <img src="{{ asset('storage/' . $photo->before_photo) }}" alt="Before" class="w-full rounded-xl shadow-lg">
+                            @if($photo->before_photo)
+                                <img src="{{ asset('storage/' . $photo->before_photo) }}" alt="Before" class="w-full rounded-xl shadow-lg">
+                            @else
+                                <div class="w-full h-32 bg-gray-100 rounded-xl flex items-center justify-center">
+                                    <span class="text-xs text-gray-400">Belum ada foto</span>
+                                </div>
+                            @endif
                         </div>
                         <div>
                             <p class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">After</p>
-                            <img src="{{ asset('storage/' . $photo->after_photo) }}" alt="After" class="w-full rounded-xl shadow-lg">
+                            @if($photo->after_photo)
+                                <img src="{{ asset('storage/' . $photo->after_photo) }}" alt="After" class="w-full rounded-xl shadow-lg">
+                            @else
+                                <div class="w-full h-32 bg-gray-100 rounded-xl flex items-center justify-center">
+                                    <span class="text-xs text-gray-400">Belum ada foto</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
+                    @if($photo->notes)
+                    <p class="text-sm text-gray-500 mt-3 pt-3 border-t border-pink-100">{{ $photo->notes }}</p>
+                    @endif
                 </div>
                 @endforeach
             </div>
         </div>
+        @endif
         @endif
 
         {{-- Feedback Section --}}
@@ -298,20 +316,70 @@
                 </p>
             </div>
             @else
-            <div class="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl border-2 border-pink-200 p-8 mt-6 text-center shadow-lg">
-                <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                    </svg>
+            <div class="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl border-2 border-pink-200 p-8 mt-6 shadow-lg">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Berikan Review Anda</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Bagaimana pengalaman Anda dengan <span class="font-semibold text-pink-600">{{ $booking->treatment->name }}</span>?</p>
+                    </div>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">Berikan Review Anda</h3>
-                <p class="text-gray-600 mb-6">Bagaimana pengalaman Anda dengan treatment ini?</p>
-                <a href="{{ route('customer.feedback.create', $booking->id) }}" class="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:-translate-y-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                    Tulis Review Sekarang
-                </a>
+
+                {{-- Inline Feedback Form --}}
+                <form method="POST" action="{{ route('customer.feedback.store', $booking->id) }}">
+                    @csrf
+
+                    {{-- Star Rating --}}
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Rating *</label>
+                        <div class="flex items-center gap-2" id="starRating">
+                            @for($s = 1; $s <= 5; $s++)
+                            <button type="button" onclick="setRating({{ $s }})" id="star_{{ $s }}"
+                                    class="star-btn w-12 h-12 rounded-xl transition-all duration-150 hover:scale-110 focus:outline-none text-gray-300 hover:text-yellow-400">
+                                <svg class="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </button>
+                            @endfor
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="{{ old('rating') }}">
+                        <p id="ratingLabel" class="text-sm text-gray-500 mt-2">Klik bintang untuk memberi rating</p>
+                        @error('rating')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Comment --}}
+                    <div class="mb-5">
+                        <label for="feedbackComment" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Komentar <span class="text-gray-400 font-normal">(opsional)</span>
+                        </label>
+                        <textarea id="feedbackComment" name="comment" rows="3"
+                                  placeholder="Ceritakan pengalaman Anda dengan treatment ini..."
+                                  class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition resize-none text-gray-700 bg-white"
+                                  maxlength="1000">{{ old('comment') }}</textarea>
+                        <p class="text-xs text-gray-400 mt-1 text-right"><span id="charCount">0</span>/1000 karakter</p>
+                        @error('comment')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <button type="submit" id="submitFeedbackBtn" disabled
+                            class="w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg
+                                   hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:-translate-y-0.5
+                                   disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Kirim Review
+                        </span>
+                    </button>
+                </form>
             </div>
             @endif
         @endif
@@ -366,6 +434,9 @@
 
 @push('scripts')
 <script>
+// -------------------------------------------------------
+// Upload Deposit Modal
+// -------------------------------------------------------
 function showUploadModal() {
     const modal = document.getElementById('uploadDepositModal');
     modal.classList.remove('hidden');
@@ -394,10 +465,43 @@ function previewImage(input) {
 
 // Close modal when clicking outside
 document.getElementById('uploadDepositModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeUploadModal();
-    }
+    if (e.target === this) closeUploadModal();
 });
+
+// -------------------------------------------------------
+// Inline Feedback Form — Star Rating
+// -------------------------------------------------------
+const ratingLabels = ['', 'Sangat Buruk 😞', 'Buruk 😕', 'Cukup 😐', 'Bagus 😊', 'Sangat Bagus 🤩'];
+
+function setRating(value) {
+    document.getElementById('ratingInput').value = value;
+
+    // Color stars
+    for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById('star_' + i);
+        star.classList.toggle('text-yellow-400', i <= value);
+        star.classList.toggle('text-gray-300',   i >  value);
+    }
+
+    // Update label & enable submit
+    document.getElementById('ratingLabel').textContent = ratingLabels[value];
+    document.getElementById('ratingLabel').className = 'text-sm font-semibold text-yellow-600 mt-2';
+    document.getElementById('submitFeedbackBtn').disabled = false;
+}
+
+// Restore previous value on page reload (validation error)
+const prevRating = parseInt(document.getElementById('ratingInput').value);
+if (prevRating >= 1 && prevRating <= 5) setRating(prevRating);
+
+// Char counter
+const textarea = document.getElementById('feedbackComment');
+if (textarea) {
+    const counter = document.getElementById('charCount');
+    counter.textContent = textarea.value.length;
+    textarea.addEventListener('input', () => {
+        counter.textContent = textarea.value.length;
+    });
+}
 </script>
 @endpush
 @endsection

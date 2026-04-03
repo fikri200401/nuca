@@ -19,38 +19,111 @@
     </div>
 
     <!-- Filter -->
-    <div class="mt-6 bg-white shadow sm:rounded-lg p-4">
-        <form method="GET" action="{{ route('admin.bookings.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div>
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    <option value="">Semua Status</option>
-                    <option value="auto_approved" {{ request('status') == 'auto_approved' ? 'selected' : '' }}>Auto Approved</option>
-                    <option value="waiting_deposit" {{ request('status') == 'waiting_deposit' ? 'selected' : '' }}>Menunggu DP</option>
-                    <option value="deposit_confirmed" {{ request('status') == 'deposit_confirmed' ? 'selected' : '' }}>DP Terkonfirmasi</option>
-                    <option value="deposit_rejected" {{ request('status') == 'deposit_rejected' ? 'selected' : '' }}>DP Ditolak</option>
-                    <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
-                </select>
+    <div class="mt-6 bg-white shadow sm:rounded-lg p-5">
+        <form method="GET" action="{{ route('admin.bookings.index') }}">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+                {{-- Search --}}
+                <div class="lg:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Cari</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="Kode booking, nama, WhatsApp..."
+                               class="block w-full rounded-lg border-gray-300 pl-10 pr-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                {{-- Status --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
+                    <select name="status" class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Semua Status</option>
+                        <option value="auto_approved"      {{ request('status') == 'auto_approved'      ? 'selected' : '' }}>Auto Approved</option>
+                        <option value="waiting_deposit"    {{ request('status') == 'waiting_deposit'    ? 'selected' : '' }}>Menunggu DP</option>
+                        <option value="deposit_confirmed"  {{ request('status') == 'deposit_confirmed'  ? 'selected' : '' }}>DP Terkonfirmasi</option>
+                        <option value="deposit_rejected"   {{ request('status') == 'deposit_rejected'   ? 'selected' : '' }}>DP Ditolak</option>
+                        <option value="completed"          {{ request('status') == 'completed'          ? 'selected' : '' }}>Selesai</option>
+                        <option value="cancelled"          {{ request('status') == 'cancelled'          ? 'selected' : '' }}>Dibatalkan</option>
+                        <option value="expired"            {{ request('status') == 'expired'            ? 'selected' : '' }}>Expired</option>
+                    </select>
+                </div>
+
+                {{-- Sort --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Urutkan</label>
+                    <select name="sort" class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                        <option value="oldest" {{ request('sort') == 'oldest'           ? 'selected' : '' }}>Terlama</option>
+                    </select>
+                </div>
+
+                {{-- Buttons --}}
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                            class="flex-1 inline-flex justify-center items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                        </svg>
+                        Filter
+                    </button>
+                    @if(request()->hasAny(['search','status','sort','date_from','date_to']))
+                    <a href="{{ route('admin.bookings.index') }}"
+                       class="inline-flex justify-center items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                    @endif
+                </div>
+
             </div>
 
-            <div>
-                <label for="date_from" class="block text-sm font-medium text-gray-700">Dari Tanggal</label>
-                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-            </div>
-
-            <div>
-                <label for="date_to" class="block text-sm font-medium text-gray-700">Sampai Tanggal</label>
-                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    Filter
-                </button>
+            {{-- Date range (row 2) --}}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4 border-t border-gray-100 pt-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Dari Tanggal</label>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}"
+                           class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Sampai Tanggal</label>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                           class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
             </div>
         </form>
+
+        {{-- Active filter badges --}}
+        @if(request()->hasAny(['search','status','sort','date_from','date_to']))
+        <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+            <span class="text-xs text-gray-400 self-center">Filter aktif:</span>
+            @if(request('search'))
+                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                    Cari: "{{ request('search') }}"
+                </span>
+            @endif
+            @if(request('status'))
+                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                    Status: {{ request('status') }}
+                </span>
+            @endif
+            @if(request('date_from') || request('date_to'))
+                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                    Tanggal: {{ request('date_from') ?: '...' }} – {{ request('date_to') ?: '...' }}
+                </span>
+            @endif
+            @if(request('sort') == 'oldest')
+                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                    Urut: Terlama
+                </span>
+            @endif
+        </div>
+        @endif
     </div>
 
     <!-- Table -->

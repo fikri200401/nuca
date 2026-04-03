@@ -308,7 +308,10 @@
             @endif
 
             <!-- Before-After Photos -->
-            @if($booking->beforeAfterPhotos && ($booking->beforeAfterPhotos->before_photo || $booking->beforeAfterPhotos->after_photo))
+            @php
+                $photosWithContent = $booking->beforeAfterPhotos->filter(fn($p) => $p->before_photo || $p->after_photo);
+            @endphp
+            @if($photosWithContent->count() > 0)
             <div class="bg-white shadow overflow-hidden sm:rounded-lg print:hidden">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -322,33 +325,36 @@
                         </button>
                     </form>
                 </div>
-                <div class="px-4 py-5 sm:p-6">
-                    <div class="grid {{ ($booking->beforeAfterPhotos->before_photo && $booking->beforeAfterPhotos->after_photo) ? 'grid-cols-2' : 'grid-cols-1' }} gap-4">
-                        @if($booking->beforeAfterPhotos->before_photo)
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 mb-2">Before</p>
-                            <img src="{{ asset('storage/' . $booking->beforeAfterPhotos->before_photo) }}" 
-                                 alt="Before" 
-                                 class="w-full rounded-lg border border-gray-200"
-                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
+                <div class="px-4 py-5 sm:p-6 space-y-6">
+                    @foreach($photosWithContent as $photo)
+                    <div class="border border-gray-100 rounded-lg p-4">
+                        <div class="grid {{ ($photo->before_photo && $photo->after_photo) ? 'grid-cols-2' : 'grid-cols-1' }} gap-4">
+                            @if($photo->before_photo)
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-2">Before</p>
+                                <img src="{{ asset('storage/' . $photo->before_photo) }}"
+                                     alt="Before"
+                                     class="w-full rounded-lg border border-gray-200"
+                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
+                            </div>
+                            @endif
+                            @if($photo->after_photo)
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-2">After</p>
+                                <img src="{{ asset('storage/' . $photo->after_photo) }}"
+                                     alt="After"
+                                     class="w-full rounded-lg border border-gray-200"
+                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
+                            </div>
+                            @endif
                         </div>
-                        @endif
-                        @if($booking->beforeAfterPhotos->after_photo)
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 mb-2">After</p>
-                            <img src="{{ asset('storage/' . $booking->beforeAfterPhotos->after_photo) }}" 
-                                 alt="After" 
-                                 class="w-full rounded-lg border border-gray-200"
-                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Not+Found';">
-                        </div>
-                        @endif
-                        @if($booking->beforeAfterPhotos->notes)
-                        <div class="{{ ($booking->beforeAfterPhotos->before_photo && $booking->beforeAfterPhotos->after_photo) ? 'col-span-2' : '' }}">
-                            <p class="text-sm font-medium text-gray-700 mb-1">Catatan:</p>
-                            <p class="text-sm text-gray-600">{{ $booking->beforeAfterPhotos->notes }}</p>
-                        </div>
+                        @if($photo->notes)
+                        <p class="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-100">
+                            <span class="font-medium text-gray-700">Catatan:</span> {{ $photo->notes }}
+                        </p>
                         @endif
                     </div>
+                    @endforeach
                 </div>
             </div>
             @endif

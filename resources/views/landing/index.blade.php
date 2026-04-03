@@ -131,7 +131,7 @@
                         <h3 class="font-serif font-bold text-lg mb-2">{{ $treatment->name }}</h3>
                         <p class="text-gray-500 text-xs mb-2 leading-relaxed">{{ Str::limit($treatment->description, 80) }}</p>
                         <p class="text-brand font-bold text-lg mb-4">{{ $treatment->formatted_price }}</p>
-                        <a href="{{ route('landing.treatment-detail', $treatment->id) }}" class="w-full inline-block py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</a>
+                        <a href="{{ route('login') }}" class="w-full inline-block py-2 bg-brand text-white text-sm rounded-lg hover:bg-brand-dark transition">Lihat Selengkapnya</a>
                     </div>
                 </div>
                 @empty
@@ -307,7 +307,7 @@
                             <p class="text-sm text-gray-700">Verifikasi reservasi di meja resepsionis</p>
                         </div>
                     </div>
-                    <button class="mt-8 px-6 py-3 bg-brand text-white rounded-full text-sm font-medium shadow-lg hover:bg-brand-dark transition">Mulai Reservasi Sekarang</button>
+                    <a href="{{ route('login') }}" class="mt-8 inline-block px-6 py-3 bg-brand text-white rounded-full text-sm font-medium shadow-lg hover:bg-brand-dark transition">Mulai Reservasi Sekarang</a>
                 </div>
 
                 <div class="w-full md:w-1/2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">

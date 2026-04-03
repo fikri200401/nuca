@@ -316,7 +316,7 @@
             </div>
 
             <!-- Payment Proof Preview -->
-            @if($deposit->payment_proof)
+            @if($deposit->proof_of_payment)
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -324,10 +324,10 @@
                     </h3>
                 </div>
                 <div class="px-4 py-5 sm:p-6">
-                    <img src="{{ Storage::url($deposit->payment_proof) }}" 
+                    <img src="{{ asset('storage/' . $deposit->proof_of_payment) }}" 
                          alt="Bukti Transfer" 
                          class="w-full rounded-lg border border-gray-200">
-                    <a href="{{ Storage::url($deposit->payment_proof) }}" 
+                    <a href="{{ asset('storage/' . $deposit->proof_of_payment) }}" 
                        target="_blank"
                        class="mt-3 block text-center text-sm text-indigo-600 hover:text-indigo-900">
                         Lihat Ukuran Penuh →

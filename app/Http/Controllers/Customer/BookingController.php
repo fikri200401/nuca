@@ -202,7 +202,7 @@ class BookingController extends Controller
         // Upload file
         $path = $request->file('proof_of_payment')->store('deposits', 'public');
 
-        // Update deposit with proof and change status to submitted
+        // Update deposit with proof and change status to submitted (waiting admin verification)
         $booking->deposit->update([
             'proof_of_payment' => $path,
             'status' => 'submitted',

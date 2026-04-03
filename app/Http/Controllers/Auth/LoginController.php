@@ -16,7 +16,20 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        return view('auth.login');
+        // Ambil 1 user per role untuk demo credentials (realtime dari DB)
+        $demoRoles = ['customer', 'frontdesk', 'doctor', 'admin', 'owner'];
+        $demoUsers = collect();
+
+        foreach ($demoRoles as $role) {
+            $user = \App\Models\User::where('role', $role)
+                ->select('name', 'whatsapp_number', 'role')
+                ->first();
+            if ($user) {
+                $demoUsers->push($user);
+            }
+        }
+
+        return view('auth.login', compact('demoUsers'));
     }
 
     /**

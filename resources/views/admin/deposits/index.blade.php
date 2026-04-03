@@ -13,45 +13,85 @@
 
     <!-- Filter Tabs -->
     <div class="mt-6">
-        <div class="sm:hidden">
-            <select class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                <option>Pending</option>
-                <option>Submitted</option>
-                <option>Approved</option>
-                <option>Rejected</option>
-                <option>Expired</option>
-            </select>
-        </div>
         <div class="hidden sm:block">
-            <nav class="flex space-x-4" aria-label="Tabs">
-                <a href="{{ route('admin.deposits.index', ['status' => 'pending']) }}" 
-                   class="{{ (!request('status') || request('status') == 'pending') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
-                    Pending
-                </a>
-                <a href="{{ route('admin.deposits.index', ['status' => 'submitted']) }}" 
-                   class="{{ request('status') == 'submitted' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
-                    Submitted
-                    @php
-                        $submittedCount = \App\Models\Deposit::where('status', 'submitted')->count();
-                    @endphp
-                    @if($submittedCount > 0)
-                        <span class="ml-2 bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $submittedCount }}</span>
+            <nav class="flex space-x-1 border-b border-gray-200" aria-label="Tabs">
+                @php
+                    $tabs = [
+                        'pending'   => ['label' => 'Pending',   'color' => 'yellow'],
+                        'submitted' => ['label' => 'Submitted', 'color' => 'blue'],
+                        'approved'  => ['label' => 'Approved',  'color' => 'green'],
+                        'rejected'  => ['label' => 'Rejected',  'color' => 'red'],
+                        'expired'   => ['label' => 'Expired',   'color' => 'gray'],
+                    ];
+                    $activeStatus = request('status', 'pending');
+                    $submittedCount = \App\Models\Deposit::where('status', 'submitted')->count();
+                @endphp
+                @foreach($tabs as $key => $tab)
+                @php $isActive = $activeStatus === $key; @endphp
+                <a href="{{ route('admin.deposits.index', array_merge(request()->except(['status','page']), ['status' => $key])) }}"
+                   class="relative px-4 py-3 text-sm font-medium border-b-2 transition-colors
+                          {{ $isActive
+                              ? 'border-indigo-600 text-indigo-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                    {{ $tab['label'] }}
+                    @if($key === 'submitted' && $submittedCount > 0)
+                        <span class="ml-1.5 inline-flex items-center justify-center rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white leading-none">
+                            {{ $submittedCount }}
+                        </span>
                     @endif
                 </a>
-                <a href="{{ route('admin.deposits.index', ['status' => 'approved']) }}" 
-                   class="{{ request('status') == 'approved' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
-                    Approved
-                </a>
-                <a href="{{ route('admin.deposits.index', ['status' => 'rejected']) }}" 
-                   class="{{ request('status') == 'rejected' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
-                    Rejected
-                </a>
-                <a href="{{ route('admin.deposits.index', ['status' => 'expired']) }}" 
-                   class="{{ request('status') == 'expired' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700' }} rounded-md px-3 py-2 text-sm font-medium">
-                    Expired
-                </a>
+                @endforeach
             </nav>
         </div>
+    </div>
+
+    <!-- Search + Sort bar -->
+    <div class="mt-4 bg-white shadow sm:rounded-lg p-4">
+        <form method="GET" action="{{ route('admin.deposits.index') }}">
+            {{-- Preserve active status tab --}}
+            <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                {{-- Search --}}
+                <div class="flex-1 relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Cari kode booking, nama, WhatsApp..."
+                           class="block w-full rounded-lg border-gray-300 pl-10 pr-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                {{-- Sort --}}
+                <div class="sm:w-44">
+                    <select name="sort" class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Deadline Terbaru</option>
+                        <option value="oldest" {{ request('sort') == 'oldest'           ? 'selected' : '' }}>Deadline Terlama</option>
+                    </select>
+                </div>
+
+                {{-- Apply --}}
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                    Filter
+                </button>
+
+                {{-- Reset search/sort only --}}
+                @if(request('search') || (request('sort') && request('sort') !== 'newest'))
+                <a href="{{ route('admin.deposits.index', ['status' => request('status', 'pending')]) }}"
+                   class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm hover:bg-gray-50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+                @endif
+            </div>
+        </form>
     </div>
 
     <div class="mt-8 flex flex-col">

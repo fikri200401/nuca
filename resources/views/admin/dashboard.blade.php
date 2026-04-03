@@ -13,17 +13,34 @@
             <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
             <p class="text-sm text-gray-500 mt-0.5">Pantau performa klinik dan aktivitas operasional hari ini.</p>
         </div>
-        <div class="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm text-sm">
-            @foreach(['hari' => 'Hari', 'minggu' => 'Minggu', 'bulan' => 'Bulan', 'custom' => 'Custom'] as $k => $label)
-            <button onclick="setPeriod('{{ $k }}')" id="period_{{ $k }}"
-                    class="period-btn px-4 py-1.5 rounded-lg font-medium transition
-                        {{ $k === 'hari' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:text-gray-700' }}">
-                {{ $label }}
-            </button>
-            @endforeach
-            <button class="ml-1 p-1.5 text-gray-400 hover:text-gray-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
-            </button>
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Period buttons --}}
+            <div class="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm text-sm">
+                @foreach(['hari' => 'Hari', 'minggu' => 'Minggu', 'bulan' => 'Bulan'] as $k => $label)
+                <button onclick="setPeriod('{{ $k }}')" id="period_{{ $k }}"
+                        class="period-btn px-4 py-1.5 rounded-lg font-medium transition
+                            {{ $k === 'minggu' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:text-gray-700' }}">
+                    {{ $label }}
+                </button>
+                @endforeach
+                {{-- Custom: show/hide date range picker --}}
+                <button onclick="toggleCustomPicker()" id="period_custom"
+                        class="period-btn px-4 py-1.5 rounded-lg font-medium transition text-gray-500 hover:text-gray-700 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Custom
+                </button>
+            </div>
+
+            {{-- Custom date range picker (hidden by default) --}}
+            <div id="customPickerPanel" class="hidden flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm text-sm">
+                <input type="date" id="customFrom" class="border-0 text-sm text-gray-700 focus:ring-0 focus:outline-none" />
+                <span class="text-gray-400">—</span>
+                <input type="date" id="customTo"   class="border-0 text-sm text-gray-700 focus:ring-0 focus:outline-none" />
+                <button onclick="applyCustomRange()"
+                        class="ml-1 px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 transition">
+                    Terapkan
+                </button>
+            </div>
         </div>
     </div>
 
@@ -298,22 +315,29 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const chartLabels = @json($chartLabels);
-const visitData   = @json($chartData);
+// Initial data from server (minggu / last 7 days)
+const initialLabels      = @json($chartLabels);
+const initialVisitData   = @json($chartVisitData);
+const initialRevenueData = @json($chartRevenueData);
 
 let trendChart;
+let currentPeriod = 'minggu';
+let currentMode   = 'kunjungan';
 
-function buildChart(mode) {
+// -------------------------------------------------------
+// Build / re-build the chart with given data
+// -------------------------------------------------------
+function buildChart(labels, data, mode) {
     const ctx   = document.getElementById('trendChart').getContext('2d');
-    const data  = visitData; // revenue would come from server; using visits as placeholder
     const color = mode === 'kunjungan' ? '#6366f1' : '#10b981';
     const fill  = mode === 'kunjungan' ? 'rgba(99,102,241,0.12)' : 'rgba(16,185,129,0.12)';
 
     if (trendChart) trendChart.destroy();
+
     trendChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: chartLabels,
+            labels: labels,
             datasets: [{
                 data: data,
                 borderColor: color,
@@ -330,36 +354,147 @@ function buildChart(mode) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(ctx) {
+                            if (currentMode === 'pendapatan') {
+                                return ' Rp ' + Number(ctx.raw).toLocaleString('id-ID');
+                            }
+                            return ' ' + ctx.raw + ' kunjungan';
+                        }
+                    }
+                }
+            },
             scales: {
                 x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 11 } } },
-                y: { grid: { color: '#f3f4f6' }, ticks: { color: '#9ca3af', font: { size: 11 }, beginAtZero: true } }
+                y: {
+                    grid: { color: '#f3f4f6' },
+                    ticks: {
+                        color: '#9ca3af',
+                        font: { size: 11 },
+                        beginAtZero: true,
+                        callback: function(val) {
+                            if (currentMode === 'pendapatan') {
+                                return val >= 1000000
+                                    ? 'Rp ' + (val / 1000000).toFixed(1) + 'jt'
+                                    : 'Rp ' + val.toLocaleString('id-ID');
+                            }
+                            return val;
+                        }
+                    }
+                }
             }
         }
     });
 }
 
-function setChartMode(mode) {
-    document.querySelectorAll('.chart-btn').forEach(b => {
-        b.classList.remove('bg-indigo-600','text-white');
-        b.classList.add('text-gray-500','hover:bg-gray-100');
-    });
-    const btn = document.getElementById('chartBtn_' + mode);
-    btn.classList.add('bg-indigo-600','text-white');
-    btn.classList.remove('text-gray-500','hover:bg-gray-100');
-    buildChart(mode);
+// -------------------------------------------------------
+// Fetch chart data from server then rebuild chart
+// -------------------------------------------------------
+async function fetchAndRebuild() {
+    const url = `{{ route('admin.dashboard.chart-data') }}?period=${currentPeriod}&type=${currentMode}`;
+
+    try {
+        const res  = await fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+        const data = currentMode === 'kunjungan' ? json.visitData : json.revenueData;
+        buildChart(json.labels, data, currentMode);
+    } catch (e) {
+        console.error('Chart data fetch error:', e);
+    }
 }
 
+// -------------------------------------------------------
+// Period button click  (Hari / Minggu / Bulan)
+// -------------------------------------------------------
 function setPeriod(p) {
+    currentPeriod = p;
+
+    // Hide custom picker when switching to non-custom period
+    document.getElementById('customPickerPanel').classList.add('hidden');
+
     document.querySelectorAll('.period-btn').forEach(b => {
-        b.classList.remove('bg-indigo-600','text-white');
+        b.classList.remove('bg-indigo-600', 'text-white');
         b.classList.add('text-gray-500');
     });
     const btn = document.getElementById('period_' + p);
-    btn.classList.add('bg-indigo-600','text-white');
+    btn.classList.add('bg-indigo-600', 'text-white');
     btn.classList.remove('text-gray-500');
+
+    fetchAndRebuild();
 }
 
+// -------------------------------------------------------
+// Custom date range
+// -------------------------------------------------------
+function toggleCustomPicker() {
+    const panel = document.getElementById('customPickerPanel');
+    const isHidden = panel.classList.contains('hidden');
+
+    if (isHidden) {
+        // Set default: from = 30 days ago, to = today
+        const today = new Date();
+        const from  = new Date(today); from.setDate(from.getDate() - 29);
+        document.getElementById('customTo').value   = today.toISOString().slice(0, 10);
+        document.getElementById('customFrom').value = from.toISOString().slice(0, 10);
+        panel.classList.remove('hidden');
+
+        // Highlight Custom button
+        document.querySelectorAll('.period-btn').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white');
+            b.classList.add('text-gray-500');
+        });
+        document.getElementById('period_custom').classList.add('bg-indigo-600', 'text-white');
+        document.getElementById('period_custom').classList.remove('text-gray-500');
+    } else {
+        panel.classList.add('hidden');
+    }
+}
+
+async function applyCustomRange() {
+    const from = document.getElementById('customFrom').value;
+    const to   = document.getElementById('customTo').value;
+    if (!from || !to) return;
+
+    currentPeriod = 'custom';
+
+    const url = `{{ route('admin.dashboard.chart-data') }}?period=custom&type=${currentMode}&from=${from}&to=${to}`;
+    try {
+        const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const json = await res.json();
+        const data = currentMode === 'kunjungan' ? json.visitData : json.revenueData;
+        buildChart(json.labels, data, currentMode);
+    } catch (e) {
+        console.error('Chart data fetch error:', e);
+    }
+}
+
+// -------------------------------------------------------
+// Chart mode button click  (Kunjungan / Pendapatan)
+// -------------------------------------------------------
+function setChartMode(mode) {
+    currentMode = mode;
+
+    document.querySelectorAll('.chart-btn').forEach(b => {
+        b.classList.remove('bg-indigo-600', 'text-white');
+        b.classList.add('text-gray-500', 'hover:bg-gray-100');
+    });
+    const btn = document.getElementById('chartBtn_' + mode);
+    btn.classList.add('bg-indigo-600', 'text-white');
+    btn.classList.remove('text-gray-500', 'hover:bg-gray-100');
+
+    fetchAndRebuild();
+}
+
+// -------------------------------------------------------
+// Booking search filter
+// -------------------------------------------------------
 function filterBookings() {
     const q = document.getElementById('bookingSearch').value.toLowerCase();
     document.querySelectorAll('.booking-row').forEach(row => {
@@ -368,6 +503,9 @@ function filterBookings() {
     });
 }
 
-buildChart('kunjungan');
+// -------------------------------------------------------
+// Initial render with server-side data (no AJAX needed)
+// -------------------------------------------------------
+buildChart(initialLabels, initialVisitData, 'kunjungan');
 </script>
 @endpush

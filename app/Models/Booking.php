@@ -94,7 +94,7 @@ class Booking extends Model
 
     public function beforeAfterPhotos()
     {
-        return $this->hasOne(BeforeAfterPhoto::class);
+        return $this->hasMany(BeforeAfterPhoto::class);
     }
 
     public function voucherUsage()

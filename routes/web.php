@@ -35,6 +35,21 @@ Route::get('/treatments/{id}', [LandingController::class, 'treatmentDetail'])->n
 Route::get('/vouchers', [LandingController::class, 'vouchers'])->name('vouchers');
 
 /*
+ * Storage fallback route — used on shared hosting where symlinks are not supported.
+ * Only activates when public/storage symlink/directory does NOT exist.
+ */
+if (! is_link(public_path('storage')) && ! is_dir(public_path('storage'))) {
+    Route::get('/storage/{path}', function (string $path) {
+        $fullPath = storage_path('app/public/' . $path);
+        if (! file_exists($fullPath)) {
+            abort(404);
+        }
+        $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+        return response()->file($fullPath, ['Content-Type' => $mime]);
+    })->where('path', '.*')->name('storage.serve');
+}
+
+/*
 |--------------------------------------------------------------------------
 | Authentication Routes
 |--------------------------------------------------------------------------
@@ -92,6 +107,7 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'role:customer
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner,doctor,frontdesk'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/chart-data', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart-data');
 
     // Only Admin/Owner
     Route::middleware('role:admin,owner')->group(function () {
