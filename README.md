@@ -35,8 +35,8 @@ On Windows, Laragon is recommended for a fast local setup.
 1. Clone repository
 
 ```bat
-git clone https://github.com/fikri200401/Reservasi.git
-cd Reservasi
+git clone https://github.com/fikri200401/nuca.git
+cd nuca
 ```
 
 2. Copy environment file
@@ -85,6 +85,28 @@ php artisan serve
 ```
 
 Alternatively use Laragon to serve the project and manage the database.
+
+## Pull Update Terbaru
+
+Untuk mendapatkan kode terbaru dari repository:
+
+```bat
+cd nuca
+git pull origin main
+```
+
+Setelah pull, jalankan langkah-langkah berikut agar perubahan berjalan sempurna:
+
+```bat
+composer install
+npm install
+php artisan migrate
+php artisan view:clear
+php artisan cache:clear
+npm run dev
+```
+
+> **Catatan:** Jika ada konflik saat pull, selesaikan konflik terlebih dahulu, lalu `git add .` dan `git commit`.
 
 ## Running tests
 
