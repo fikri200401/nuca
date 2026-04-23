@@ -11,8 +11,16 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                brand: {
+                    light: '#ff8fa3',
+                    DEFAULT: '#ff4d88',
+                    dark: '#e03e73',
+                },
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['system-ui', ...defaultTheme.fontFamily.sans],
+                serif: ['Georgia', ...defaultTheme.fontFamily.serif],
             },
         },
     },

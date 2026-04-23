@@ -32,6 +32,10 @@ class LandingController extends Controller
             'about' => Setting::get('about', ''),
             'google_maps_url' => Setting::get('google_maps_url', ''),
         ];
+        $heroImagePath = Setting::get('hero_image');
+        $clinicInfo['hero_image'] = $heroImagePath
+            ? \Illuminate\Support\Facades\Storage::url($heroImagePath)
+            : null;
 
         return view('landing.index', compact('popularTreatments', 'activeVouchers', 'clinicInfo'));
     }

@@ -134,7 +134,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+<script src="/js/vue.global.js"></script>
 <script>
 const { createApp } = Vue;
 createApp({

@@ -74,7 +74,7 @@
         </div>
 
         <div class="mt-5 md:mt-0 md:col-span-2">
-            <form action="{{ route('admin.settings.update') }}" method="POST">
+            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="shadow sm:rounded-md sm:overflow-hidden">
                     <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
@@ -158,6 +158,37 @@
                                 @error('address')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
+                            </div>
+
+                            <!-- Hero Image -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Gambar Banner / Hero Landing Page
+                                </label>
+                                @php $heroImage = $settings['hero_image'] ?? null; @endphp
+                                @if($heroImage)
+                                <div class="mb-3">
+                                    <img src="{{ Storage::url($heroImage) }}" alt="Hero Image" class="w-full max-h-48 object-cover rounded-md border border-gray-200">
+                                    <div class="mt-2 flex items-center gap-3">
+                                        <span class="text-xs text-gray-500">Gambar saat ini</span>
+                                        <label class="flex items-center gap-1 text-xs text-red-600 cursor-pointer">
+                                            <input type="checkbox" name="remove_hero_image" value="1" class="h-3 w-3 text-red-600 border-gray-300 rounded">
+                                            Hapus gambar ini
+                                        </label>
+                                    </div>
+                                </div>
+                                @endif
+                                <input type="file"
+                                       id="hero_image"
+                                       name="hero_image"
+                                       accept="image/jpeg,image/png,image/webp"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 @error('hero_image') border-red-300 @enderror"
+                                       onchange="previewHeroImage(this)">
+                                <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG, WebP. Maks 3 MB. Resolusi disarankan minimal 1200×500px.</p>
+                                @error('hero_image')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <img id="heroPreview" src="" alt="" class="mt-2 hidden w-full max-h-48 object-cover rounded-md border border-gray-200">
                             </div>
 
                             <!-- Google Maps URL -->
@@ -549,5 +580,21 @@ if (testConnectionBtn) {
     });
 }
 });
+</script>
+
+<script>
+function previewHeroImage(input) {
+    const preview = document.getElementById('heroPreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.classList.add('hidden');
+    }
+}
 </script>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -23,6 +24,7 @@ class SettingController extends Controller
             'whatsapp_enabled' => 'boolean',
             'address' => 'nullable|string',
             'google_maps_url' => 'nullable|url',
+            'hero_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ]);
 
         // Update or create settings
@@ -50,6 +52,34 @@ class SettingController extends Controller
             ['key' => 'google_maps_url'],
             ['value' => $request->input('google_maps_url')]
         );
+
+        // Handle hero image upload
+        if ($request->hasFile('hero_image')) {
+            // Delete old hero image if exists
+            $oldPath = Setting::get('hero_image');
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('hero_image')->store('hero', 'public');
+
+            Setting::updateOrCreate(
+                ['key' => 'hero_image'],
+                ['value' => $path]
+            );
+        }
+
+        // Handle hero image removal
+        if ($request->input('remove_hero_image') === '1') {
+            $oldPath = Setting::get('hero_image');
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+            Setting::updateOrCreate(
+                ['key' => 'hero_image'],
+                ['value' => null]
+            );
+        }
 
         // Update .env file (optional)
         $this->updateEnvFile([

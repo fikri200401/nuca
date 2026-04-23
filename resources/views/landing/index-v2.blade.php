@@ -5,31 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'Nuca Beauty Skin') }}</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="/css/fontawesome.min.css">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            light: '#ff8fa3',
-                            DEFAULT: '#ff4d88',
-                            dark: '#e03e73',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         html { scroll-behavior: smooth; }
     </style>
@@ -65,7 +43,9 @@
     </nav>
 
     <header id="home" class="relative h-[500px] flex items-center justify-center bg-gray-100 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2070&auto=format&fit=crop" alt="Beauty Clinic" class="absolute w-full h-full object-cover opacity-90">
+        @if(!empty($clinicInfo['hero_image']))
+        <img src="{{ $clinicInfo['hero_image'] }}" alt="Beauty Clinic" class="absolute w-full h-full object-cover opacity-90">
+        @endif
         
         <div class="absolute inset-0 bg-white/30"></div>
 
