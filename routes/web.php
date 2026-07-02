@@ -35,7 +35,7 @@ Route::get('/treatments/{id}', [LandingController::class, 'treatmentDetail'])->n
 Route::get('/vouchers', [LandingController::class, 'vouchers'])->name('vouchers');
 
 /*
- * Storage fallback route — used on shared hosting where symlinks are not supported.
+ * Storage fallback route - used on shared hosting where symlinks are not supported.
  * Only activates when public/storage symlink/directory does NOT exist.
  */
 if (! is_link(public_path('storage')) && ! is_dir(public_path('storage'))) {
@@ -144,6 +144,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner,do
         Route::post('bookings/{booking}/reschedule', [AdminBookingController::class, 'reschedule'])->name('bookings.reschedule')->middleware('permission:bookings,edit');
         Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel')->middleware('permission:bookings,edit');
         Route::post('bookings/{booking}/complete', [AdminBookingController::class, 'complete'])->name('bookings.complete')->middleware('permission:bookings,edit');
+        Route::post('bookings/{booking}/approve', [AdminBookingController::class, 'approve'])->name('bookings.approve')->middleware('permission:bookings,edit');
+        Route::post('bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('bookings.reject')->middleware('permission:bookings,edit');
         Route::post('bookings/{booking}/no-show', [AdminBookingController::class, 'markAsNoShow'])->name('bookings.no-show')->middleware('permission:bookings,edit');
         Route::post('bookings/{booking}/update-notes', [AdminBookingController::class, 'updateNotes'])->name('bookings.update-notes')->middleware('permission:bookings,edit');
 
@@ -191,6 +193,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,owner,do
         Route::post('settings', [SettingController::class, 'update'])->name('settings.update')->middleware('permission:settings,edit');
         Route::post('settings/test-connection', [SettingController::class, 'testConnection'])->name('settings.test-connection')->middleware('permission:settings,view');
         Route::post('settings/toggle-shop', [SettingController::class, 'toggleShopStatus'])->name('settings.toggle-shop')->middleware('permission:settings,edit');
+        // Kebijakan Booking
+        Route::post('settings/booking-policy', [SettingController::class, 'saveBookingPolicy'])->name('settings.booking-policy')->middleware('permission:settings,edit');
+        // Hari Libur & Tutup
+        Route::post('settings/closed-weekdays', [SettingController::class, 'saveClosedWeekdays'])->name('settings.closed-weekdays')->middleware('permission:settings,edit');
+        Route::post('settings/closed-dates', [SettingController::class, 'storeClosedDate'])->name('settings.closed-dates.store')->middleware('permission:settings,edit');
+        Route::delete('settings/closed-dates/{closedDate}', [SettingController::class, 'destroyClosedDate'])->name('settings.closed-dates.destroy')->middleware('permission:settings,edit');
+        // Auto-approval OFF per tanggal janji temu
+        Route::post('settings/manual-approval-dates', [SettingController::class, 'storeManualApprovalDate'])->name('settings.manual-approval-dates.store')->middleware('permission:settings,edit');
+        Route::delete('settings/manual-approval-dates/{manualApprovalDate}', [SettingController::class, 'destroyManualApprovalDate'])->name('settings.manual-approval-dates.destroy')->middleware('permission:settings,edit');
 
         // Articles
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);

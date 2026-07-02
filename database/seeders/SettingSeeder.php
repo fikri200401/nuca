@@ -79,6 +79,25 @@ class SettingSeeder extends Seeder
                 'type' => 'number',
                 'description' => 'Batas waktu pembayaran DP (jam)',
             ],
+            // === Setting Booking ===
+            [
+                'key' => 'booking_auto_approval',
+                'value' => '1',
+                'type' => 'boolean',
+                'description' => 'Auto-approve booking untuk jadwal hari ini (matikan untuk menahan booking jadwal hari ini)',
+            ],
+            [
+                'key' => 'deposit_enabled',
+                'value' => '1',
+                'type' => 'boolean',
+                'description' => 'Aktifkan kebijakan DP untuk booking jauh hari',
+            ],
+            [
+                'key' => 'deposit_threshold_days',
+                'value' => '7',
+                'type' => 'number',
+                'description' => 'Booking >= sekian hari perlu DP',
+            ],
             [
                 'key' => 'member_discount_default',
                 'value' => '10',

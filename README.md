@@ -1,4 +1,4 @@
-# Reservasi — Nuca Beauty Skin Booking System
+# Reservasi - Nuca Beauty Skin Booking System
 
 Laravel-based booking/reservation system for Nuca Beauty Skin.
 

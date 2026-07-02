@@ -17,7 +17,7 @@ define('SECRET_KEY', 'nuca-storage-sync-2026');   // ← GANTI INI
 // ── Auth ─────────────────────────────────────────────────────
 if (($_GET['key'] ?? '') !== SECRET_KEY) {
     http_response_code(403);
-    die('<h2 style="color:red;font-family:sans-serif">403 Forbidden — wrong key</h2>');
+    die('<h2 style="color:red;font-family:sans-serif">403 Forbidden - wrong key</h2>');
 }
 
 // ── Paths ────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ $errors   = array_filter($results, fn($r) => $r[0] === 'error');
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Storage Sync — Nuca</title>
+<title>Storage Sync - Nuca</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; background: #f9fafb; color: #111; margin: 0; padding: 32px; }
   h1   { font-size: 1.5rem; margin-bottom: 4px; }
@@ -132,7 +132,7 @@ $errors   = array_filter($results, fn($r) => $r[0] === 'error');
 
 <?php if ($dryRun): ?>
 <div class="card" style="border-color:#fcd34d">
-    <strong class="orange">⚠️ Dry Run Mode — tidak ada file yang benar-benar disalin.</strong>
+    <strong class="orange">⚠️ Dry Run Mode - tidak ada file yang benar-benar disalin.</strong>
     <a class="btn btn-primary" style="margin-left:12px" href="?key=<?= htmlspecialchars(SECRET_KEY) ?>">Jalankan sungguhan</a>
 </div>
 <?php endif; ?>

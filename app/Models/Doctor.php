@@ -93,7 +93,7 @@ class Doctor extends Model
         // Check for conflicting bookings - use simpler logic for SQLite
         $bookings = $this->bookings()
             ->whereDate('booking_date', $dateOnly)
-            ->whereIn('status', ['auto_approved', 'waiting_deposit', 'deposit_confirmed'])
+            ->whereIn('status', ['pending_approval', 'auto_approved', 'waiting_deposit', 'deposit_confirmed'])
             ->get();
 
         foreach ($bookings as $booking) {

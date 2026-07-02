@@ -59,7 +59,11 @@
                 </h2>
                 <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
                     <div class="mt-2 flex items-center text-sm text-gray-500">
-                        @if($booking->status === 'pending')
+                        @if($booking->status === 'pending_approval')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                Menunggu Konfirmasi
+                            </span>
+                        @elseif($booking->status === 'pending')
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                 Pending
                             </span>
@@ -93,6 +97,24 @@
             </div>
             <div class="mt-4 flex flex-wrap gap-2 md:mt-0 md:ml-4 print:hidden">
                 @canDo('bookings', 'edit')
+                @if($booking->status === 'pending_approval')
+                    <form action="{{ route('admin.bookings.approve', $booking) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                                onclick="return confirm('Setujui dan konfirmasi booking ini?')"
+                                class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                            ✓ Setujui
+                        </button>
+                    </form>
+                    <form action="{{ route('admin.bookings.reject', $booking) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                                onclick="return confirm('Tolak booking ini? Customer akan diberi tahu.')"
+                                class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                            ✗ Tolak
+                        </button>
+                    </form>
+                @endif
                 @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
                     <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf

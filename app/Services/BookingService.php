@@ -142,6 +142,15 @@ class BookingService
             $treatment = Treatment::findOrFail($data['treatment_id']);
             $doctor = Doctor::findOrFail($data['doctor_id']);
 
+            // Tolak booking pelanggan pada hari/tanggal klinik tutup.
+            // Entri manual admin boleh menembus (is_manual_entry).
+            if (! ($data['is_manual_entry'] ?? false)) {
+                $closedReason = $this->getClosedReason($data['booking_date']);
+                if ($closedReason) {
+                    throw new \Exception($closedReason);
+                }
+            }
+
             // Calculate end time based on treatment duration
             $startTime = Carbon::parse($data['booking_time']);
             $endTime = $startTime->copy()->addMinutes($treatment->duration_minutes);
@@ -188,19 +197,45 @@ class BookingService
                 'is_manual_entry' => $data['is_manual_entry'] ?? false,
             ]);
 
-            // Check if deposit is required
-            $bookingDate = Carbon::parse($data['booking_date']);
-            $daysDifference = now()->diffInDays($bookingDate, false);
+            // === Penentuan status booking berdasarkan Setting Booking ===
+            $depositEnabled       = \App\Models\Setting::get('deposit_enabled', true);
+            $thresholdDays        = (int) \App\Models\Setting::get('deposit_threshold_days', 7);
+            $depositAmount        = (float) \App\Models\Setting::get('min_deposit', 50000);
+            $depositDeadlineHours = (int) \App\Models\Setting::get('deposit_deadline_hours', 24);
 
-            if ($daysDifference >= 7) {
-                // Booking 7 hari atau lebih, butuh DP
+            $bookingDate = Carbon::parse($data['booking_date']);
+
+            // Apakah booking ditahan (pending_approval)?
+            // - Entri manual admin: tidak pernah ditahan (admin = pihak yang meng-ACC).
+            // - Jadwal HARI INI: dikendalikan checkbox "Auto Approval Booking" (booking_auto_approval).
+            // - Jadwal ke depan: dikendalikan daftar "Auto-Approval OFF per Tanggal".
+            if ($data['is_manual_entry'] ?? false) {
+                $held = false;
+            } elseif ($bookingDate->isToday()) {
+                $held = ! \App\Models\Setting::get('booking_auto_approval', true);
+            } else {
+                $held = $this->requiresManualApproval($data['booking_date']);
+            }
+
+            $daysDifference = now()->diffInDays($bookingDate, false);
+            $needsDeposit = $depositEnabled && $daysDifference >= $thresholdDays;
+
+            if ($held) {
+                // Ditahan (Menunggu Konfirmasi): jadwal hari ini saat auto-approve OFF,
+                // atau tanggal ke depan yang ada di daftar Auto-Approval OFF per Tanggal.
+                // Slot tetap terkunci (lihat Doctor::isAvailable) agar tidak bentrok.
+                $booking->update(['status' => 'pending_approval']);
+
+                $this->whatsappService->sendBookingPendingApproval($booking);
+            } elseif ($needsDeposit) {
+                // Booking >= ambang hari, butuh DP
                 $booking->update(['status' => 'waiting_deposit']);
 
                 $deposit = Deposit::create([
                     'booking_id' => $booking->id,
-                    'amount' => 50000, // Minimal DP
+                    'amount' => $depositAmount, // Minimal DP (dari Setting Booking)
                     'status' => 'pending',
-                    'deadline_at' => now()->addHours(24),
+                    'deadline_at' => now()->addHours($depositDeadlineHours),
                 ]);
 
                 // Send notification for deposit
@@ -317,8 +352,62 @@ class BookingService
     public function completeBooking($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);
-        
+
         $booking->update(['status' => 'completed']);
+
+        return [
+            'success' => true,
+            'booking' => $booking,
+        ];
+    }
+
+    /**
+     * Setujui booking yang sedang ditahan (pending_approval).
+     * Persetujuan manual langsung mengonfirmasi booking (auto_approved).
+     */
+    public function approveBooking($bookingId)
+    {
+        $booking = Booking::findOrFail($bookingId);
+
+        if ($booking->status !== 'pending_approval') {
+            return [
+                'success' => false,
+                'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+            ];
+        }
+
+        $booking->update(['status' => 'auto_approved']);
+
+        // Kirim konfirmasi ke customer
+        $this->whatsappService->sendBookingConfirmation($booking->fresh());
+
+        return [
+            'success' => true,
+            'booking' => $booking,
+        ];
+    }
+
+    /**
+     * Tolak booking yang sedang ditahan (pending_approval).
+     */
+    public function rejectBooking($bookingId, $reason = null)
+    {
+        $booking = Booking::findOrFail($bookingId);
+
+        if ($booking->status !== 'pending_approval') {
+            return [
+                'success' => false,
+                'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+            ];
+        }
+
+        $booking->update([
+            'status' => 'cancelled',
+            'admin_notes' => $reason ?: 'Booking ditolak oleh admin.',
+        ]);
+
+        // Beri tahu customer bahwa booking ditolak
+        $this->whatsappService->sendBookingRejected($booking->fresh(), $reason);
 
         return [
             'success' => true,
@@ -350,5 +439,59 @@ class BookingService
             ->values();
 
         return $doctors;
+    }
+
+    /**
+     * Kembalikan alasan (string) jika klinik tutup pada tanggal tsb, atau null jika buka.
+     * Sumber: hari tutup rutin (setting closed_weekdays) + tanggal libur khusus (tabel).
+     */
+    public function getClosedReason($date): ?string
+    {
+        $carbon = Carbon::parse($date);
+        $weekdayEn = strtolower($carbon->format('l'));
+
+        // 1) Hari tutup rutin (mis. tiap Minggu)
+        $closedWeekdays = \App\Models\Setting::get('closed_weekdays', []);
+        if (! is_array($closedWeekdays)) {
+            $closedWeekdays = [];
+        }
+        if (in_array($weekdayEn, $closedWeekdays, true)) {
+            return 'Klinik libur setiap hari ' . self::weekdayLabelId($weekdayEn) . '.';
+        }
+
+        // 2) Tanggal libur khusus (one-off)
+        $closed = \App\Models\ClinicClosedDate::whereDate('date', $carbon->toDateString())->first();
+        if ($closed) {
+            return $closed->note
+                ? ('Klinik libur pada tanggal ini: ' . $closed->note . '.')
+                : 'Klinik libur pada tanggal ini.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Apakah tanggal janji temu ini di-set wajib approval manual
+     * (auto-approval dimatikan khusus tanggal ini)?
+     */
+    public function requiresManualApproval($date): bool
+    {
+        return \App\Models\ManualApprovalDate::whereDate('date', Carbon::parse($date)->toDateString())->exists();
+    }
+
+    /**
+     * Nama hari (Inggris -> Indonesia) untuk pesan & tampilan.
+     */
+    public static function weekdayLabelId(string $en): string
+    {
+        return [
+            'monday' => 'Senin',
+            'tuesday' => 'Selasa',
+            'wednesday' => 'Rabu',
+            'thursday' => 'Kamis',
+            'friday' => 'Jumat',
+            'saturday' => 'Sabtu',
+            'sunday' => 'Minggu',
+        ][strtolower($en)] ?? ucfirst($en);
     }
 }

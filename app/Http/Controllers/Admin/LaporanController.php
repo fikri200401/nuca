@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class LaporanController extends Controller
 {
     /**
-     * Main report page — supports ?tab=pengunjung|pendapatan|treatment&from=&to=
+     * Main report page - supports ?tab=pengunjung|pendapatan|treatment&from=&to=
      */
     public function index(Request $request)
     {
@@ -114,7 +114,7 @@ class LaporanController extends Controller
             $treatmentUniqueCount = $treatmentRecap->count();
             $treatmentTopName = $treatmentRecap->first()?->treatment?->name ?? '-';
 
-            // Chart data for doughnut/bar chart — top treatments
+            // Chart data for doughnut/bar chart - top treatments
             $colorPalette = [
                 'rgba(99,102,241,0.8)',   // indigo
                 'rgba(16,185,129,0.8)',   // emerald

@@ -34,7 +34,7 @@
             {{-- Custom date range picker (hidden by default) --}}
             <div id="customPickerPanel" class="hidden flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm text-sm">
                 <input type="date" id="customFrom" class="border-0 text-sm text-gray-700 focus:ring-0 focus:outline-none" />
-                <span class="text-gray-400">—</span>
+                <span class="text-gray-400">-</span>
                 <input type="date" id="customTo"   class="border-0 text-sm text-gray-700 focus:ring-0 focus:outline-none" />
                 <button onclick="applyCustomRange()"
                         class="ml-1 px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 transition">

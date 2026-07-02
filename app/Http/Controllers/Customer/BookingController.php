@@ -45,7 +45,19 @@ class BookingController extends Controller
         try {
             // Check if shop is open
             $isShopOpen = \App\Models\Setting::get('is_shop_open', true);
-            
+
+            // Cek hari/tanggal libur klinik
+            $closedReason = $this->bookingService->getClosedReason($request->date);
+            if ($closedReason) {
+                return response()->json([
+                    'success' => true,
+                    'slots' => [],
+                    'is_shop_open' => $isShopOpen,
+                    'closed' => true,
+                    'closed_reason' => $closedReason,
+                ]);
+            }
+
             $slots = $this->bookingService->getAvailableSlots(
                 $request->treatment_id,
                 $request->date,
@@ -56,6 +68,7 @@ class BookingController extends Controller
                 'success' => true,
                 'slots' => $slots,
                 'is_shop_open' => $isShopOpen,
+                'closed' => false,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -119,6 +132,15 @@ class BookingController extends Controller
                 'notes' => 'nullable|string|max:500',
             ]);
 
+            // Tolak jika klinik libur pada tanggal tsb
+            $closedReason = $this->bookingService->getClosedReason($request->booking_date);
+            if ($closedReason) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $closedReason,
+                ], 422);
+            }
+
             $result = $this->bookingService->createBooking(Auth::id(), [
                 'treatment_id' => $request->treatment_id,
                 'doctor_id' => $request->doctor_id,
@@ -129,9 +151,15 @@ class BookingController extends Controller
             ]);
 
             if ($result['success']) {
+                $message = match ($result['booking']->status) {
+                    'pending_approval' => 'Booking Anda diterima dan sedang menunggu konfirmasi admin.',
+                    'waiting_deposit' => 'Booking dibuat! Silakan lakukan pembayaran DP sesuai instruksi yang dikirim.',
+                    default => 'Booking berhasil dibuat!',
+                };
+
                 return response()->json([
                     'success' => true,
-                    'message' => 'Booking berhasil dibuat!',
+                    'message' => $message,
                     'booking_id' => $result['booking']->id,
                 ]);
             }

@@ -157,6 +157,38 @@ class BookingController extends Controller
     }
 
     /**
+     * Setujui booking yang menunggu persetujuan (auto-approval dimatikan)
+     */
+    public function approve(Booking $booking)
+    {
+        $result = $this->bookingService->approveBooking($booking->id);
+
+        if ($result['success']) {
+            return back()->with('success', 'Booking berhasil disetujui dan dikonfirmasi.');
+        }
+
+        return back()->withErrors(['error' => $result['message']]);
+    }
+
+    /**
+     * Tolak booking yang menunggu persetujuan
+     */
+    public function reject(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $result = $this->bookingService->rejectBooking($booking->id, $request->reason);
+
+        if ($result['success']) {
+            return back()->with('success', 'Booking telah ditolak.');
+        }
+
+        return back()->withErrors(['error' => $result['message']]);
+    }
+
+    /**
      * Mark booking as no-show and forfeit deposit (for testing)
      */
     public function markAsNoShow(Request $request, Booking $booking)

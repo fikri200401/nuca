@@ -145,7 +145,7 @@ class User extends Authenticatable
     public function canDo(string $module, string $action = 'view'): bool
     {
         // If a role is assigned via role_id, ALWAYS use its permission matrix.
-        // This applies to everyone — owner, admin, frontdesk, doctor, etc.
+        // This applies to everyone - owner, admin, frontdesk, doctor, etc.
         if ($this->role_id && $this->roleModel) {
             return $this->roleModel->hasPermission($module, $action);
         }

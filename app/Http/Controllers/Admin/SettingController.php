@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\ClinicClosedDate;
+use App\Models\ManualApprovalDate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,8 +14,10 @@ class SettingController extends Controller
     public function index()
     {
         $settings = Setting::pluck('value', 'key')->toArray();
-        
-        return view('admin.settings.index', compact('settings'));
+        $closedDates = ClinicClosedDate::orderBy('date')->get();
+        $manualApprovalDates = ManualApprovalDate::orderBy('date')->get();
+
+        return view('admin.settings.index', compact('settings', 'closedDates', 'manualApprovalDates'));
     }
 
     public function update(Request $request)
@@ -93,6 +97,48 @@ class SettingController extends Controller
     }
 
     /**
+     * Simpan Kebijakan Booking (auto-approval & DP).
+     * type di-set eksplisit agar Setting::get() melakukan cast yang benar.
+     */
+    public function saveBookingPolicy(Request $request)
+    {
+        $request->validate([
+            'booking_auto_approval' => 'boolean',
+            'deposit_enabled' => 'boolean',
+            'deposit_threshold_days' => 'nullable|integer|min:0|max:365',
+            'min_deposit' => 'nullable|numeric|min:0',
+            'deposit_deadline_hours' => 'nullable|integer|min:1|max:720',
+        ]);
+
+        Setting::updateOrCreate(
+            ['key' => 'booking_auto_approval'],
+            ['value' => $request->input('booking_auto_approval', 0) ? '1' : '0', 'type' => 'boolean']
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'deposit_enabled'],
+            ['value' => $request->input('deposit_enabled', 0) ? '1' : '0', 'type' => 'boolean']
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'deposit_threshold_days'],
+            ['value' => (int) $request->input('deposit_threshold_days', 7), 'type' => 'number']
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'min_deposit'],
+            ['value' => (int) $request->input('min_deposit', 50000), 'type' => 'number']
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'deposit_deadline_hours'],
+            ['value' => (int) $request->input('deposit_deadline_hours', 24), 'type' => 'number']
+        );
+
+        return back()->with('success', 'Kebijakan booking berhasil disimpan.');
+    }
+
+    /**
      * Toggle shop open/close status
      */
     public function toggleShopStatus(Request $request)
@@ -110,6 +156,86 @@ class SettingController extends Controller
             'is_open' => $newStatus,
             'message' => $newStatus ? 'Toko dibuka' : 'Toko ditutup'
         ]);
+    }
+
+    /**
+     * Simpan hari tutup rutin (mis. tiap Minggu)
+     */
+    public function saveClosedWeekdays(Request $request)
+    {
+        $request->validate([
+            'closed_weekdays' => 'nullable|array',
+            'closed_weekdays.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+        ]);
+
+        Setting::updateOrCreate(
+            ['key' => 'closed_weekdays'],
+            [
+                'value' => json_encode(array_values($request->input('closed_weekdays', []))),
+                'type' => 'json',
+            ]
+        );
+
+        return back()->with('success', 'Hari tutup rutin berhasil disimpan.');
+    }
+
+    /**
+     * Tambah tanggal libur khusus
+     */
+    public function storeClosedDate(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        ClinicClosedDate::updateOrCreate(
+            ['date' => $request->date],
+            ['note' => $request->note]
+        );
+
+        return back()->with('success', 'Tanggal libur berhasil ditambahkan.');
+    }
+
+    /**
+     * Hapus tanggal libur khusus
+     */
+    public function destroyClosedDate(ClinicClosedDate $closedDate)
+    {
+        $closedDate->delete();
+
+        return back()->with('success', 'Tanggal libur berhasil dihapus.');
+    }
+
+    /**
+     * Tambah tanggal (janji temu) yang wajib approval manual.
+     * Juga dipakai tombol cepat "matikan auto-approval hari ini".
+     */
+    public function storeManualApprovalDate(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date|after:today',
+            'note' => 'nullable|string|max:255',
+        ], [
+            'date.after' => 'Tanggal harus setelah hari ini (mulai besok).',
+        ]);
+
+        ManualApprovalDate::updateOrCreate(
+            ['date' => $request->date],
+            ['note' => $request->note]
+        );
+
+        return back()->with('success', 'Tanggal wajib approval manual berhasil ditambahkan.');
+    }
+
+    /**
+     * Hapus tanggal wajib approval manual
+     */
+    public function destroyManualApprovalDate(ManualApprovalDate $manualApprovalDate)
+    {
+        $manualApprovalDate->delete();
+
+        return back()->with('success', 'Tanggal wajib approval manual berhasil dihapus.');
     }
 
     /**

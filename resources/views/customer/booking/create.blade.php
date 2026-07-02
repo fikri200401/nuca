@@ -18,10 +18,21 @@
                 </svg>
                 <div class="flex-1">
                     <h3 class="font-bold text-blue-900 mb-1">Kebijakan Booking</h3>
+                    @php
+                        $depositEnabled = \App\Models\Setting::get('deposit_enabled', true);
+                        $thresholdDays = (int) \App\Models\Setting::get('deposit_threshold_days', 7);
+                        $minDeposit = (int) \App\Models\Setting::get('min_deposit', 50000);
+                        $deadlineHours = (int) \App\Models\Setting::get('deposit_deadline_hours', 24);
+                    @endphp
                     <ul class="text-sm text-blue-800 space-y-1">
                         <li>• Klinik:<strong> Open-close</strong> 08:00 pm-08:00 am</li>
-                        <li>• Booking <strong>kurang dari 7 hari</strong>: Langsung dikonfirmasi (Auto Approved)</li>
-                        <li>• Booking <strong>7 hari atau lebih</strong>: Perlu bayar deposit Rp 50.000 dalam 24 jam</li>
+                        @if($depositEnabled)
+                        <li>• Booking <strong>kurang dari {{ $thresholdDays }} hari</strong>: biasanya langsung dikonfirmasi (Auto Approved)</li>
+                        <li>• Booking <strong>{{ $thresholdDays }} hari atau lebih</strong>: Perlu bayar deposit Rp {{ number_format($minDeposit, 0, ',', '.') }} dalam {{ $deadlineHours }} jam</li>
+                        @else
+                        <li>• Booking biasanya langsung dikonfirmasi (Auto Approved)</li>
+                        @endif
+                        <li>• Pada tanggal tertentu yang ramai, booking bisa <strong>menunggu konfirmasi admin</strong> dulu.</li>
                     </ul>
                 </div>
             </div>
@@ -303,6 +314,14 @@ const app = createApp({
                         if (typeof showClinicClosedModal === 'function') {
                             showClinicClosedModal('Maaf, klinik sedang tutup. Reservasi online sementara tidak tersedia.');
                         }
+                        this.loading = false;
+                        return;
+                    }
+
+                    if (data.closed) {
+                        this.availableSlots = [];
+                        this.availableDoctors = [];
+                        this.errorMessage = data.closed_reason || 'Klinik libur pada tanggal ini.';
                         this.loading = false;
                         return;
                     }

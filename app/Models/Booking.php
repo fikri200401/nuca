@@ -107,7 +107,7 @@ class Booking extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['auto_approved', 'waiting_deposit', 'deposit_confirmed']);
+        return $query->whereIn('status', ['pending_approval', 'auto_approved', 'waiting_deposit', 'deposit_confirmed']);
     }
 
     public function scopeCompleted($query)
@@ -134,14 +134,6 @@ class Booking extends Model
     /**
      * Helper methods
      */
-    public function needsDeposit()
-    {
-        $bookingDate = \Carbon\Carbon::parse($this->booking_date);
-        $daysDifference = now()->diffInDays($bookingDate, false);
-        
-        return $daysDifference >= 7; // Booking 7 hari atau lebih butuh DP
-    }
-
     public function canBeFeedback()
     {
         return $this->status === 'completed' && !$this->feedback;

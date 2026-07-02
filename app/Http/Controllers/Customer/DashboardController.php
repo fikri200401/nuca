@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $totalBookings = $user->bookings()->count();
         $completedBookings = $user->bookings()->where('status', 'completed')->count();
         $pendingBookings = $user->bookings()
-            ->whereIn('status', ['auto_approved', 'waiting_deposit', 'deposit_confirmed'])
+            ->whereIn('status', ['pending_approval', 'auto_approved', 'waiting_deposit', 'deposit_confirmed'])
             ->count();
         
         $recentBookings = $user->bookings()

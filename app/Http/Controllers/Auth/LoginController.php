@@ -68,7 +68,7 @@ class LoginController extends Controller
         // Track last login time
         $user->update(['last_login_at' => now()]);
 
-        // Redirect based on role — use direct redirect to prevent cross-role intended URL issues
+        // Redirect based on role - use direct redirect to prevent cross-role intended URL issues
         if (in_array($user->role, ['admin', 'owner', 'doctor', 'frontdesk'])) {
             return redirect()->route('admin.dashboard');
         }

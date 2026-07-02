@@ -210,7 +210,7 @@
                             {{ \Carbon\Carbon::parse($row->booking_date)->format('d M Y') }}
                         </td>
                         <td class="px-6 py-4 text-gray-800 font-medium">
-                            {{ $row->treatment->name ?? '—' }}
+                            {{ $row->treatment->name ?? '-' }}
                         </td>
                         <td class="px-6 py-4 text-center">
                             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm">
@@ -352,7 +352,7 @@
         <div class="mb-4">
             <h2 class="text-base font-bold text-gray-800">Tren Treatment per Bulan</h2>
             <p class="text-xs text-gray-400 mt-0.5">
-                Top 5 treatment — {{ $from->format('d M') }} – {{ $to->format('d M Y') }}
+                Top 5 treatment - {{ $from->format('d M') }} – {{ $to->format('d M Y') }}
             </p>
         </div>
         <div class="relative" style="height: 300px;">
@@ -396,7 +396,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: {{ $treatmentChartColors[$index] ?? 'rgba(156,163,175,0.8)' }}"></div>
-                                <span class="font-medium text-gray-800">{{ $row->treatment->name ?? '—' }}</span>
+                                <span class="font-medium text-gray-800">{{ $row->treatment->name ?? '-' }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">

@@ -28,6 +28,23 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="mb-6 rounded-md bg-red-50 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                @foreach($errors->all() as $error)
+                <p class="text-sm font-medium text-red-800">{{ $error }}</p>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Shop Open/Close Toggle -->
     <div class="mb-6 bg-white shadow sm:rounded-lg">
         <div class="px-4 py-5 sm:p-6">
@@ -258,6 +275,257 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- ================= PENGATURAN BOOKING ================= --}}
+    <div class="mt-10 mb-2">
+        <h2 class="text-xl font-bold text-gray-900">Pengaturan Booking</h2>
+        <p class="mt-1 text-sm text-gray-500">Semua aturan terkait booking online ada di sini.</p>
+    </div>
+
+    <!-- Kebijakan Booking -->
+    <div class="mt-4 bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Kebijakan Booking</h3>
+            <p class="mt-1 text-sm text-gray-500">Atur persetujuan booking online dan kebijakan DP.</p>
+
+            @php
+                $bAuto = \App\Models\Setting::get('booking_auto_approval', true);
+                $bDepositEnabled = \App\Models\Setting::get('deposit_enabled', true);
+                $bThreshold = \App\Models\Setting::get('deposit_threshold_days', 7);
+                $bMinDeposit = \App\Models\Setting::get('min_deposit', 50000);
+                $bDeadline = \App\Models\Setting::get('deposit_deadline_hours', 24);
+            @endphp
+
+            <form action="{{ route('admin.settings.booking-policy') }}" method="POST" class="mt-5 space-y-5">
+                @csrf
+
+                {{-- Auto Approval --}}
+                <div class="flex items-start p-4 rounded-lg border border-gray-200 bg-gray-50">
+                    <div class="flex items-center h-5">
+                        <input id="booking_auto_approval" name="booking_auto_approval" type="checkbox" value="1"
+                               {{ old('booking_auto_approval', $bAuto ? '1' : '0') ? 'checked' : '' }}
+                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="booking_auto_approval" class="font-medium text-gray-700">Auto-approve booking untuk hari ini</label>
+                        <p class="text-gray-500">
+                            Berlaku khusus booking yang <strong>jadwalnya hari ini</strong>. Jika <strong>aktif</strong>, langsung dikonfirmasi otomatis.
+                            Jika <strong>dimatikan</strong>, booking jadwal hari ini ditahan (<em>Menunggu Konfirmasi</em>) untuk kamu ACC, cocok saat walk-in ramai.
+                            Untuk tanggal lain, atur di <strong>Auto-Approval OFF per Tanggal</strong> di bawah.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Enable Deposit --}}
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="deposit_enabled" name="deposit_enabled" type="checkbox" value="1"
+                               {{ old('deposit_enabled', $bDepositEnabled ? '1' : '0') ? 'checked' : '' }}
+                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="deposit_enabled" class="font-medium text-gray-700">Aktifkan Kebijakan DP</label>
+                        <p class="text-gray-500">Wajibkan DP untuk booking yang jauh dari tanggal sekarang.</p>
+                    </div>
+                </div>
+
+                {{-- DP parameters --}}
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="deposit_threshold_days" class="block text-sm font-medium text-gray-700">Ambang Hari (butuh DP)</label>
+                        <input type="number" min="0" max="365" id="deposit_threshold_days" name="deposit_threshold_days"
+                               value="{{ old('deposit_threshold_days', $bThreshold) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Booking >= sekian hari perlu DP.</p>
+                    </div>
+                    <div>
+                        <label for="min_deposit" class="block text-sm font-medium text-gray-700">Nominal DP (Rp)</label>
+                        <input type="number" min="0" step="1000" id="min_deposit" name="min_deposit"
+                               value="{{ old('min_deposit', $bMinDeposit) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Minimal DP per booking.</p>
+                    </div>
+                    <div>
+                        <label for="deposit_deadline_hours" class="block text-sm font-medium text-gray-700">Batas Bayar DP (jam)</label>
+                        <input type="number" min="1" max="720" id="deposit_deadline_hours" name="deposit_deadline_hours"
+                               value="{{ old('deposit_deadline_hours', $bDeadline) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Sejak booking dibuat.</p>
+                    </div>
+                </div>
+
+                @canDo('settings', 'edit')
+                <div>
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Simpan Kebijakan Booking
+                    </button>
+                </div>
+                @endCanDo
+            </form>
+        </div>
+    </div>
+
+    <!-- Hari Libur & Tutup -->
+    <div class="mt-8 bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-lg font-medium text-gray-900">Hari Libur & Tutup</h3>
+                <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">Tidak bisa dipesan</span>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">
+                Customer tidak bisa membuat booking online pada hari atau tanggal berikut.
+            </p>
+
+            {{-- 1. Hari tutup rutin (mingguan) --}}
+            <form action="{{ route('admin.settings.closed-weekdays') }}" method="POST" class="mt-6">
+                @csrf
+                @php $closedWeekdays = (array) \App\Models\Setting::get('closed_weekdays', []); @endphp
+                <h4 class="text-sm font-semibold text-gray-800">1. Tutup rutin (setiap minggu)</h4>
+                <p class="mt-1 mb-3 text-xs text-gray-500">Centang hari yang klinik selalu tutup - berlaku berulang tiap minggu.</p>
+                <div class="flex flex-wrap gap-2">
+                    @foreach(['monday'=>'Senin','tuesday'=>'Selasa','wednesday'=>'Rabu','thursday'=>'Kamis','friday'=>'Jumat','saturday'=>'Sabtu','sunday'=>'Minggu'] as $val => $label)
+                    <label class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" name="closed_weekdays[]" value="{{ $val }}"
+                               {{ in_array($val, $closedWeekdays) ? 'checked' : '' }}
+                               class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        {{ $label }}
+                    </label>
+                    @endforeach
+                </div>
+                @canDo('settings', 'edit')
+                <div class="mt-3">
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Simpan Hari Tutup
+                    </button>
+                </div>
+                @endCanDo
+            </form>
+
+            {{-- 2. Tanggal libur khusus (sekali) --}}
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <h4 class="text-sm font-semibold text-gray-800">2. Tanggal libur khusus (sekali)</h4>
+                <p class="mt-1 mb-3 text-xs text-gray-500">Untuk libur nasional atau tanggal tertentu yang tidak berulang.</p>
+
+                @canDo('settings', 'edit')
+                <form action="{{ route('admin.settings.closed-dates.store') }}" method="POST" class="flex flex-col sm:flex-row gap-3 mb-4">
+                    @csrf
+                    <input type="date" name="date" required
+                           class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input type="text" name="note" maxlength="255" placeholder="Keterangan (mis. HUT RI)"
+                           class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Tambah
+                    </button>
+                </form>
+                @endCanDo
+
+                @if($closedDates->isEmpty())
+                    <p class="text-sm text-gray-400">Belum ada tanggal libur khusus.</p>
+                @else
+                    <ul class="divide-y divide-gray-100 rounded-md border border-gray-200">
+                        @foreach($closedDates as $cd)
+                        @php $c = \Carbon\Carbon::parse($cd->date); @endphp
+                        <li class="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-900">{{ $c->format('d/m/Y') }}</span>
+                                <span class="text-gray-400">({{ \App\Services\BookingService::weekdayLabelId(strtolower($c->format('l'))) }})</span>
+                                @if($cd->note)<span class="text-gray-600"> - {{ $cd->note }}</span>@endif
+                                @if($c->isPast() && !$c->isToday())<span class="ml-1 text-xs text-gray-400">(lewat)</span>@endif
+                            </div>
+                            @canDo('settings', 'edit')
+                            <form action="{{ route('admin.settings.closed-dates.destroy', $cd) }}" method="POST"
+                                  onsubmit="return confirm('Hapus tanggal libur ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="flex-shrink-0 text-red-600 hover:text-red-800 text-xs font-medium">Hapus</button>
+                            </form>
+                            @endCanDo
+                        </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Approval OFF per Tanggal -->
+    <div class="mt-8 bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-lg font-medium text-gray-900">Auto-Approval OFF per Tanggal</h3>
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">Ditahan untuk di-ACC</span>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">
+                Booking yang <strong>tanggal janji temu-nya</strong> (jadwal treatment) jatuh pada salah satu tanggal di daftar
+                akan otomatis berstatus <strong>Menunggu Konfirmasi</strong> (bukan langsung auto-approve), supaya kamu ACC manual
+                dari menu Booking. Cocok untuk mengamankan hari yang sudah diprediksi ramai walk-in.
+            </p>
+            <p class="mt-2 text-xs text-gray-500">
+                Contoh: kalau kamu tambahkan <strong>09/07/2026</strong>, maka booking dengan jadwal 09/07/2026 akan ditahan,
+                kapan pun booking itu dibuat. Booking untuk tanggal lain tetap auto-approve.
+            </p>
+
+            <div class="mt-3 rounded-md bg-blue-50 border border-blue-200 px-3 py-2 text-xs text-blue-800">
+                Daftar ini khusus <strong>tanggal ke depan</strong> (mulai besok). Untuk menahan booking yang <strong>jadwalnya hari ini</strong>,
+                matikan <strong>"Auto-approve booking untuk hari ini"</strong> di kartu Kebijakan Booking di atas.
+            </div>
+
+            {{-- Tambah tanggal janji temu --}}
+            @canDo('settings', 'edit')
+            <div class="mt-5">
+                <h4 class="text-sm font-semibold text-gray-800">Tambah tanggal janji temu</h4>
+                <p class="mt-1 mb-3 text-xs text-gray-500">Masukkan tanggal jadwal treatment yang ingin ditahan untuk di-ACC manual.</p>
+                <form action="{{ route('admin.settings.manual-approval-dates.store') }}" method="POST" class="flex flex-col sm:flex-row gap-3">
+                    @csrf
+                    <input type="date" name="date" required
+                           min="{{ \Carbon\Carbon::tomorrow()->format('Y-m-d') }}"
+                           class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input type="text" name="note" maxlength="255" placeholder="Keterangan (mis. prediksi ramai)"
+                           class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Tambah
+                    </button>
+                </form>
+            </div>
+            @endCanDo
+
+            <div class="mt-4">
+                @if($manualApprovalDates->isEmpty())
+                    <p class="text-sm text-gray-400">Belum ada tanggal wajib approval manual.</p>
+                @else
+                    <ul class="divide-y divide-gray-100 rounded-md border border-gray-200">
+                        @foreach($manualApprovalDates as $md)
+                        @php $m = \Carbon\Carbon::parse($md->date); @endphp
+                        <li class="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-900">{{ $m->format('d/m/Y') }}</span>
+                                <span class="text-gray-400">({{ \App\Services\BookingService::weekdayLabelId(strtolower($m->format('l'))) }})</span>
+                                @if($md->note)<span class="text-gray-600"> - {{ $md->note }}</span>@endif
+                                @if($m->isToday())
+                                    <span class="ml-1 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">hari ini</span>
+                                @elseif($m->isPast())
+                                    <span class="ml-1 text-xs text-gray-400">(lewat)</span>
+                                @endif
+                            </div>
+                            @canDo('settings', 'edit')
+                            <form action="{{ route('admin.settings.manual-approval-dates.destroy', $md) }}" method="POST"
+                                  onsubmit="return confirm('Hapus tanggal ini dari daftar wajib approval?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="flex-shrink-0 text-red-600 hover:text-red-800 text-xs font-medium">Hapus</button>
+                            </form>
+                            @endCanDo
+                        </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
         </div>
     </div>
 

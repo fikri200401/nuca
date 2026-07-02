@@ -52,7 +52,7 @@ class BeforeAfterPhotoController extends Controller
             $data['after_photo'] = $request->file('after_photo')->store('before-after', 'public');
         }
 
-        // Always create a new record (hasMany — each upload = new entry)
+        // Always create a new record (hasMany - each upload = new entry)
         BeforeAfterPhoto::create($data);
 
         return back()->with('success', 'Foto before-after berhasil diupload.');

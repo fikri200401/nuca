@@ -68,6 +68,50 @@ class WhatsAppService
     }
 
     /**
+     * Send booking pending-approval notification.
+     * Dipakai ketika auto-approval dimatikan: booking ditahan menunggu ACC admin.
+     */
+    public function sendBookingPendingApproval($booking)
+    {
+        $user = $booking->user;
+        $treatment = $booking->treatment;
+        $doctor = $booking->doctor;
+
+        $message = "*BOOKING DITERIMA - MENUNGGU KONFIRMASI* ⏳\n\n";
+        $message .= "Halo {$user->name},\n\n";
+        $message .= "Booking Anda sudah kami terima dan sedang *menunggu konfirmasi* dari admin.\n\n";
+        $message .= "*Detail Booking:*\n";
+        $message .= "📋 Kode: {$booking->booking_code}\n";
+        $message .= "💆 Treatment: {$treatment->name}\n";
+        $message .= "👨‍⚕️ Dokter: {$doctor->name}\n";
+        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') . "\n";
+        $message .= "🕐 Jam: {$booking->booking_time}\n\n";
+        $message .= "Kami akan mengabari Anda segera setelah booking dikonfirmasi. 🙏";
+
+        return $this->sendMessage($user->whatsapp_number, $message);
+    }
+
+    /**
+     * Send booking rejected notification (booking pending_approval yang ditolak admin).
+     */
+    public function sendBookingRejected($booking, $reason = null)
+    {
+        $user = $booking->user;
+
+        $message = "*BOOKING TIDAK DAPAT DIKONFIRMASI* ❌\n\n";
+        $message .= "Halo {$user->name},\n\n";
+        $message .= "Mohon maaf, booking Anda ({$booking->booking_code}) belum dapat kami konfirmasi.\n\n";
+
+        if ($reason) {
+            $message .= "*Alasan:* {$reason}\n\n";
+        }
+
+        $message .= "Silakan hubungi kami atau buat booking baru dengan jadwal lain. Terima kasih 🙏";
+
+        return $this->sendMessage($user->whatsapp_number, $message);
+    }
+
+    /**
      * Send booking reminder (H-1)
      */
     public function sendBookingReminder($booking)

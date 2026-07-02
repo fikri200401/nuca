@@ -39,7 +39,9 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <h3 class="text-xl font-bold text-gray-900">{{ $booking->treatment->name }}</h3>
-                                    @if($booking->status === 'auto_approved')
+                                    @if($booking->status === 'pending_approval')
+                                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">Menunggu Konfirmasi</span>
+                                    @elseif($booking->status === 'auto_approved')
                                         <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Auto Approved</span>
                                     @elseif($booking->status === 'waiting_deposit')
                                         <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Menunggu Deposit</span>

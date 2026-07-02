@@ -43,6 +43,7 @@
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
                     <select name="status" class="block w-full rounded-lg border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Semua Status</option>
+                        <option value="pending_approval"   {{ request('status') == 'pending_approval'   ? 'selected' : '' }}>Menunggu Konfirmasi</option>
                         <option value="auto_approved"      {{ request('status') == 'auto_approved'      ? 'selected' : '' }}>Auto Approved</option>
                         <option value="waiting_deposit"    {{ request('status') == 'waiting_deposit'    ? 'selected' : '' }}>Menunggu DP</option>
                         <option value="deposit_confirmed"  {{ request('status') == 'deposit_confirmed'  ? 'selected' : '' }}>DP Terkonfirmasi</option>
@@ -171,6 +172,7 @@
                                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                                     @php
                                         $statusColors = [
+                                            'pending_approval' => 'bg-amber-100 text-amber-800',
                                             'auto_approved' => 'bg-green-100 text-green-800',
                                             'waiting_deposit' => 'bg-yellow-100 text-yellow-800',
                                             'deposit_confirmed' => 'bg-blue-100 text-blue-800',
@@ -180,6 +182,7 @@
                                             'cancelled' => 'bg-red-100 text-red-800',
                                         ];
                                         $statusLabels = [
+                                            'pending_approval' => 'Menunggu Konfirmasi',
                                             'auto_approved' => 'Approved',
                                             'waiting_deposit' => 'Menunggu DP',
                                             'deposit_confirmed' => 'DP OK',

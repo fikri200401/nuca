@@ -27,7 +27,7 @@ class UserManagementController extends Controller
         }
 
         if ($request->filled('role')) {
-            // Filter by role slug — join to roles table
+            // Filter by role slug - join to roles table
             $query->whereHas('roleModel', fn($q) => $q->where('slug', $request->role));
         }
 
