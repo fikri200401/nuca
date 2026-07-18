@@ -35,6 +35,7 @@
                 </div>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4">
+                @canDo('members', 'edit')
                 @if(!$member->is_member)
                 <form action="{{ route('admin.members.activate', $member) }}" method="POST" class="inline">
                     @csrf
@@ -45,6 +46,7 @@
                     </button>
                 </form>
                 @endif
+                @endCanDo
             </div>
         </div>
     </div>

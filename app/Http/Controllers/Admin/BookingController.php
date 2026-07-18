@@ -47,9 +47,10 @@ class BookingController extends Controller
             });
         }
 
-        $bookings = $query->orderBy('booking_date', 'desc')
-            ->orderBy('booking_time', 'desc')
-            ->paginate(20);
+        $bookings = $query->orderBy('booking_date', $request->sort === 'oldest' ? 'asc' : 'desc')
+            ->orderBy('booking_time', $request->sort === 'oldest' ? 'asc' : 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.bookings.index', compact('bookings'));
     }

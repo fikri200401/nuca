@@ -52,22 +52,8 @@ class BeforeAfterPhotoController extends Controller
             $data['after_photo'] = $request->file('after_photo')->store('before-after', 'public');
         }
 
-        // Check if already exists
-        if ($booking->beforeAfterPhotos) {
-            $beforeAfterPhoto = $booking->beforeAfterPhotos;
-            
-            // Delete old photos if replacing
-            if (isset($data['before_photo']) && $beforeAfterPhoto->before_photo) {
-                Storage::disk('public')->delete($beforeAfterPhoto->before_photo);
-            }
-            if (isset($data['after_photo']) && $beforeAfterPhoto->after_photo) {
-                Storage::disk('public')->delete($beforeAfterPhoto->after_photo);
-            }
-
-            $beforeAfterPhoto->update($data);
-        } else {
-            BeforeAfterPhoto::create($data);
-        }
+        // Always create a new record (hasMany — each upload = new entry)
+        BeforeAfterPhoto::create($data);
 
         return back()->with('success', 'Foto before-after berhasil diupload.');
     }
@@ -77,21 +63,20 @@ class BeforeAfterPhotoController extends Controller
      */
     public function destroy(Booking $booking)
     {
-        if (!$booking->beforeAfterPhotos) {
+        if ($booking->beforeAfterPhotos->isEmpty()) {
             return back()->withErrors(['error' => 'Tidak ada foto untuk dihapus.']);
         }
 
-        $photos = $booking->beforeAfterPhotos;
-
-        // Delete files
-        if ($photos->before_photo) {
-            Storage::disk('public')->delete($photos->before_photo);
+        // Delete all photos for this booking
+        foreach ($booking->beforeAfterPhotos as $photo) {
+            if ($photo->before_photo) {
+                Storage::disk('public')->delete($photo->before_photo);
+            }
+            if ($photo->after_photo) {
+                Storage::disk('public')->delete($photo->after_photo);
+            }
+            $photo->delete();
         }
-        if ($photos->after_photo) {
-            Storage::disk('public')->delete($photos->after_photo);
-        }
-
-        $photos->delete();
 
         return back()->with('success', 'Foto before-after berhasil dihapus.');
     }

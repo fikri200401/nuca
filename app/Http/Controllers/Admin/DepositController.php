@@ -22,11 +22,29 @@ class DepositController extends Controller
     {
         $query = Deposit::with(['booking.user', 'booking.treatment']);
 
+        // Filter by status tab
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        } else {
+            $query->where('status', 'pending');
         }
 
-        $deposits = $query->orderBy('deadline_at', 'asc')->paginate(20);
+        // Search: booking code or customer name/WhatsApp
+        if ($request->filled('search')) {
+            $query->whereHas('booking', function ($q) use ($request) {
+                $q->where('booking_code', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('user', function ($q2) use ($request) {
+                      $q2->where('name', 'like', '%' . $request->search . '%')
+                         ->orWhere('whatsapp_number', 'like', '%' . $request->search . '%');
+                  });
+            });
+        }
+
+        // Sort
+        $sortDir = $request->sort === 'oldest' ? 'asc' : 'desc';
+        $query->orderBy('deadline_at', $sortDir);
+
+        $deposits = $query->paginate(20)->withQueryString();
 
         return view('admin.deposits.index', compact('deposits'));
     }

@@ -115,23 +115,44 @@
             </div>
 
             <!-- Demo Credentials -->
+            @if($demoUsers->isNotEmpty())
             <div class="mt-6 pt-6 border-t border-gray-200">
-                <p class="text-xs text-gray-500 text-center mb-3">
+                <p class="text-xs text-center mb-3">
                     <strong class="text-pink-600">Demo Login:</strong>
+                    <span class="text-gray-400"> Klik untuk mengisi otomatis</span>
                 </p>
-                <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div class="bg-pink-50 border border-pink-100 rounded-lg p-3">
-                        <p class="font-semibold text-pink-700 mb-1">Customer</p>
-                        <p class="text-gray-600">WA: <code class="bg-white px-1.5 py-0.5 rounded">081234567892</code></p>
-                        <p class="text-gray-600">Pass: <code class="bg-white px-1.5 py-0.5 rounded">password</code></p>
-                    </div>
-                    <div class="bg-purple-50 border border-purple-100 rounded-lg p-3">
-                        <p class="font-semibold text-purple-700 mb-1">Admin</p>
-                        <p class="text-gray-600">WA: <code class="bg-white px-1.5 py-0.5 rounded">081234567890</code></p>
-                        <p class="text-gray-600">Pass: <code class="bg-white px-1.5 py-0.5 rounded">password</code></p>
-                    </div>
+
+                @php
+                    $roleConfig = [
+                        'customer'  => ['label' => 'Customer',  'bg' => 'bg-pink-50',   'border' => 'border-pink-100',   'hover' => 'hover:bg-pink-100 hover:border-pink-300',   'text' => 'text-pink-700',   'htext' => 'group-hover:text-pink-800'],
+                        'frontdesk' => ['label' => 'Frontdesk', 'bg' => 'bg-blue-50',   'border' => 'border-blue-100',   'hover' => 'hover:bg-blue-100 hover:border-blue-300',   'text' => 'text-blue-700',   'htext' => 'group-hover:text-blue-800'],
+                        'doctor'    => ['label' => 'Dokter',    'bg' => 'bg-green-50',  'border' => 'border-green-100',  'hover' => 'hover:bg-green-100 hover:border-green-300',  'text' => 'text-green-700',  'htext' => 'group-hover:text-green-800'],
+                        'admin'     => ['label' => 'Admin',     'bg' => 'bg-purple-50', 'border' => 'border-purple-100', 'hover' => 'hover:bg-purple-100 hover:border-purple-300','text' => 'text-purple-700', 'htext' => 'group-hover:text-purple-800'],
+                        'owner'     => ['label' => 'Owner',     'bg' => 'bg-orange-50', 'border' => 'border-orange-100', 'hover' => 'hover:bg-orange-100 hover:border-orange-300','text' => 'text-orange-700', 'htext' => 'group-hover:text-orange-800'],
+                    ];
+                    $cols = $demoUsers->count() <= 2 ? 'grid-cols-2' : ($demoUsers->count() === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-' . min($demoUsers->count(), 4));
+                @endphp
+
+                <div class="grid {{ $cols }} gap-2 text-xs">
+                    @foreach($demoUsers as $demo)
+                    @php $cfg = $roleConfig[$demo->role] ?? ['label' => ucfirst($demo->role), 'bg' => 'bg-gray-50', 'border' => 'border-gray-100', 'hover' => 'hover:bg-gray-100', 'text' => 'text-gray-700', 'htext' => 'group-hover:text-gray-800']; @endphp
+                    <button type="button"
+                            onclick="fillDemo('{{ $demo->whatsapp_number }}', 'password')"
+                            class="{{ $cfg['bg'] }} {{ $cfg['border'] }} {{ $cfg['hover'] }} border rounded-lg p-3 text-left hover:shadow-md transition-all duration-150 cursor-pointer group">
+                        <p class="font-semibold {{ $cfg['text'] }} {{ $cfg['htext'] }} mb-1.5 flex items-center justify-between">
+                            {{ $cfg['label'] }}
+                            <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                        </p>
+                        <p class="text-gray-500 truncate">{{ $demo->name }}</p>
+                        <p class="text-gray-500 mt-0.5">WA: <code class="bg-white px-1 py-0.5 rounded text-gray-700">{{ $demo->whatsapp_number }}</code></p>
+                        <p class="text-gray-400 mt-0.5">Pass: <code class="bg-white px-1 py-0.5 rounded text-gray-600">password</code></p>
+                    </button>
+                    @endforeach
                 </div>
             </div>
+            @endif
         </form>
 
         <!-- Back to Home -->
@@ -145,4 +166,14 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function fillDemo(identifier, password) {
+    document.getElementById('identifier').value = identifier;
+    document.getElementById('password').value = password;
+    document.getElementById('identifier').focus();
+}
+</script>
+@endpush
 @endsection

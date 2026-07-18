@@ -24,12 +24,13 @@ class LandingController extends Controller
 
         // Get clinic info from settings
         $clinicInfo = [
-            'name' => Setting::get('clinic_name', 'Klinik Kecantikan'),
-            'address' => Setting::get('clinic_address', ''),
+            'name' => Setting::get('clinic_name', 'Nuca Beauty Skin'),
+            'address' => Setting::get('address', Setting::get('clinic_address', '')),
             'phone' => Setting::get('clinic_phone', ''),
             'whatsapp' => Setting::get('clinic_whatsapp', ''),
             'operating_hours' => Setting::get('operating_hours', 'Senin - Sabtu: 09:00 - 18:00'),
             'about' => Setting::get('about', ''),
+            'google_maps_url' => Setting::get('google_maps_url', ''),
         ];
 
         return view('landing.index', compact('popularTreatments', 'activeVouchers', 'clinicInfo'));

@@ -160,7 +160,7 @@
             <div class="mb-5">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Bukti Transfer</label>
                 <div class="relative border-2 border-dashed border-pink-300 rounded-xl p-6 text-center hover:border-pink-400 transition bg-pink-50">
-                    <input type="file" name="deposit_proof" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage(this)">
+                    <input type="file" name="proof_of_payment" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage(this)">
                     <div id="uploadPlaceholder">
                         <svg class="w-12 h-12 text-pink-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
