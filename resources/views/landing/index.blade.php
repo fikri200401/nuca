@@ -337,6 +337,7 @@
             <!-- Booking Info Card -->
             @if(session('booking_info'))
             @php $booking = session('booking_info'); @endphp
+            @php $awaitingVerification = $booking->isAwaitingDepositVerification(); @endphp
             <div class="max-w-4xl mx-auto mb-6 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl shadow-lg p-6">
                 <div class="flex items-start justify-between mb-4">
                     <div>
@@ -347,10 +348,11 @@
                         @if($booking->status === 'completed') bg-green-100 text-green-800
                         @elseif($booking->status === 'cancelled') bg-red-100 text-red-800
                         @elseif($booking->status === 'deposit_confirmed') bg-blue-100 text-blue-800
+                        @elseif($awaitingVerification) bg-blue-100 text-blue-800
                         @elseif($booking->status === 'waiting_deposit') bg-yellow-100 text-yellow-800
                         @else bg-gray-100 text-gray-800
                         @endif">
-                        {{ strtoupper(str_replace('_', ' ', $booking->status)) }}
+                        {{ $awaitingVerification ? 'MENUNGGU VERIFIKASI' : strtoupper(str_replace('_', ' ', $booking->status)) }}
                     </span>
                 </div>
                 
@@ -375,14 +377,21 @@
                 </div>
 
                 @if($booking->status === 'waiting_deposit' && $booking->deposit)
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p class="text-sm font-bold text-yellow-800 mb-2">⚠️ Menunggu Upload Bukti Transfer</p>
-                    <p class="text-xs text-yellow-700">Batas waktu: {{ $booking->deposit->deadline_at->format('d M Y H:i') }}</p>
-                    <p class="text-xs text-yellow-700 mt-1">Nominal DP: Rp {{ number_format($booking->deposit->amount, 0, ',', '.') }}</p>
-                    <a href="{{ route('customer.bookings.show', $booking->id) }}" class="inline-block mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg text-xs font-bold hover:bg-yellow-600">
-                        Upload Bukti Transfer
-                    </a>
-                </div>
+                    @if($awaitingVerification)
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm font-bold text-blue-800">Bukti Transfer Menunggu Verifikasi</p>
+                        <p class="text-xs text-blue-700 mt-1">Bukti pembayaran sudah diterima dan sedang diperiksa oleh admin.</p>
+                    </div>
+                    @else
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-sm font-bold text-yellow-800 mb-2">Menunggu Upload Bukti Transfer</p>
+                        <p class="text-xs text-yellow-700">Batas waktu: {{ $booking->deposit->deadline_at->format('d M Y H:i') }}</p>
+                        <p class="text-xs text-yellow-700 mt-1">Nominal DP: Rp {{ number_format($booking->deposit->amount, 0, ',', '.') }}</p>
+                        <a href="{{ route('customer.bookings.show', $booking->id) }}" class="inline-block mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg text-xs font-bold hover:bg-yellow-600">
+                            Upload Bukti Transfer
+                        </a>
+                    </div>
+                    @endif
                 @elseif($booking->status === 'deposit_confirmed')
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p class="text-sm font-bold text-blue-800">✓ Deposit Dikonfirmasi - Siap untuk Treatment</p>

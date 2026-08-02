@@ -22,9 +22,8 @@ class DashboardController extends Controller
         $bookingsToday     = Booking::whereDate('booking_date', $today)->count();
         $bookingsYesterday = Booking::whereDate('booking_date', $yesterday)->count();
 
-        $pendingDepositsCount = Deposit::pending()->count();
+        $pendingDepositsCount = Deposit::submitted()->count();
         $expiredDepositsCount = Deposit::expired()->count();
-        $pendingDepLastWeek   = Deposit::pending()->where('created_at', '<', $lastWeek)->count();
 
         $totalMembers     = User::members()->count();
         $newMembersThisWeek = User::members()->where('created_at', '>=', $lastWeek)->count();
@@ -46,14 +45,14 @@ class DashboardController extends Controller
         [$chartLabels, $chartVisitData, $chartRevenueData] = $this->buildChartData('minggu');
 
         // ---- Pending deposits (sidebar list, latest 5) ----
-        $pendingDeposits = Deposit::pending()
+        $pendingDeposits = Deposit::submitted()
             ->with(['booking.user', 'booking.treatment'])
             ->orderBy('deadline_at')
             ->limit(5)
             ->get();
 
         // ---- Today's bookings table (limit 5) ----
-        $todayBookings = Booking::with(['user', 'treatment', 'doctor'])
+        $todayBookings = Booking::with(['user', 'treatment', 'doctor', 'deposit'])
             ->whereDate('booking_date', $today)
             ->orderBy('booking_time')
             ->limit(5)

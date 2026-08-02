@@ -23,7 +23,7 @@
                         'rejected'  => ['label' => 'Rejected',  'color' => 'red'],
                         'expired'   => ['label' => 'Expired',   'color' => 'gray'],
                     ];
-                    $activeStatus = request('status', 'pending');
+                    $activeStatus = request('status', 'submitted');
                     $submittedCount = \App\Models\Deposit::where('status', 'submitted')->count();
                 @endphp
                 @foreach($tabs as $key => $tab)
@@ -49,7 +49,7 @@
     <div class="mt-4 bg-white shadow sm:rounded-lg p-4">
         <form method="GET" action="{{ route('admin.deposits.index') }}">
             {{-- Preserve active status tab --}}
-            <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
+            <input type="hidden" name="status" value="{{ request('status', 'submitted') }}">
 
             <div class="flex flex-col sm:flex-row gap-3">
                 {{-- Search --}}
@@ -83,7 +83,7 @@
 
                 {{-- Reset search/sort only --}}
                 @if(request('search') || (request('sort') && request('sort') !== 'newest'))
-                <a href="{{ route('admin.deposits.index', ['status' => request('status', 'pending')]) }}"
+                <a href="{{ route('admin.deposits.index', ['status' => request('status', 'submitted')]) }}"
                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm hover:bg-gray-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

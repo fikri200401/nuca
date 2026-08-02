@@ -65,16 +65,16 @@
             <p class="text-xs text-gray-400 mt-0.5">{{ $g >= 0 ? '+' . $g : $g }}% dari kemarin</p>
         </div>
 
-        {{-- DP Pending --}}
+        {{-- DP Menunggu Verifikasi --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
                     <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600">Pending</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">Submitted</span>
             </div>
             <p class="text-3xl font-bold text-gray-900">{{ $stats['pending_deposits'] }}</p>
-            <p class="text-sm text-gray-500 mt-1">DP Pending</p>
+            <p class="text-sm text-gray-500 mt-1">DP Perlu Verifikasi</p>
             <p class="text-xs text-gray-400 mt-0.5">Menunggu verifikasi pembayaran</p>
         </div>
 
@@ -135,10 +135,10 @@
             </div>
         </div>
 
-        {{-- RIGHT: Deposit Pending List --}}
+        {{-- RIGHT: Deposit Verification List --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">
             <div class="flex items-center justify-between mb-1">
-                <h2 class="text-base font-semibold text-gray-900">Deposit Pending</h2>
+                <h2 class="text-base font-semibold text-gray-900">Verifikasi Deposit</h2>
                 @if($stats['pending_deposits'] > 0)
                 <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $stats['pending_deposits'] }}</span>
                 @endif
@@ -167,7 +167,7 @@
                 @empty
                 <div class="flex flex-col items-center justify-center h-32 text-gray-400 text-sm">
                     <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Tidak ada deposit pending
+                    Tidak ada deposit yang perlu diverifikasi
                 </div>
                 @endforelse
             </div>
@@ -256,7 +256,9 @@
                             'cancelled'         => ['label' => 'Dibatalkan',  'class' => 'bg-red-100 text-red-600'],
                             'no_show'           => ['label' => 'No-show',     'class' => 'bg-gray-100 text-gray-600'],
                         ];
-                        $st = $statusMap[$booking->status] ?? ['label' => ucfirst($booking->status), 'class' => 'bg-gray-100 text-gray-600'];
+                        $st = $booking->isAwaitingDepositVerification()
+                            ? ['label' => 'Verifikasi DP', 'class' => 'bg-blue-100 text-blue-700']
+                            : ($statusMap[$booking->status] ?? ['label' => ucfirst($booking->status), 'class' => 'bg-gray-100 text-gray-600']);
                     @endphp
                     <tr class="booking-row hover:bg-gray-50 transition">
                         <td class="px-5 py-4 font-mono text-xs text-gray-400">{{ $booking->booking_code }}</td>

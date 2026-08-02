@@ -53,7 +53,11 @@
                     @elseif($booking->status === 'auto_approved')
                         <span class="px-4 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded-full">Auto Approved</span>
                     @elseif($booking->status === 'waiting_deposit')
-                        <span class="px-4 py-2 bg-yellow-100 text-yellow-700 text-sm font-semibold rounded-full">Menunggu Deposit</span>
+                        @if($booking->isAwaitingDepositVerification())
+                            <span class="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">Menunggu Verifikasi</span>
+                        @else
+                            <span class="px-4 py-2 bg-yellow-100 text-yellow-700 text-sm font-semibold rounded-full">Menunggu Deposit</span>
+                        @endif
                     @elseif($booking->status === 'deposit_confirmed')
                         <span class="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">Deposit Terkonfirmasi</span>
                     @elseif($booking->status === 'deposit_rejected')

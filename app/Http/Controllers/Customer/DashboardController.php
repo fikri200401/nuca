@@ -18,7 +18,7 @@ class DashboardController extends Controller
             ->count();
         
         $recentBookings = $user->bookings()
-            ->with(['treatment', 'doctor'])
+            ->with(['treatment', 'doctor', 'deposit'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

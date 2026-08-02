@@ -171,6 +171,7 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                                     @php
+                                        $awaitingVerification = $booking->isAwaitingDepositVerification();
                                         $statusColors = [
                                             'pending_approval' => 'bg-amber-100 text-amber-800',
                                             'auto_approved' => 'bg-green-100 text-green-800',
@@ -191,9 +192,15 @@
                                             'completed' => 'Selesai',
                                             'cancelled' => 'Dibatalkan',
                                         ];
+                                        $displayStatusColor = $awaitingVerification
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : ($statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800');
+                                        $displayStatusLabel = $awaitingVerification
+                                            ? 'Menunggu Verifikasi DP'
+                                            : ($statusLabels[$booking->status] ?? $booking->status);
                                     @endphp
-                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ $statusLabels[$booking->status] ?? $booking->status }}
+                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {{ $displayStatusColor }}">
+                                        {{ $displayStatusLabel }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

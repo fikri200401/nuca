@@ -47,6 +47,11 @@ class Deposit extends Model
         return $query->where('status', 'pending');
     }
 
+    public function scopeSubmitted($query)
+    {
+        return $query->where('status', 'submitted');
+    }
+
     public function scopeExpired($query)
     {
         return $query->where('status', 'expired');
@@ -73,6 +78,11 @@ class Deposit extends Model
     public function isPending()
     {
         return $this->status === 'pending';
+    }
+
+    public function isSubmitted()
+    {
+        return $this->status === 'submitted';
     }
 
     public function isApproved()

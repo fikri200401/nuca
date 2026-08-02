@@ -155,6 +155,17 @@ class Booking extends Model
     }
 
     /**
+     * The customer has uploaded deposit proof and it is waiting for admin review.
+     * Booking remains in waiting_deposit until the deposit is approved.
+     */
+    public function isAwaitingDepositVerification(): bool
+    {
+        return $this->status === 'waiting_deposit'
+            && $this->deposit
+            && $this->deposit->status === 'submitted';
+    }
+
+    /**
      * Accessor for booking_number (alias for booking_code)
      */
     public function getBookingNumberAttribute()

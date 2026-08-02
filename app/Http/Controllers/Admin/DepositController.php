@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
-use App\Models\Booking;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +25,8 @@ class DepositController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
-            $query->where('status', 'pending');
+            // Deposit yang sudah diunggah adalah antrean utama untuk diverifikasi.
+            $query->where('status', 'submitted');
         }
 
         // Search: booking code or customer name/WhatsApp
@@ -61,8 +61,8 @@ class DepositController extends Controller
      */
     public function approve(Deposit $deposit)
     {
-        if ($deposit->status !== 'pending') {
-            return back()->withErrors(['error' => 'Deposit tidak dapat diapprove.']);
+        if (! $deposit->isSubmitted()) {
+            return back()->withErrors(['error' => 'Hanya deposit yang menunggu verifikasi yang dapat disetujui.']);
         }
 
         $deposit->approve(Auth::id());
@@ -85,8 +85,8 @@ class DepositController extends Controller
             'rejection_reason' => 'required|string',
         ]);
 
-        if ($deposit->status !== 'pending') {
-            return back()->withErrors(['error' => 'Deposit tidak dapat direject.']);
+        if (! $deposit->isSubmitted()) {
+            return back()->withErrors(['error' => 'Hanya deposit yang menunggu verifikasi yang dapat ditolak.']);
         }
 
         $deposit->reject(Auth::id(), $request->rejection_reason);

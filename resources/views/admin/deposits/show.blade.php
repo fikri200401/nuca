@@ -50,7 +50,7 @@
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
                 @canDo('deposits', 'edit')
-                @if(in_array($deposit->status, ['pending', 'submitted']))
+                @if($deposit->status === 'submitted')
                     <button type="button" 
                             onclick="showApproveModal()"
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all hover:shadow-lg">
@@ -245,19 +245,25 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Status Booking</dt>
                             <dd class="mt-1">
-                                @if($deposit->booking->status === 'pending')
+                                @if($deposit->booking->status === 'pending_approval')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Pending
+                                        Menunggu Konfirmasi
                                     </span>
-                                @elseif($deposit->booking->status === 'waiting_dp')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        Waiting DP
-                                    </span>
+                                @elseif($deposit->booking->status === 'waiting_deposit')
+                                    @if($deposit->booking->isAwaitingDepositVerification())
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Menunggu Verifikasi DP
+                                        </span>
+                                    @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                            Menunggu DP
+                                        </span>
+                                    @endif
                                 @elseif($deposit->booking->status === 'deposit_confirmed')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         DP Confirmed
                                     </span>
-                                @elseif($deposit->booking->status === 'confirmed')
+                                @elseif($deposit->booking->status === 'auto_approved')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Confirmed
                                     </span>
@@ -460,4 +466,3 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 @endsection
-

@@ -44,7 +44,11 @@
                                     @elseif($booking->status === 'auto_approved')
                                         <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Auto Approved</span>
                                     @elseif($booking->status === 'waiting_deposit')
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Menunggu Deposit</span>
+                                        @if($booking->isAwaitingDepositVerification())
+                                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Menunggu Verifikasi</span>
+                                        @else
+                                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Menunggu Deposit</span>
+                                        @endif
                                     @elseif($booking->status === 'deposit_confirmed')
                                         <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Deposit Terkonfirmasi</span>
                                     @elseif($booking->status === 'deposit_rejected')
@@ -106,10 +110,10 @@
                                 Lihat Detail
                             </a>
                             
-                            {{-- Upload Deposit Button (only if waiting_deposit) --}}
-                            @if($booking->status === 'waiting_deposit')
+                            {{-- Upload atau upload ulang selama bukti belum disetujui. --}}
+                            @if(in_array($booking->status, ['waiting_deposit', 'deposit_rejected']) && in_array($booking->deposit?->status, ['pending', 'rejected']))
                             <button onclick="showUploadModal({{ $booking->id }})" class="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:-translate-y-0.5">
-                                Upload Deposit
+                                {{ $booking->deposit->status === 'rejected' ? 'Upload Ulang Deposit' : 'Upload Deposit' }}
                             </button>
                             @endif
                         </div>

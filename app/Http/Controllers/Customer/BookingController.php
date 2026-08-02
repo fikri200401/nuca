@@ -237,6 +237,11 @@ class BookingController extends Controller
             'rejection_reason' => null, // Clear rejection reason if re-uploading
         ]);
 
+        // Re-upload setelah penolakan harus kembali ke alur menunggu verifikasi.
+        // Belum ada status booking khusus "submitted", sehingga detail status
+        // ditentukan dari kombinasi booking waiting_deposit + deposit submitted.
+        $booking->update(['status' => 'waiting_deposit']);
+
         return back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
     }
 
@@ -337,4 +342,3 @@ class BookingController extends Controller
         }
     }
 }
-
