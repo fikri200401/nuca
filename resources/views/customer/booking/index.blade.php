@@ -18,9 +18,54 @@
             </div>
         </div>
 
+        {{-- Search & Sort --}}
+        <form id="bookingHistoryFilters" method="GET" action="{{ route('customer.bookings.index') }}" class="mb-6 rounded-2xl border border-pink-100 bg-white p-4 shadow-lg">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end">
+                <div class="flex-1">
+                    <label for="bookingSearch" class="mb-2 block text-sm font-semibold text-gray-700">Cari booking</label>
+                    <div class="relative">
+                        <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
+                        </svg>
+                        <input
+                            id="bookingSearch"
+                            type="search"
+                            name="q"
+                            value="{{ $search }}"
+                            placeholder="Kode booking, treatment, atau dokter..."
+                            autocomplete="off"
+                            class="w-full rounded-xl border-gray-300 py-3 pl-12 pr-4 focus:border-pink-500 focus:ring-pink-500"
+                        >
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-64">
+                    <label for="bookingSort" class="mb-2 block text-sm font-semibold text-gray-700">Urutkan berdasarkan</label>
+                    <select id="bookingSort" name="sort" class="w-full rounded-xl border-gray-300 py-3 focus:border-pink-500 focus:ring-pink-500">
+                        <option value="booking_latest" {{ $sort === 'booking_latest' ? 'selected' : '' }}>Pemesanan terbaru</option>
+                        <option value="booking_oldest" {{ $sort === 'booking_oldest' ? 'selected' : '' }}>Pemesanan terlama</option>
+                        <option value="schedule_latest" {{ $sort === 'schedule_latest' ? 'selected' : '' }}>Jadwal terbaru</option>
+                        <option value="schedule_oldest" {{ $sort === 'schedule_oldest' ? 'selected' : '' }}>Jadwal terlama</option>
+                    </select>
+                </div>
+
+                @if($search !== '' || $sort !== 'booking_latest')
+                    <a href="{{ route('customer.bookings.index') }}" class="inline-flex h-[50px] items-center justify-center rounded-xl border-2 border-pink-200 px-5 text-sm font-semibold text-pink-700 transition hover:bg-pink-50">
+                        Reset
+                    </a>
+                @endif
+            </div>
+
+            <div class="mt-3 flex items-center justify-between border-t border-pink-50 pt-3 text-xs text-gray-500">
+                <span>{{ $bookings->total() }} booking ditemukan</span>
+                <span id="bookingFilterStatus" class="hidden font-medium text-pink-600">Memuat hasil...</span>
+            </div>
+        </form>
+
         {{-- Bookings List --}}
+        <div id="bookingResults" class="transition-opacity duration-200">
         @forelse($bookings as $booking)
-        <div class="bg-white rounded-2xl shadow-lg border border-pink-100 mb-4 overflow-hidden hover:shadow-xl hover:border-pink-200 transition-all duration-200">
+        <div class="booking-history-card bg-white rounded-2xl shadow-lg border border-pink-100 mb-4 overflow-hidden hover:shadow-xl hover:border-pink-200 transition-all duration-200">
             <div class="p-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {{-- Booking Info --}}
@@ -129,16 +174,25 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Belum Ada Booking</h3>
-            <p class="text-gray-600 mb-6">Anda belum memiliki riwayat booking treatment apapun.</p>
-            <a href="{{ route('customer.bookings.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:-translate-y-0.5">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Buat Booking Baru
-            </a>
+            @if($search !== '')
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Booking Tidak Ditemukan</h3>
+                <p class="text-gray-600 mb-6">Tidak ada booking yang cocok dengan pencarian “{{ $search }}”.</p>
+                <a href="{{ route('customer.bookings.index', ['sort' => $sort]) }}" class="inline-flex items-center gap-2 px-6 py-3 border-2 border-pink-200 text-pink-700 font-semibold rounded-xl hover:bg-pink-50 transition">
+                    Hapus Pencarian
+                </a>
+            @else
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Belum Ada Booking</h3>
+                <p class="text-gray-600 mb-6">Anda belum memiliki riwayat booking treatment apapun.</p>
+                <a href="{{ route('customer.bookings.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:-translate-y-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Buat Booking Baru
+                </a>
+            @endif
         </div>
         @endforelse
+        </div>
 
         {{-- Pagination --}}
         @if($bookings->hasPages())
@@ -201,6 +255,37 @@
 @push('scripts')
 <script>
 let currentBookingId = null;
+
+document.addEventListener('DOMContentLoaded', function () {
+    const $ = window.jQuery;
+
+    if (!$) {
+        return;
+    }
+
+    const $filterForm = $('#bookingHistoryFilters');
+    const $results = $('#bookingResults');
+    const $status = $('#bookingFilterStatus');
+    let searchTimer = null;
+
+    function submitFilters() {
+        $status.removeClass('hidden');
+        $results.addClass('pointer-events-none opacity-60');
+        $filterForm.get(0).requestSubmit();
+    }
+
+    $('#bookingSort').on('change', submitFilters);
+
+    $('#bookingSearch').on('input', function () {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(submitFilters, 450);
+    });
+
+    $filterForm.on('submit', function () {
+        $status.removeClass('hidden');
+        $results.addClass('pointer-events-none opacity-60');
+    });
+});
 
 function showUploadModal(bookingId) {
     currentBookingId = bookingId;

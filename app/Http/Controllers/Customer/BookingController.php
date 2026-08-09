@@ -188,15 +188,49 @@ class BookingController extends Controller
     /**
      * Show booking list
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::where('user_id', Auth::id())
+        $search = trim((string) $request->input('q', ''));
+        $sort = (string) $request->input('sort', 'booking_latest');
+
+        $allowedSorts = [
+            'booking_latest',
+            'booking_oldest',
+            'schedule_latest',
+            'schedule_oldest',
+        ];
+
+        if (! in_array($sort, $allowedSorts, true)) {
+            $sort = 'booking_latest';
+        }
+
+        $query = Booking::where('user_id', Auth::id())
             ->with(['treatment', 'doctor', 'deposit'])
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('booking_time', 'desc')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($bookingQuery) use ($search) {
+                    $bookingQuery->where('booking_code', 'like', "%{$search}%")
+                        ->orWhereHas('treatment', function ($treatmentQuery) use ($search) {
+                            $treatmentQuery->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('doctor', function ($doctorQuery) use ($search) {
+                            $doctorQuery->where('name', 'like', "%{$search}%");
+                        });
+                });
+            });
+
+        match ($sort) {
+            'booking_oldest' => $query->orderBy('created_at')->orderBy('id'),
+            'schedule_latest' => $query->orderByDesc('booking_date')->orderByDesc('booking_time')->orderByDesc('id'),
+            'schedule_oldest' => $query->orderBy('booking_date')->orderBy('booking_time')->orderBy('id'),
+            default => $query->orderByDesc('created_at')->orderByDesc('id'),
+        };
+
+        $bookings = $query
             ->paginate(10);
 
-        return view('customer.booking.index', compact('bookings'));
+        $bookings->withQueryString();
+
+        return view('customer.booking.index', compact('bookings', 'search', 'sort'));
     }
 
     /**

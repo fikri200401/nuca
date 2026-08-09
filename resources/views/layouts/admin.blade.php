@@ -6,15 +6,38 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - Klinik Kecantikan</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        #adminSidebarNav {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+        }
+
+        #adminSidebarNav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #adminSidebarNav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #adminSidebarNav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 9999px;
+        }
+
+        #adminSidebarNav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.55);
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-indigo-900 text-white w-64 flex-shrink-0 transition-all duration-300">
-            <div class="p-4">
+        <aside id="sidebar" class="flex h-screen w-64 flex-shrink-0 flex-col overflow-hidden bg-indigo-900 text-white transition-all duration-300">
+            <div class="flex-shrink-0 p-4">
                 <h1 class="text-xl font-bold">Admin Panel</h1>
             </div>
-            <nav class="mt-4">
+            <nav id="adminSidebarNav" class="mt-4 flex-1 overflow-y-auto overscroll-contain pb-6">
                 {{-- Dashboard: selalu tampil karena semua user perlu akses --}}
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 py-3 hover:bg-indigo-800 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-800 border-l-4 border-white' : '' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

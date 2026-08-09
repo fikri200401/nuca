@@ -107,8 +107,17 @@
 
         <!-- Recent Bookings -->
         <div class="bg-white rounded-xl shadow-lg border border-pink-100">
-            <div class="px-6 py-4 border-b border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50">
-                <h3 class="text-lg font-bold text-gray-900">Booking Terakhir</h3>
+            <div class="flex flex-col gap-3 px-6 py-4 border-b border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Booking Terakhir</h3>
+                    <p class="mt-0.5 text-xs text-gray-500">Diurutkan berdasarkan waktu pemesanan terbaru</p>
+                </div>
+                <a href="{{ route('customer.bookings.index', ['sort' => 'booking_latest']) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-pink-600 hover:text-pink-700">
+                    Lihat semua
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/>
+                    </svg>
+                </a>
             </div>
             <div class="p-6">
                 @if(isset($recentBookings) && $recentBookings->count() > 0)

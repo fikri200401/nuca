@@ -19,7 +19,8 @@ class DashboardController extends Controller
         
         $recentBookings = $user->bookings()
             ->with(['treatment', 'doctor', 'deposit'])
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(5)
             ->get();
 
