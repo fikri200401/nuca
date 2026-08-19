@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\OtpVerification;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -10,8 +9,11 @@ use Illuminate\Support\Facades\Log;
 class WhatsAppService
 {
     protected $apiUrl;
+
     protected $apiKey;
+
     protected $device;
+
     protected $enabled;
 
     public function __construct()
@@ -25,7 +27,7 @@ class WhatsAppService
         // Log configuration for debugging
         Log::info('WhatsAppService initialized', [
             'api_url' => $this->apiUrl,
-            'api_key_exists' => !empty($this->apiKey),
+            'api_key_exists' => ! empty($this->apiKey),
             'api_key_length' => strlen($this->apiKey),
             'device' => $this->device,
             'enabled' => $this->enabled,
@@ -39,7 +41,7 @@ class WhatsAppService
     public function sendOTP($whatsappNumber, $otpCode, $purpose = 'verification')
     {
         $message = $this->formatOTPMessage($otpCode, $purpose);
-        
+
         return $this->sendMessage($whatsappNumber, $message);
     }
 
@@ -59,10 +61,10 @@ class WhatsAppService
         $message .= "📋 Kode: {$booking->booking_code}\n";
         $message .= "💆 Treatment: {$treatment->name}\n";
         $message .= "👨‍⚕️ Dokter: {$doctor->name}\n";
-        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') . "\n";
+        $message .= '📅 Tanggal: '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
         $message .= "🕐 Jam: {$booking->booking_time}\n";
-        $message .= "💰 Total: Rp " . number_format($booking->final_price, 0, ',', '.') . "\n\n";
-        $message .= "Terima kasih! 😊";
+        $message .= '💰 Total: Rp '.number_format($booking->final_price, 0, ',', '.')."\n\n";
+        $message .= 'Terima kasih! 😊';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -84,9 +86,33 @@ class WhatsAppService
         $message .= "📋 Kode: {$booking->booking_code}\n";
         $message .= "💆 Treatment: {$treatment->name}\n";
         $message .= "👨‍⚕️ Dokter: {$doctor->name}\n";
-        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') . "\n";
+        $message .= '📅 Tanggal: '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
         $message .= "🕐 Jam: {$booking->booking_time}\n\n";
-        $message .= "Kami akan mengabari Anda segera setelah booking dikonfirmasi. 🙏";
+        $message .= 'Kami akan mengabari Anda segera setelah booking dikonfirmasi. 🙏';
+
+        return $this->sendMessage($user->whatsapp_number, $message);
+    }
+
+    /**
+     * Notify an approved customer that the selected doctor/date/time is still
+     * occupied. Deliberately omit the numeric queue position.
+     */
+    public function sendBookingWaitingList($booking)
+    {
+        $user = $booking->user;
+        $treatment = $booking->treatment;
+        $doctor = $booking->doctor;
+
+        $message = "*BOOKING MASUK WAITING LIST* ⏳\n\n";
+        $message .= "Halo {$user->name},\n\n";
+        $message .= "Booking Anda sudah disetujui, tetapi jadwal yang dipilih masih digunakan booking sebelumnya.\n\n";
+        $message .= "*Detail Booking:*\n";
+        $message .= "📋 Kode: {$booking->booking_code}\n";
+        $message .= "💆 Treatment: {$treatment->name}\n";
+        $message .= "👨‍⚕️ Dokter: {$doctor->name}\n";
+        $message .= '📅 Tanggal: '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
+        $message .= "🕐 Jam: {$booking->booking_time}\n\n";
+        $message .= 'Kami akan mengabari Anda otomatis jika slot tersedia. 🙏';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -106,7 +132,7 @@ class WhatsAppService
             $message .= "*Alasan:* {$reason}\n\n";
         }
 
-        $message .= "Silakan hubungi kami atau buat booking baru dengan jadwal lain. Terima kasih 🙏";
+        $message .= 'Silakan hubungi kami atau buat booking baru dengan jadwal lain. Terima kasih 🙏';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -123,9 +149,9 @@ class WhatsAppService
         $message .= "Halo {$user->name},\n\n";
         $message .= "Mengingatkan booking Anda besok:\n\n";
         $message .= "💆 Treatment: {$treatment->name}\n";
-        $message .= "📅 Tanggal: " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') . "\n";
+        $message .= '📅 Tanggal: '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
         $message .= "🕐 Jam: {$booking->booking_time}\n\n";
-        $message .= "Sampai jumpa besok! 👋";
+        $message .= 'Sampai jumpa besok! 👋';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -140,11 +166,11 @@ class WhatsAppService
         $message = "*MENUNGGU PEMBAYARAN DP* 💳\n\n";
         $message .= "Halo {$user->name},\n\n";
         $message .= "Booking Anda memerlukan DP sebesar:\n";
-        $message .= "💰 Rp " . number_format($deposit->amount, 0, ',', '.') . "\n\n";
-        $message .= "⏰ *Batas waktu:* " . $deposit->deadline_at->format('d/m/Y H:i') . "\n";
+        $message .= '💰 Rp '.number_format($deposit->amount, 0, ',', '.')."\n\n";
+        $message .= '⏰ *Batas waktu:* '.$deposit->deadline_at->format('d/m/Y H:i')."\n";
         $message .= "(24 jam dari sekarang)\n\n";
         $message .= "Silakan transfer dan upload bukti pembayaran melalui website.\n\n";
-        $message .= "Terima kasih! 😊";
+        $message .= 'Terima kasih! 😊';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -160,9 +186,26 @@ class WhatsAppService
         $message .= "Halo {$user->name},\n\n";
         $message .= "DP Anda telah diverifikasi dan disetujui!\n\n";
         $message .= "Booking Anda terkonfirmasi untuk:\n";
-        $message .= "📅 " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') . "\n";
+        $message .= '📅 '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
         $message .= "🕐 {$booking->booking_time}\n\n";
-        $message .= "Sampai jumpa! 👋";
+        $message .= 'Sampai jumpa! 👋';
+
+        return $this->sendMessage($user->whatsapp_number, $message);
+    }
+
+    /**
+     * Deposit is valid, but another approved booking still holds the slot.
+     */
+    public function sendDepositApprovedWaitingList($booking)
+    {
+        $user = $booking->user;
+
+        $message = "*DP DISETUJUI - MENUNGGU SLOT* ✅⏳\n\n";
+        $message .= "Halo {$user->name},\n\n";
+        $message .= "DP Anda telah diverifikasi dan disetujui. Jadwal yang dipilih masih digunakan booking sebelumnya, sehingga booking Anda berada di waiting list.\n\n";
+        $message .= '📅 '.\Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y')."\n";
+        $message .= "🕐 {$booking->booking_time}\n\n";
+        $message .= 'Kami akan mengabari Anda otomatis jika slot tersedia. 🙏';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -177,13 +220,13 @@ class WhatsAppService
         $message = "*DP DITOLAK* ❌\n\n";
         $message .= "Halo {$user->name},\n\n";
         $message .= "Maaf, DP Anda ditolak.\n\n";
-        
+
         if ($deposit->rejection_reason) {
             $message .= "*Alasan:* {$deposit->rejection_reason}\n\n";
         }
-        
+
         $message .= "Silakan upload ulang bukti pembayaran yang benar.\n\n";
-        $message .= "Terima kasih!";
+        $message .= 'Terima kasih!';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -199,7 +242,7 @@ class WhatsAppService
         $message .= "Halo {$user->name},\n\n";
         $message .= "Booking Anda telah expired karena DP tidak dikonfirmasi dalam 24 jam.\n\n";
         $message .= "Silakan buat booking baru jika masih berminat.\n\n";
-        $message .= "Terima kasih!";
+        $message .= 'Terima kasih!';
 
         return $this->sendMessage($user->whatsapp_number, $message);
     }
@@ -210,10 +253,11 @@ class WhatsAppService
     protected function sendMessage($phoneNumber, $message)
     {
         // Check if WhatsApp is enabled
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             Log::warning('WhatsApp is disabled. Message not sent.', [
                 'phone' => $phoneNumber,
             ]);
+
             return false;
         }
 
@@ -222,6 +266,7 @@ class WhatsAppService
             Log::error('WhatsApp API key is not configured', [
                 'phone' => $phoneNumber,
             ]);
+
             return false;
         }
 
@@ -253,14 +298,16 @@ class WhatsAppService
                 Log::info('WhatsApp sent successfully', [
                     'phone' => $phoneNumber,
                 ]);
+
                 return true;
             }
 
             Log::error('WhatsApp send failed', [
                 'phone' => $phoneNumber,
                 'status' => $response->status(),
-                'response' => $response->body()
+                'response' => $response->body(),
             ]);
+
             return false;
 
         } catch (\Exception $e) {
@@ -269,6 +316,7 @@ class WhatsAppService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -278,7 +326,7 @@ class WhatsAppService
      */
     protected function formatOTPMessage($otpCode, $purpose)
     {
-        $purposeText = match($purpose) {
+        $purposeText = match ($purpose) {
             'register' => 'pendaftaran akun',
             'login' => 'login',
             'reset_password' => 'reset password',
@@ -290,7 +338,7 @@ class WhatsAppService
         $message .= "*{$otpCode}*\n\n";
         $message .= "Kode ini berlaku 10 menit.\n";
         $message .= "Jangan berikan kode ini kepada siapapun!\n\n";
-        $message .= "Terima kasih 😊";
+        $message .= 'Terima kasih 😊';
 
         return $message;
     }
@@ -305,12 +353,12 @@ class WhatsAppService
 
         // If starts with 0, replace with 62
         if (substr($phone, 0, 1) === '0') {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
 
         // If doesn't start with 62, add it
         if (substr($phone, 0, 2) !== '62') {
-            $phone = '62' . $phone;
+            $phone = '62'.$phone;
         }
 
         return $phone;

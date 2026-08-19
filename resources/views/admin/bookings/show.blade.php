@@ -121,7 +121,7 @@
                         </button>
                     </form>
                 @endif
-                @if(in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
+                @if($booking->isSlotHolder() && in_array($booking->status, ['confirmed', 'deposit_confirmed', 'auto_approved']))
                     <form action="{{ route('admin.bookings.complete', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
@@ -131,7 +131,7 @@
                         </button>
                     </form>
                 @endif
-                @if(in_array($booking->status, ['pending', 'waiting_deposit', 'deposit_confirmed', 'confirmed', 'auto_approved']))
+                @if(in_array($booking->status, ['pending_approval', 'pending', 'waiting_deposit', 'deposit_confirmed', 'confirmed', 'auto_approved']))
                     <form action="{{ route('admin.bookings.cancel', $booking) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" 
@@ -187,6 +187,22 @@
                                 {{ $booking->doctor->name }}
                                 @if($booking->doctor->specialization)
                                     <span class="text-gray-500">- {{ $booking->doctor->specialization }}</span>
+                                @endif
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Status Antrean Slot</dt>
+                            <dd class="mt-1">
+                                @if($booking->queue_status === 'confirmed')
+                                    <span class="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800">Pemegang Slot</span>
+                                @elseif($booking->queue_status === 'waiting')
+                                    <span class="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-800">
+                                        Waiting List #{{ $booking->queuePosition() }}
+                                    </span>
+                                    <p class="mt-1 text-xs text-gray-500">Posisi bergerak otomatis ketika booking sebelumnya dibatalkan atau dilepas.</p>
+                                @else
+                                    <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">Antrean Dilepas</span>
                                 @endif
                             </dd>
                         </div>

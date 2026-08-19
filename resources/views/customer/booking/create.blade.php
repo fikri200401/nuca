@@ -33,6 +33,7 @@
                         <li>• Booking biasanya langsung dikonfirmasi (Auto Approved)</li>
                         @endif
                         <li>• Pada tanggal tertentu yang ramai, booking bisa <strong>menunggu konfirmasi admin</strong> dulu.</li>
+                        <li>• Antrean dihitung terpisah untuk setiap <strong>dokter, tanggal, dan jam</strong>. Informasi perkiraan urutan tampil saat memilih dokter.</li>
                     </ul>
                 </div>
             </div>
@@ -103,11 +104,21 @@
                 <div v-if="availableDoctors.length > 0">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Dokter *</label>
                     <div class="space-y-3">
-                        <label v-for="doctor in availableDoctors" :key="doctor.id" class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition shadow-sm" :class="formData.doctor_id === doctor.id ? 'border-pink-500 bg-pink-50 shadow-md' : 'border-gray-300 hover:border-pink-400 hover:shadow-md'">
+                        <label v-for="doctor in availableDoctors" :key="doctor.id" class="flex items-start p-4 border-2 rounded-xl cursor-pointer transition shadow-sm" :class="formData.doctor_id === doctor.id ? 'border-pink-500 bg-pink-50 shadow-md' : 'border-gray-300 hover:border-pink-400 hover:shadow-md'">
                             <input type="radio" :value="doctor.id" v-model="formData.doctor_id" class="text-pink-600 focus:ring-pink-500">
-                            <div class="ml-3">
+                            <div class="ml-3 flex-1">
                                 <p class="font-bold text-gray-900">@{{ doctor.name }}</p>
                                 <p class="text-sm text-gray-600">@{{ doctor.specialization }}</p>
+                                <div class="mt-2 rounded-lg border px-3 py-2 text-xs"
+                                     :class="doctor.queue_count > 0 ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-green-200 bg-green-50 text-green-700'">
+                                    <template v-if="doctor.queue_count > 0">
+                                        <span class="font-semibold">@{{ doctor.queue_count }} booking</span> sudah tercatat pada jam ini.
+                                        Jika Anda booking, perkiraan urutan <span class="font-bold">@{{ doctor.next_queue_position }}</span>.
+                                    </template>
+                                    <template v-else>
+                                        Belum ada antrean pada jam ini. Anda akan menjadi urutan pertama.
+                                    </template>
+                                </div>
                             </div>
                         </label>
                     </div>
@@ -327,7 +338,8 @@ const app = createApp({
                     }
 
                     const rawSlots = Array.isArray(data.slots) ? data.slots : [];
-                    // Hanya ambil slot yang masih tersedia dan belum lewat, sama seperti di booking manual
+                    // Slot yang sudah mempunyai booking tetap ditampilkan agar
+                    // customer dapat memilihnya dan masuk waiting list.
                     const available = rawSlots.filter(slot => slot.available && !slot.isPast);
                     this.availableSlots = available.map(slot => slot.time);
 

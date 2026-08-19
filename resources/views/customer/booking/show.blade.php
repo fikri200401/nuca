@@ -48,7 +48,9 @@
                     <p class="text-gray-600 font-mono text-sm bg-pink-50 border border-pink-200 px-3 py-1 rounded-full inline-block">{{ $booking->booking_code }}</p>
                 </div>
                 <div>
-                    @if($booking->status === 'pending_approval')
+                    @if($booking->isWaitingForSlot())
+                        <span class="px-4 py-2 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">Waiting List</span>
+                    @elseif($booking->status === 'pending_approval')
                         <span class="px-4 py-2 bg-amber-100 text-amber-700 text-sm font-semibold rounded-full">Menunggu Konfirmasi</span>
                     @elseif($booking->status === 'auto_approved')
                         <span class="px-4 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded-full">Auto Approved</span>

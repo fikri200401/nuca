@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Deposit;
-use App\Models\Booking;
-use App\Services\WhatsAppService;
+use App\Services\BookingService;
 use Illuminate\Console\Command;
 
 class ExpireDeposits extends Command
@@ -23,12 +22,12 @@ class ExpireDeposits extends Command
      */
     protected $description = 'Auto-expire deposits that passed 24 hours deadline';
 
-    protected $whatsappService;
+    protected $bookingService;
 
-    public function __construct(WhatsAppService $whatsappService)
+    public function __construct(BookingService $bookingService)
     {
         parent::__construct();
-        $this->whatsappService = $whatsappService;
+        $this->bookingService = $bookingService;
     }
 
     /**
@@ -47,17 +46,12 @@ class ExpireDeposits extends Command
         $count = 0;
 
         foreach ($expiredDeposits as $deposit) {
-            // Update deposit status
-            $deposit->update(['status' => 'expired']);
+            $result = $this->bookingService->expireDeposit($deposit->id);
 
-            // Update booking status
-            $deposit->booking->update(['status' => 'expired']);
-
-            // Send notification to customer
-            $this->whatsappService->sendDepositExpired($deposit->booking);
-
-            $count++;
-            $this->info("Expired: Booking #{$deposit->booking->booking_code}");
+            if ($result['success']) {
+                $count++;
+                $this->info("Expired: Booking #{$result['booking']->booking_code}");
+            }
         }
 
         $this->info("Total expired deposits: {$count}");

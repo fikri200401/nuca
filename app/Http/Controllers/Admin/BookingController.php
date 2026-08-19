@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\Treatment;
 use App\Models\Doctor;
+use App\Models\Treatment;
 use App\Models\User;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
@@ -38,12 +38,12 @@ class BookingController extends Controller
 
         // Search
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('booking_code', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function($q2) use ($request) {
-                      $q2->where('name', 'like', '%' . $request->search . '%')
-                         ->orWhere('whatsapp_number', 'like', '%' . $request->search . '%');
-                  });
+            $query->where(function ($q) use ($request) {
+                $q->where('booking_code', 'like', '%'.$request->search.'%')
+                    ->orWhereHas('user', function ($q2) use ($request) {
+                        $q2->where('name', 'like', '%'.$request->search.'%')
+                            ->orWhere('whatsapp_number', 'like', '%'.$request->search.'%');
+                    });
             });
         }
 
@@ -58,7 +58,7 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         $booking->load(['user', 'treatment', 'doctor', 'deposit', 'feedback', 'beforeAfterPhotos']);
-        
+
         return view('admin.bookings.show', compact('booking'));
     }
 
@@ -70,9 +70,9 @@ class BookingController extends Controller
         $treatments = Treatment::active()->get();
         $doctors = Doctor::active()->get();
         $users = User::where('role', 'customer')
-                     ->orderBy('name')
-                     ->get();
-        
+            ->orderBy('name')
+            ->get();
+
         return view('admin.bookings.create', compact('treatments', 'doctors', 'users'));
     }
 
@@ -151,7 +151,11 @@ class BookingController extends Controller
      */
     public function complete(Booking $booking)
     {
-        $result = $this->bookingService->completeBooking($booking->id);
+        try {
+            $result = $this->bookingService->completeBooking($booking->id);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
 
         return back()->with('success', 'Booking berhasil diselesaikan.');
     }
@@ -164,7 +168,11 @@ class BookingController extends Controller
         $result = $this->bookingService->approveBooking($booking->id);
 
         if ($result['success']) {
-            return back()->with('success', 'Booking berhasil disetujui dan dikonfirmasi.');
+            $message = $result['waitlisted']
+                ? 'Booking berhasil disetujui dan masuk waiting list sampai slot tersedia.'
+                : 'Booking berhasil disetujui dan menjadi pemegang slot.';
+
+            return back()->with('success', $message);
         }
 
         return back()->withErrors(['error' => $result['message']]);
@@ -200,6 +208,8 @@ class BookingController extends Controller
         // Update booking status to no-show
         $booking->update([
             'status' => 'no-show',
+            'queue_status' => 'released',
+            'queue_confirmed_at' => null,
             'admin_notes' => $request->reason ?? 'Customer tidak datang (Testing)',
         ]);
 
@@ -263,7 +273,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => 'Error: '.$e->getMessage(),
             ], 500);
         }
     }

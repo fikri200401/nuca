@@ -19,6 +19,9 @@ class Booking extends Model
         'booking_time',
         'end_time',
         'status',
+        'queue_status',
+        'queue_entered_at',
+        'queue_confirmed_at',
         'total_price',
         'discount_amount',
         'final_price',
@@ -29,6 +32,8 @@ class Booking extends Model
 
     protected $casts = [
         'booking_date' => 'date',
+        'queue_entered_at' => 'datetime',
+        'queue_confirmed_at' => 'datetime',
         'total_price' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'final_price' => 'decimal:2',
@@ -40,7 +45,10 @@ class Booking extends Model
      */
     public function getBookingTimeAttribute($value)
     {
-        if (!$value) return null;
+        if (! $value) {
+            return null;
+        }
+
         return \Carbon\Carbon::parse($value)->format('H:i');
     }
 
@@ -49,7 +57,10 @@ class Booking extends Model
      */
     public function getEndTimeAttribute($value)
     {
-        if (!$value) return null;
+        if (! $value) {
+            return null;
+        }
+
         return \Carbon\Carbon::parse($value)->format('H:i');
     }
 
@@ -58,8 +69,12 @@ class Booking extends Model
         parent::boot();
 
         static::creating(function ($booking) {
-            if (!$booking->booking_code) {
-                $booking->booking_code = 'BK-' . strtoupper(Str::random(10));
+            if (! $booking->booking_code) {
+                $booking->booking_code = 'BK-'.strtoupper(Str::random(10));
+            }
+
+            if (! $booking->queue_entered_at) {
+                $booking->queue_entered_at = now();
             }
         });
     }
@@ -118,7 +133,8 @@ class Booking extends Model
     public function scopeUpcoming($query)
     {
         return $query->whereIn('status', ['auto_approved', 'deposit_confirmed'])
-                     ->where('booking_date', '>=', now()->toDateString());
+            ->where('queue_status', 'confirmed')
+            ->where('booking_date', '>=', now()->toDateString());
     }
 
     public function scopePast($query)
@@ -136,7 +152,7 @@ class Booking extends Model
      */
     public function canBeFeedback()
     {
-        return $this->status === 'completed' && !$this->feedback;
+        return $this->status === 'completed' && ! $this->feedback;
     }
 
     public function isExpired()
@@ -151,7 +167,44 @@ class Booking extends Model
 
     public function isConfirmed()
     {
-        return in_array($this->status, ['auto_approved', 'deposit_confirmed']);
+        return in_array($this->status, ['auto_approved', 'deposit_confirmed'])
+            && $this->queue_status === 'confirmed';
+    }
+
+    public function isSlotHolder(): bool
+    {
+        return $this->queue_status === 'confirmed';
+    }
+
+    public function isWaitingForSlot(): bool
+    {
+        return $this->queue_status === 'waiting'
+            && in_array($this->status, ['auto_approved', 'deposit_confirmed'], true);
+    }
+
+    /**
+     * Queue position is for the admin UI only. Customer pages deliberately do
+     * not expose it after a reservation has been submitted.
+     */
+    public function queuePosition(): ?int
+    {
+        if (! in_array($this->queue_status, ['waiting', 'confirmed'], true)) {
+            return null;
+        }
+
+        $ids = static::query()
+            ->where('doctor_id', $this->doctor_id)
+            ->whereDate('booking_date', $this->booking_date->toDateString())
+            ->whereTime('booking_time', $this->getRawOriginal('booking_time'))
+            ->whereIn('queue_status', ['waiting', 'confirmed'])
+            ->whereNotIn('status', ['cancelled', 'expired', 'completed', 'no-show'])
+            ->orderByRaw('COALESCE(queue_entered_at, created_at)')
+            ->orderBy('id')
+            ->pluck('id');
+
+        $index = $ids->search($this->id);
+
+        return $index === false ? null : $index + 1;
     }
 
     /**

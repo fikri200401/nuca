@@ -2,17 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Models\BeforeAfterPhoto;
 use App\Models\Booking;
-use App\Models\User;
-use App\Models\Treatment;
-use App\Models\Doctor;
 use App\Models\Deposit;
+use App\Models\Doctor;
+use App\Models\Doctor as DoctorModel;
+use App\Models\NoShowNote;
+use App\Models\Treatment;
+use App\Models\User;
 use App\Models\Voucher;
 use App\Models\VoucherUsage;
-use App\Models\BeforeAfterPhoto;
-use App\Models\NoShowNote;
-use Illuminate\Database\Seeder;
+use App\Services\BookingQueueService;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BookingSeeder extends Seeder
 {
@@ -36,7 +39,7 @@ class BookingSeeder extends Seeder
 
         // 1. Booking COMPLETED dengan Before/After Photos (sudah selesai)
         $booking1 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $facialBasic->id,
             'doctor_id' => $doctors->random()->id,
@@ -66,7 +69,7 @@ class BookingSeeder extends Seeder
 
         // 2. Booking COMPLETED dengan Before/After Photos (2 minggu lalu)
         $booking2 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $whitening->id,
             'doctor_id' => $doctors->random()->id,
@@ -95,7 +98,7 @@ class BookingSeeder extends Seeder
 
         // 3. Booking DEPOSIT_CONFIRMED (menunggu jadwal treatment)
         $booking3 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $laser->id,
             'doctor_id' => $doctors->random()->id,
@@ -138,7 +141,7 @@ class BookingSeeder extends Seeder
 
         // 4. Booking WAITING_DEPOSIT (butuh upload bukti DP)
         $booking4 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $peeling->id,
             'doctor_id' => $doctors->random()->id,
@@ -168,7 +171,7 @@ class BookingSeeder extends Seeder
 
         // 5. Booking DEPOSIT_REJECTED (harus upload ulang)
         $booking5 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $facialAcne->id,
             'doctor_id' => $doctors->random()->id,
@@ -202,7 +205,7 @@ class BookingSeeder extends Seeder
 
         // 6. Booking AUTO_APPROVED (booking dekat, tidak perlu DP)
         $booking6 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $facialBasic->id,
             'doctor_id' => $doctors->random()->id,
@@ -222,7 +225,7 @@ class BookingSeeder extends Seeder
 
         // 7. Booking CANCELLED (dibatalkan customer)
         $booking7 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $microderma->id,
             'doctor_id' => $doctors->random()->id,
@@ -242,7 +245,7 @@ class BookingSeeder extends Seeder
 
         // 8. Booking CANCELLED (customer tidak datang - marked as cancelled)
         $booking8 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $whitening->id,
             'doctor_id' => $doctors->random()->id,
@@ -271,7 +274,7 @@ class BookingSeeder extends Seeder
 
         // 9. Booking EXPIRED (deadline DP terlewat)
         $booking9 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $microderma->id,
             'doctor_id' => $doctors->random()->id,
@@ -301,7 +304,7 @@ class BookingSeeder extends Seeder
 
         // 10. Booking COMPLETED (manual entry by admin)
         $booking10 = Booking::create([
-            'booking_code' => 'BK-' . strtoupper(substr(md5(uniqid()), 0, 10)),
+            'booking_code' => 'BK-'.strtoupper(substr(md5(uniqid()), 0, 10)),
             'user_id' => $customer->id,
             'treatment_id' => $laser->id,
             'doctor_id' => $doctors->random()->id,
@@ -327,6 +330,26 @@ class BookingSeeder extends Seeder
             'uploaded_by' => 1,
             'created_at' => Carbon::now()->subDays(30),
         ]);
+
+        // Normalise demo booking queues after all seeded records exist.
+        $queueService = app(BookingQueueService::class);
+        Booking::query()
+            ->select(['doctor_id', 'booking_date'])
+            ->distinct()
+            ->get()
+            ->each(function ($slotDate) use ($queueService) {
+                DB::transaction(function () use ($slotDate, $queueService) {
+                    DoctorModel::query()
+                        ->whereKey($slotDate->doctor_id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    $queueService->reconcileLocked(
+                        $slotDate->doctor_id,
+                        Carbon::parse($slotDate->booking_date)->toDateString()
+                    );
+                });
+            });
 
         echo "✓ Created 10 bookings with various statuses\n";
         echo "✓ Created 3 before/after photo records\n";

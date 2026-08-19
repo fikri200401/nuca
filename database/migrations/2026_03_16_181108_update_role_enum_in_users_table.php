@@ -12,6 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('role')->default('customer')->change();
+            });
+
+            return;
+        }
+
         // Change ENUM to include doctor and frontdesk roles
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('customer', 'admin', 'owner', 'doctor', 'frontdesk') DEFAULT 'customer'");
     }
@@ -21,6 +29,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('role')->default('customer')->change();
+            });
+
+            return;
+        }
+
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('customer', 'admin', 'owner') DEFAULT 'customer'");
     }
 };

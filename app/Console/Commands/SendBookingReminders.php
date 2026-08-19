@@ -42,6 +42,7 @@ class SendBookingReminders extends Command
         $tomorrow = Carbon::tomorrow()->toDateString();
 
         $bookings = Booking::whereIn('status', ['auto_approved', 'deposit_confirmed'])
+            ->where('queue_status', 'confirmed')
             ->whereDate('booking_date', $tomorrow)
             ->with(['user', 'treatment', 'doctor'])
             ->get();
@@ -50,7 +51,7 @@ class SendBookingReminders extends Command
 
         foreach ($bookings as $booking) {
             $this->whatsappService->sendBookingReminder($booking);
-            
+
             $count++;
             $this->info("Reminder sent: Booking #{$booking->booking_code} - {$booking->user->name}");
         }

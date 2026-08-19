@@ -63,21 +63,21 @@ class Doctor extends Model
     public function isAvailable($date, $startTime, $endTime)
     {
         $dayOfWeek = strtolower(date('l', strtotime($date)));
-        
+
         // Check if doctor has schedule on that day
         $schedule = $this->schedules()
             ->where('day_of_week', $dayOfWeek)
             ->where('is_active', true)
             ->first();
 
-        if (!$schedule) {
+        if (! $schedule) {
             return false;
         }
 
         // Normalize time format for comparison (HH:MM)
         $startTime = substr($startTime, 0, 5);
         $endTime = substr($endTime, 0, 5);
-        
+
         // Extract time from schedule (SQLite stores as datetime)
         $scheduleStart = \Carbon\Carbon::parse($schedule->start_time)->format('H:i');
         $scheduleEnd = \Carbon\Carbon::parse($schedule->end_time)->format('H:i');
@@ -109,5 +109,33 @@ class Doctor extends Model
         }
 
         return true; // No conflicts
+    }
+
+    /**
+     * Check working hours only. Existing bookings do not hide the schedule,
+     * because customers may still join the waiting list for that time.
+     */
+    public function isScheduledAt($date, $startTime, $endTime): bool
+    {
+        $dayOfWeek = strtolower(date('l', strtotime($date)));
+        $startTime = substr($startTime, 0, 5);
+        $endTime = substr($endTime, 0, 5);
+
+        $schedules = $this->relationLoaded('schedules')
+            ? $this->schedules
+            : $this->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_active', true)
+                ->get();
+
+        return $schedules
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true)
+            ->contains(function ($schedule) use ($startTime, $endTime) {
+                $scheduleStart = \Carbon\Carbon::parse($schedule->start_time)->format('H:i');
+                $scheduleEnd = \Carbon\Carbon::parse($schedule->end_time)->format('H:i');
+
+                return $startTime >= $scheduleStart && $endTime <= $scheduleEnd;
+            });
     }
 }

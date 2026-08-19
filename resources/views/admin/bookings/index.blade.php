@@ -141,6 +141,7 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dokter</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal & Jam</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Antrean Slot</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Harga</th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                     <span class="sr-only">Actions</span>
@@ -203,6 +204,17 @@
                                         {{ $displayStatusLabel }}
                                     </span>
                                 </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                    @if($booking->queue_status === 'confirmed')
+                                        <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">Pemegang Slot</span>
+                                    @elseif($booking->queue_status === 'waiting')
+                                        <span class="inline-flex rounded-full bg-indigo-100 px-2 text-xs font-semibold leading-5 text-indigo-800">
+                                            Waiting List #{{ $booking->queuePosition() }}
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-gray-400">Dilepas</span>
+                                    @endif
+                                </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     Rp {{ number_format($booking->final_price, 0, ',', '.') }}
                                 </td>
@@ -214,7 +226,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="px-3 py-8 text-center text-sm text-gray-500">
+                                <td colspan="9" class="px-3 py-8 text-center text-sm text-gray-500">
                                     Tidak ada data booking
                                 </td>
                             </tr>

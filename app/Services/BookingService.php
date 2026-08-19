@@ -3,19 +3,25 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use App\Models\Deposit;
 use App\Models\Doctor;
 use App\Models\Treatment;
-use App\Models\Deposit;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class BookingService
 {
     protected $whatsappService;
 
-    public function __construct(WhatsAppService $whatsappService)
-    {
+    protected $bookingQueueService;
+
+    public function __construct(
+        WhatsAppService $whatsappService,
+        BookingQueueService $bookingQueueService
+    ) {
         $this->whatsappService = $whatsappService;
+        $this->bookingQueueService = $bookingQueueService;
     }
 
     /**
@@ -28,16 +34,16 @@ class BookingService
 
         // Get doctors available on this day
         $doctors = Doctor::active()
-            ->whereHas('schedules', function($query) use ($dayOfWeek) {
+            ->whereHas('schedules', function ($query) use ($dayOfWeek) {
                 $query->where('day_of_week', $dayOfWeek)
-                      ->where('is_active', true);
+                    ->where('is_active', true);
             })
-            ->when($doctorId, function($query) use ($doctorId) {
+            ->when($doctorId, function ($query) use ($doctorId) {
                 return $query->where('id', $doctorId);
             })
-            ->with(['schedules' => function($query) use ($dayOfWeek) {
+            ->with(['schedules' => function ($query) use ($dayOfWeek) {
                 $query->where('day_of_week', $dayOfWeek)
-                      ->where('is_active', true);
+                    ->where('is_active', true);
             }])
             ->get();
 
@@ -56,11 +62,11 @@ class BookingService
 
                 foreach ($slots as $slot) {
                     $timeKey = $slot['time'];
-                    if (!isset($slotDetails[$timeKey])) {
+                    if (! isset($slotDetails[$timeKey])) {
                         $slotDetails[$timeKey] = $slot;
                     } else {
                         // If slot already exists and this one is available, mark as available
-                        if ($slot['available'] && !$slot['isPast']) {
+                        if ($slot['available'] && ! $slot['isPast']) {
                             $slotDetails[$timeKey]['available'] = true;
                         }
                     }
@@ -70,7 +76,7 @@ class BookingService
 
         // Sort by time
         ksort($slotDetails);
-        
+
         // Return array of slot objects
         return array_values($slotDetails);
     }
@@ -81,16 +87,16 @@ class BookingService
     protected function generateTimeSlots($startTime, $endTime, $duration, $doctor, $date)
     {
         $slots = [];
-        
+
         // Extract time from datetime if necessary
         $startTimeStr = is_string($startTime) ? $startTime : $startTime->format('H:i:s');
         $endTimeStr = is_string($endTime) ? $endTime : $endTime->format('H:i:s');
-        
+
         $currentTime = Carbon::createFromTimeString($startTimeStr);
         $endTime = Carbon::createFromTimeString($endTimeStr);
         $bookingDate = Carbon::parse($date);
         $now = Carbon::now();
-        
+
         // Get max booking time from settings (default 20:00 / 8 PM)
         $maxBookingTime = \App\Models\Setting::get('max_booking_time', '20:00');
         $maxTime = Carbon::createFromTimeString($maxBookingTime);
@@ -98,12 +104,13 @@ class BookingService
         while ($currentTime->copy()->addMinutes($duration)->lte($endTime)) {
             $slotStart = $currentTime->format('H:i');
             $slotEnd = $currentTime->copy()->addMinutes($duration)->format('H:i');
-            
+
             // Check if slot exceeds max booking time (slot bisa dimulai sampai max booking time)
             $slotStartTime = Carbon::createFromTimeString($slotStart);
             if ($slotStartTime->gt($maxTime)) {
                 // Skip slots that start AFTER max booking time (20:00)
                 $currentTime->addMinutes(30);
+
                 continue;
             }
 
@@ -114,8 +121,9 @@ class BookingService
                 $isPast = true;
             }
 
-            // Check if slot is available
-            $isAvailable = $doctor->isAvailable($date, $slotStart, $slotEnd) && !$isPast;
+            // Existing reservations do not hide a slot. Customers can still
+            // choose it and join the doctor/date/time waiting list.
+            $isAvailable = $doctor->isScheduledAt($date, $slotStart, $slotEnd) && ! $isPast;
 
             $slots[] = [
                 'time' => $slotStart,
@@ -140,7 +148,12 @@ class BookingService
 
         try {
             $treatment = Treatment::findOrFail($data['treatment_id']);
-            $doctor = Doctor::findOrFail($data['doctor_id']);
+            // Serialise queue writes per doctor so simultaneous reservations
+            // cannot race when deciding who holds the slot.
+            $doctor = Doctor::query()
+                ->whereKey($data['doctor_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
 
             // Tolak booking pelanggan pada hari/tanggal klinik tutup.
             // Entri manual admin boleh menembus (is_manual_entry).
@@ -155,9 +168,17 @@ class BookingService
             $startTime = Carbon::parse($data['booking_time']);
             $endTime = $startTime->copy()->addMinutes($treatment->duration_minutes);
 
-            // Check availability
-            if (!$doctor->isAvailable($data['booking_date'], $data['booking_time'], $endTime->format('H:i'))) {
-                throw new \Exception('Slot tidak tersedia. Silakan pilih waktu lain.');
+            if (! ($data['is_manual_entry'] ?? false)) {
+                $appointment = Carbon::parse($data['booking_date'].' '.$data['booking_time']);
+                if ($appointment->lte(now())) {
+                    throw new \Exception('Waktu booking sudah lewat. Silakan pilih jadwal berikutnya.');
+                }
+            }
+
+            // Validate working hours only. An occupied slot remains bookable
+            // because the new request will be placed in its waiting list.
+            if (! $doctor->isScheduledAt($data['booking_date'], $data['booking_time'], $endTime->format('H:i'))) {
+                throw new \Exception('Dokter tidak memiliki jadwal pada waktu tersebut.');
             }
 
             // Calculate price with discounts
@@ -189,6 +210,8 @@ class BookingService
                 'booking_date' => $data['booking_date'],
                 'booking_time' => $data['booking_time'],
                 'end_time' => $endTime->format('H:i:s'),
+                'queue_status' => 'waiting',
+                'queue_entered_at' => now(),
                 'total_price' => $totalPrice,
                 'discount_amount' => $discountAmount,
                 'final_price' => $finalPrice,
@@ -198,9 +221,9 @@ class BookingService
             ]);
 
             // === Penentuan status booking berdasarkan Setting Booking ===
-            $depositEnabled       = \App\Models\Setting::get('deposit_enabled', true);
-            $thresholdDays        = (int) \App\Models\Setting::get('deposit_threshold_days', 7);
-            $depositAmount        = (float) \App\Models\Setting::get('min_deposit', 50000);
+            $depositEnabled = \App\Models\Setting::get('deposit_enabled', true);
+            $thresholdDays = (int) \App\Models\Setting::get('deposit_threshold_days', 7);
+            $depositAmount = (float) \App\Models\Setting::get('min_deposit', 50000);
             $depositDeadlineHours = (int) \App\Models\Setting::get('deposit_deadline_hours', 24);
 
             $bookingDate = Carbon::parse($data['booking_date']);
@@ -223,10 +246,7 @@ class BookingService
             if ($held) {
                 // Ditahan (Menunggu Konfirmasi): jadwal hari ini saat auto-approve OFF,
                 // atau tanggal ke depan yang ada di daftar Auto-Approval OFF per Tanggal.
-                // Slot tetap terkunci (lihat Doctor::isAvailable) agar tidak bentrok.
                 $booking->update(['status' => 'pending_approval']);
-
-                $this->whatsappService->sendBookingPendingApproval($booking);
             } elseif ($needsDeposit) {
                 // Booking >= ambang hari, butuh DP
                 $booking->update(['status' => 'waiting_deposit']);
@@ -238,15 +258,15 @@ class BookingService
                     'deadline_at' => now()->addHours($depositDeadlineHours),
                 ]);
 
-                // Send notification for deposit
-                $this->whatsappService->sendDepositWaiting($booking, $deposit);
             } else {
                 // Auto approve
                 $booking->update(['status' => 'auto_approved']);
-
-                // Send confirmation
-                $this->whatsappService->sendBookingConfirmation($booking);
             }
+
+            $this->bookingQueueService->reconcileLocked(
+                $doctor->id,
+                Carbon::parse($data['booking_date'])->toDateString()
+            );
 
             // Record voucher usage if applicable
             if (isset($voucher) && $voucher) {
@@ -262,9 +282,12 @@ class BookingService
 
             DB::commit();
 
+            $booking = $booking->fresh(['user', 'treatment', 'doctor', 'deposit']);
+            $this->sendCurrentBookingNotification($booking);
+
             return [
                 'success' => true,
-                'booking' => $booking->load(['treatment', 'doctor', 'deposit']),
+                'booking' => $booking,
             ];
 
         } catch (\Exception $e) {
@@ -282,40 +305,71 @@ class BookingService
      */
     public function rescheduleBooking($bookingId, $newDate, $newTime, $doctorId = null)
     {
+        $snapshot = Booking::findOrFail($bookingId);
         DB::beginTransaction();
 
         try {
-            $booking = Booking::findOrFail($bookingId);
+            $newDoctorId = (int) ($doctorId ?: $snapshot->doctor_id);
+            $doctorIds = collect([$snapshot->doctor_id, $newDoctorId])->unique()->sort()->values();
+            $lockedDoctors = Doctor::query()
+                ->whereIn('id', $doctorIds)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+            $booking = Booking::query()->whereKey($bookingId)->lockForUpdate()->firstOrFail();
             $treatment = $booking->treatment;
-            
-            // Use current doctor if not specified
-            $doctor = $doctorId ? Doctor::findOrFail($doctorId) : $booking->doctor;
+
+            $oldDoctorId = $booking->doctor_id;
+            $oldDate = $booking->booking_date->toDateString();
+            $doctor = $lockedDoctors->get($newDoctorId);
+
+            if (! $doctor) {
+                throw new \Exception('Dokter tidak ditemukan.');
+            }
 
             // Calculate end time
             $startTime = Carbon::parse($newTime);
             $endTime = $startTime->copy()->addMinutes($treatment->duration_minutes);
 
-            // Check availability
-            if (!$doctor->isAvailable($newDate, $newTime, $endTime->format('H:i'))) {
-                throw new \Exception('Slot tidak tersedia untuk reschedule.');
+            if (Carbon::parse($newDate.' '.$newTime)->lte(now())) {
+                throw new \Exception('Waktu reschedule sudah lewat. Silakan pilih jadwal berikutnya.');
             }
 
-            // Update booking
+            if (! $doctor->isScheduledAt($newDate, $newTime, $endTime->format('H:i'))) {
+                throw new \Exception('Dokter tidak memiliki jadwal pada waktu reschedule tersebut.');
+            }
+
             $booking->update([
                 'booking_date' => $newDate,
                 'booking_time' => $newTime,
                 'end_time' => $endTime->format('H:i:s'),
                 'doctor_id' => $doctor->id,
+                'queue_status' => 'waiting',
+                'queue_entered_at' => now(),
+                'queue_confirmed_at' => null,
             ]);
+
+            $activated = collect();
+            $activated = $activated->merge(
+                $this->bookingQueueService->reconcileLocked($oldDoctorId, $oldDate)
+            );
+
+            if ($oldDoctorId !== $newDoctorId || $oldDate !== Carbon::parse($newDate)->toDateString()) {
+                $activated = $activated->merge(
+                    $this->bookingQueueService->reconcileLocked($newDoctorId, $newDate)
+                );
+            }
 
             DB::commit();
 
-            // Send notification
-            $this->whatsappService->sendBookingConfirmation($booking->fresh());
+            $booking = $booking->fresh(['user', 'treatment', 'doctor', 'deposit']);
+            $this->sendActivationNotifications($activated, [$booking->id]);
+            $this->sendCurrentBookingNotification($booking);
 
             return [
                 'success' => true,
-                'booking' => $booking->fresh(),
+                'booking' => $booking,
             ];
 
         } catch (\Exception $e) {
@@ -333,16 +387,31 @@ class BookingService
      */
     public function cancelBooking($bookingId, $adminNotes = null)
     {
-        $booking = Booking::findOrFail($bookingId);
-        
-        $booking->update([
-            'status' => 'cancelled',
-            'admin_notes' => $adminNotes,
-        ]);
+        $snapshot = Booking::findOrFail($bookingId);
+        $result = DB::transaction(function () use ($bookingId, $adminNotes, $snapshot) {
+            Doctor::query()->whereKey($snapshot->doctor_id)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($bookingId)->lockForUpdate()->firstOrFail();
+
+            $booking->update([
+                'status' => 'cancelled',
+                'admin_notes' => $adminNotes,
+            ]);
+            $this->bookingQueueService->release($booking);
+
+            return [
+                'booking' => $booking->fresh(),
+                'activated' => $this->bookingQueueService->reconcileLocked(
+                    $booking->doctor_id,
+                    $booking->booking_date->toDateString()
+                ),
+            ];
+        });
+
+        $this->sendActivationNotifications($result['activated']);
 
         return [
             'success' => true,
-            'booking' => $booking,
+            'booking' => $result['booking'],
         ];
     }
 
@@ -351,13 +420,32 @@ class BookingService
      */
     public function completeBooking($bookingId)
     {
-        $booking = Booking::findOrFail($bookingId);
+        $snapshot = Booking::findOrFail($bookingId);
+        $result = DB::transaction(function () use ($bookingId, $snapshot) {
+            Doctor::query()->whereKey($snapshot->doctor_id)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($bookingId)->lockForUpdate()->firstOrFail();
 
-        $booking->update(['status' => 'completed']);
+            if (! $booking->isSlotHolder()) {
+                throw new \Exception('Hanya pemegang slot yang dapat ditandai selesai.');
+            }
+
+            $booking->update(['status' => 'completed']);
+            $this->bookingQueueService->release($booking);
+
+            return [
+                'booking' => $booking->fresh(),
+                'activated' => $this->bookingQueueService->reconcileLocked(
+                    $booking->doctor_id,
+                    $booking->booking_date->toDateString()
+                ),
+            ];
+        });
+
+        $this->sendActivationNotifications($result['activated']);
 
         return [
             'success' => true,
-            'booking' => $booking,
+            'booking' => $result['booking'],
         ];
     }
 
@@ -367,23 +455,42 @@ class BookingService
      */
     public function approveBooking($bookingId)
     {
-        $booking = Booking::findOrFail($bookingId);
+        $snapshot = Booking::findOrFail($bookingId);
+        $result = DB::transaction(function () use ($bookingId, $snapshot) {
+            Doctor::query()->whereKey($snapshot->doctor_id)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($bookingId)->lockForUpdate()->firstOrFail();
 
-        if ($booking->status !== 'pending_approval') {
+            if ($booking->status !== 'pending_approval') {
+                return [
+                    'success' => false,
+                    'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+                ];
+            }
+
+            $booking->update(['status' => 'auto_approved']);
+            $activated = $this->bookingQueueService->reconcileLocked(
+                $booking->doctor_id,
+                $booking->booking_date->toDateString()
+            );
+
             return [
-                'success' => false,
-                'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+                'success' => true,
+                'booking' => $booking->fresh(['user', 'treatment', 'doctor', 'deposit']),
+                'activated' => $activated,
             ];
+        });
+
+        if (! $result['success']) {
+            return $result;
         }
 
-        $booking->update(['status' => 'auto_approved']);
-
-        // Kirim konfirmasi ke customer
-        $this->whatsappService->sendBookingConfirmation($booking->fresh());
+        $this->sendActivationNotifications($result['activated'], [$result['booking']->id]);
+        $this->sendCurrentBookingNotification($result['booking']);
 
         return [
             'success' => true,
-            'booking' => $booking,
+            'booking' => $result['booking'],
+            'waitlisted' => $result['booking']->isWaitingForSlot(),
         ];
     }
 
@@ -392,27 +499,180 @@ class BookingService
      */
     public function rejectBooking($bookingId, $reason = null)
     {
-        $booking = Booking::findOrFail($bookingId);
+        $snapshot = Booking::findOrFail($bookingId);
+        $result = DB::transaction(function () use ($bookingId, $reason, $snapshot) {
+            Doctor::query()->whereKey($snapshot->doctor_id)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($bookingId)->lockForUpdate()->firstOrFail();
 
-        if ($booking->status !== 'pending_approval') {
+            if ($booking->status !== 'pending_approval') {
+                return [
+                    'success' => false,
+                    'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+                ];
+            }
+
+            $booking->update([
+                'status' => 'cancelled',
+                'admin_notes' => $reason ?: 'Booking ditolak oleh admin.',
+            ]);
+            $this->bookingQueueService->release($booking);
+
             return [
-                'success' => false,
-                'message' => 'Booking ini tidak sedang menunggu persetujuan.',
+                'success' => true,
+                'booking' => $booking->fresh(['user']),
+                'activated' => $this->bookingQueueService->reconcileLocked(
+                    $booking->doctor_id,
+                    $booking->booking_date->toDateString()
+                ),
             ];
+        });
+
+        if (! $result['success']) {
+            return $result;
         }
 
-        $booking->update([
-            'status' => 'cancelled',
-            'admin_notes' => $reason ?: 'Booking ditolak oleh admin.',
-        ]);
+        $this->sendActivationNotifications($result['activated']);
+        $this->whatsappService->sendBookingRejected($result['booking'], $reason);
 
-        // Beri tahu customer bahwa booking ditolak
-        $this->whatsappService->sendBookingRejected($booking->fresh(), $reason);
+        return [
+            'success' => true,
+            'booking' => $result['booking'],
+        ];
+    }
+
+    /**
+     * Approve a submitted deposit and let the queue decide whether this
+     * booking can hold the requested slot immediately.
+     */
+    public function approveDeposit(int $depositId, int $adminId): array
+    {
+        $snapshot = Deposit::with('booking:id,doctor_id')->findOrFail($depositId);
+
+        $result = DB::transaction(function () use ($depositId, $adminId, $snapshot) {
+            Doctor::query()->whereKey($snapshot->booking->doctor_id)->lockForUpdate()->firstOrFail();
+            $deposit = Deposit::query()->whereKey($depositId)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($deposit->booking_id)->lockForUpdate()->firstOrFail();
+
+            if (! $deposit->isSubmitted()) {
+                return [
+                    'success' => false,
+                    'message' => 'Hanya deposit yang menunggu verifikasi yang dapat disetujui.',
+                ];
+            }
+
+            $deposit->approve($adminId);
+            $booking->update(['status' => 'deposit_confirmed']);
+
+            return [
+                'success' => true,
+                'booking' => $booking->fresh(['user', 'treatment', 'doctor', 'deposit']),
+                'activated' => $this->bookingQueueService->reconcileLocked(
+                    $booking->doctor_id,
+                    $booking->booking_date->toDateString()
+                ),
+            ];
+        });
+
+        if (! $result['success']) {
+            return $result;
+        }
+
+        $booking = $result['booking']->fresh(['user', 'treatment', 'doctor', 'deposit']);
+        $this->sendActivationNotifications($result['activated'], [$booking->id]);
+
+        if ($booking->isSlotHolder()) {
+            $this->whatsappService->sendDepositApproved($booking);
+        } else {
+            $this->whatsappService->sendDepositApprovedWaitingList($booking);
+        }
 
         return [
             'success' => true,
             'booking' => $booking,
+            'waitlisted' => $booking->isWaitingForSlot(),
         ];
+    }
+
+    /**
+     * Expire a deposit and release its place, promoting the next eligible
+     * request automatically.
+     */
+    public function expireDeposit(int $depositId): array
+    {
+        $snapshot = Deposit::with('booking:id,doctor_id')->findOrFail($depositId);
+
+        $result = DB::transaction(function () use ($depositId, $snapshot) {
+            Doctor::query()->whereKey($snapshot->booking->doctor_id)->lockForUpdate()->firstOrFail();
+            $deposit = Deposit::query()->whereKey($depositId)->lockForUpdate()->firstOrFail();
+            $booking = Booking::query()->whereKey($deposit->booking_id)->lockForUpdate()->firstOrFail();
+
+            if ($deposit->status !== 'pending') {
+                return [
+                    'success' => false,
+                    'message' => 'Deposit ini tidak lagi menunggu pembayaran.',
+                ];
+            }
+
+            $deposit->update(['status' => 'expired']);
+            $booking->update(['status' => 'expired']);
+            $this->bookingQueueService->release($booking);
+
+            return [
+                'success' => true,
+                'booking' => $booking->fresh(['user']),
+                'activated' => $this->bookingQueueService->reconcileLocked(
+                    $booking->doctor_id,
+                    $booking->booking_date->toDateString()
+                ),
+            ];
+        });
+
+        if (! $result['success']) {
+            return $result;
+        }
+
+        $this->sendActivationNotifications($result['activated']);
+        $this->whatsappService->sendDepositExpired($result['booking']);
+
+        return $result;
+    }
+
+    /**
+     * Notify customers whose waiting-list entry has just become the holder.
+     */
+    public function sendActivationNotifications(Collection $bookings, array $exceptIds = []): void
+    {
+        $bookings
+            ->unique('id')
+            ->reject(fn (Booking $booking) => in_array($booking->id, $exceptIds, true))
+            ->each(function (Booking $booking) {
+                $this->whatsappService->sendBookingConfirmation(
+                    $booking->fresh(['user', 'treatment', 'doctor'])
+                );
+            });
+    }
+
+    private function sendCurrentBookingNotification(Booking $booking): void
+    {
+        if ($booking->status === 'pending_approval') {
+            $this->whatsappService->sendBookingPendingApproval($booking);
+
+            return;
+        }
+
+        if ($booking->status === 'waiting_deposit' && $booking->deposit) {
+            $this->whatsappService->sendDepositWaiting($booking, $booking->deposit);
+
+            return;
+        }
+
+        if (in_array($booking->status, BookingQueueService::CONFIRMED_BOOKING_STATUSES, true)) {
+            if ($booking->isSlotHolder()) {
+                $this->whatsappService->sendBookingConfirmation($booking);
+            } else {
+                $this->whatsappService->sendBookingWaitingList($booking);
+            }
+        }
     }
 
     /**
@@ -422,23 +682,30 @@ class BookingService
     {
         $treatment = Treatment::findOrFail($treatmentId);
         $dayOfWeek = strtolower(Carbon::parse($date)->format('l')); // Get day name: monday, tuesday, etc
-        
+
         $startTime = $time;
         $endTime = Carbon::parse($time)->addMinutes($treatment->duration_minutes)->format('H:i');
 
-        $doctors = Doctor::active()
-            ->whereHas('schedules', function($query) use ($dayOfWeek, $startTime, $endTime) {
+        return Doctor::active()
+            ->whereHas('schedules', function ($query) use ($dayOfWeek, $startTime, $endTime) {
                 $query->where('day_of_week', $dayOfWeek)
-                      ->where('start_time', '<=', $startTime)
-                      ->where('end_time', '>=', $endTime);
+                    ->where('start_time', '<=', $startTime)
+                    ->where('end_time', '>=', $endTime);
             })
             ->get()
-            ->filter(function($doctor) use ($date, $startTime, $endTime) {
-                return $doctor->isAvailable($date, $startTime, $endTime);
+            ->filter(fn ($doctor) => $doctor->isScheduledAt($date, $startTime, $endTime))
+            ->map(function ($doctor) use ($date, $startTime) {
+                return array_merge([
+                    'id' => $doctor->id,
+                    'name' => $doctor->name,
+                    'specialization' => $doctor->specialization,
+                ], $this->bookingQueueService->getSlotStats(
+                    $doctor->id,
+                    $date,
+                    $startTime
+                ));
             })
             ->values();
-
-        return $doctors;
     }
 
     /**
@@ -456,14 +723,14 @@ class BookingService
             $closedWeekdays = [];
         }
         if (in_array($weekdayEn, $closedWeekdays, true)) {
-            return 'Klinik libur setiap hari ' . self::weekdayLabelId($weekdayEn) . '.';
+            return 'Klinik libur setiap hari '.self::weekdayLabelId($weekdayEn).'.';
         }
 
         // 2) Tanggal libur khusus (one-off)
         $closed = \App\Models\ClinicClosedDate::whereDate('date', $carbon->toDateString())->first();
         if ($closed) {
             return $closed->note
-                ? ('Klinik libur pada tanggal ini: ' . $closed->note . '.')
+                ? ('Klinik libur pada tanggal ini: '.$closed->note.'.')
                 : 'Klinik libur pada tanggal ini.';
         }
 

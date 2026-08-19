@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
+use App\Services\BookingService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,9 +13,14 @@ class DepositController extends Controller
 {
     protected $whatsappService;
 
-    public function __construct(WhatsAppService $whatsappService)
-    {
+    protected $bookingService;
+
+    public function __construct(
+        WhatsAppService $whatsappService,
+        BookingService $bookingService
+    ) {
         $this->whatsappService = $whatsappService;
+        $this->bookingService = $bookingService;
     }
 
     public function index(Request $request)
@@ -32,11 +38,11 @@ class DepositController extends Controller
         // Search: booking code or customer name/WhatsApp
         if ($request->filled('search')) {
             $query->whereHas('booking', function ($q) use ($request) {
-                $q->where('booking_code', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function ($q2) use ($request) {
-                      $q2->where('name', 'like', '%' . $request->search . '%')
-                         ->orWhere('whatsapp_number', 'like', '%' . $request->search . '%');
-                  });
+                $q->where('booking_code', 'like', '%'.$request->search.'%')
+                    ->orWhereHas('user', function ($q2) use ($request) {
+                        $q2->where('name', 'like', '%'.$request->search.'%')
+                            ->orWhere('whatsapp_number', 'like', '%'.$request->search.'%');
+                    });
             });
         }
 
@@ -52,7 +58,7 @@ class DepositController extends Controller
     public function show(Deposit $deposit)
     {
         $deposit->load(['booking.user', 'booking.treatment', 'booking.doctor', 'verifier']);
-        
+
         return view('admin.deposits.show', compact('deposit'));
     }
 
@@ -61,19 +67,17 @@ class DepositController extends Controller
      */
     public function approve(Deposit $deposit)
     {
-        if (! $deposit->isSubmitted()) {
-            return back()->withErrors(['error' => 'Hanya deposit yang menunggu verifikasi yang dapat disetujui.']);
+        $result = $this->bookingService->approveDeposit($deposit->id, Auth::id());
+
+        if (! $result['success']) {
+            return back()->withErrors(['error' => $result['message']]);
         }
 
-        $deposit->approve(Auth::id());
-        
-        // Update booking status
-        $deposit->booking->update(['status' => 'deposit_confirmed']);
+        $message = $result['waitlisted']
+            ? 'Deposit disetujui. Booking tetap berada di waiting list sampai slot tersedia.'
+            : 'Deposit berhasil diapprove dan booking menjadi pemegang slot.';
 
-        // Send notification
-        $this->whatsappService->sendDepositApproved($deposit->booking);
-
-        return back()->with('success', 'Deposit berhasil diapprove.');
+        return back()->with('success', $message);
     }
 
     /**
@@ -90,7 +94,7 @@ class DepositController extends Controller
         }
 
         $deposit->reject(Auth::id(), $request->rejection_reason);
-        
+
         // Update booking status
         $deposit->booking->update(['status' => 'deposit_rejected']);
 

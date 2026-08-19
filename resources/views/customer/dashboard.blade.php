@@ -140,9 +140,13 @@
                                 </p>
                             </div>
                             <div class="text-right">
-                                @php $awaitingVerification = $booking->isAwaitingDepositVerification(); @endphp
+                                @php
+                                    $awaitingVerification = $booking->isAwaitingDepositVerification();
+                                    $waitingForSlot = $booking->isWaitingForSlot();
+                                @endphp
                                 <span class="px-3 py-1 text-xs font-bold rounded-full
-                                    @if($booking->status == 'completed') bg-green-100 text-green-800 border border-green-200
+                                    @if($waitingForSlot) bg-indigo-100 text-indigo-800 border border-indigo-200
+                                    @elseif($booking->status == 'completed') bg-green-100 text-green-800 border border-green-200
                                     @elseif($booking->status == 'deposit_confirmed') bg-blue-100 text-blue-800 border border-blue-200
                                     @elseif($awaitingVerification) bg-blue-100 text-blue-800 border border-blue-200
                                     @elseif($booking->status == 'waiting_deposit') bg-yellow-100 text-yellow-800 border border-yellow-200
@@ -151,7 +155,7 @@
                                     @elseif($booking->status == 'expired') bg-gray-100 text-gray-800 border border-gray-200
                                     @else bg-pink-100 text-pink-800 border border-pink-200
                                     @endif">
-                                    {{ $awaitingVerification ? 'MENUNGGU VERIFIKASI' : strtoupper(str_replace('_', ' ', $booking->status)) }}
+                                    {{ $waitingForSlot ? 'WAITING LIST' : ($awaitingVerification ? 'MENUNGGU VERIFIKASI' : strtoupper(str_replace('_', ' ', $booking->status))) }}
                                 </span>
                                 <p class="text-sm font-bold text-gray-900 mt-2">Rp {{ number_format($booking->final_price, 0, ',', '.') }}</p>
                             </div>
